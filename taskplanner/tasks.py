@@ -3,9 +3,10 @@ This module describes a task and the relation between parent and children tasks.
 '''
 
 # %% Imports
-from anytree import Node
+from anytree import Node, RenderTree
 from inspect import currentframe, getargvalues
 from datetime import datetime, date
+from logging import warning
 
 # %% Task
 PRIORITY_LEVELS = ["low", "medium", "high"]
@@ -28,16 +29,16 @@ class Task(Node):
     '''
 
     def __init__(self,
-                 parent = None,
+                 parent=None,
                  name: str = "A Task",
-                 category = "No Category",
-                 description = "",
-                 priority = "medium",
+                 category="No Category",
+                 description="",
+                 priority="medium",
                  start_date: date = date.today(),
                  end_date: date = None,
                  assignee=None):
         '''
-        :param parent: py:class:'Node', optional
+        :param parent: py:class:'anytree.Node', optional
             The parent of the current task. If 'None', the task is considered as a top-level task.
         :param name: str, optional
             The name of the task.
@@ -54,7 +55,7 @@ class Task(Node):
             The name of the person who is assigned the task.
         '''
         super().__init__(name=name,
-                         parent=parent) # A task is a node of a tree
+                         parent=parent)  # A task is a node of a tree
         # Get the argument names passed to the __init__ function
         argvalues = getargvalues(currentframe())
         attribute_names = argvalues.args
@@ -65,6 +66,7 @@ class Task(Node):
         for a in attribute_names:
             # Set the corresponding properties to the passed argument values
             setattr(self, a, argvalues.locals[a])
+        self._completed = False
 
     @property
     def start_date(self):
@@ -107,3 +109,143 @@ class Task(Node):
         if value not in PRIORITY_LEVELS:
             raise ValueError(f"Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}")
         self._priority = value
+
+    @property
+    def completed(self):
+        return self._completed
+
+    @completed.setter
+    def completed(self, value):
+        if type(value) is not bool:
+            raise TypeError('Attribute "completed" must be a boolean')
+        self._completed = value
+
+    @property
+    def is_top_level(self):
+        '''
+        It returns 'True' if and only if this task has no parent tasks.
+        :return:
+        '''
+        return self.parent is None
+
+    def set_parent_task(self, parent):
+        '''
+        Sets a new parent task.
+
+        :param parent: py:class:'anytree.Node', optional
+        :return:
+        '''
+        if parent == self:
+            raise ValueError(f'Task {self.name} cannot be its own parent.')
+        if self.parent is not None:
+            children = list(self.parent.children)
+            children.remove(self)
+            self.parent.children = tuple(children)
+        super().__init__(name=self.name,
+                         parent=parent,
+                         children=self.children)
+
+    def add_children_tasks(self, *children):
+        '''
+        Adds children tasks as positional arguments.
+
+        :param children: arguments of type :py:class:'anytree.Node'
+            children tasks in the form of positional arguments
+        :return:
+        '''
+        if self in children:
+            raise ValueError(f'Cannot add task {self.name} to its own children.')
+        all_children = tuple(list(self.children) + list(children))
+        parent = self.parent
+        if self.parent in all_children:
+            warning(
+                f"Task {self.name}: adding parent {self.parent.name} as child! New parent will now be the next ancestor.")
+            parent = self.parent.parent
+        super().__init__(name=self.name,
+                         parent=parent,
+                         children=all_children)
+
+    def __str__(self):
+        '''
+        Returns a string representation of the tree, showing its nodes and
+        dependencies.
+
+        Returns
+        -------
+        s : str
+            The string representation of the tree.
+
+        '''
+        s = ""
+        for pre, fill, node in RenderTree(self):
+            s += "%s%s" % (pre, node.name) + "\n"
+        return s
+
+    def _print(self):
+        '''
+        Prints a graphical representation of the tree, showing its nodes and
+        dependencies.
+        '''
+        for pre, fill, node in RenderTree(self):
+            print("%s%s" % (pre, node.name))
+
+    def make_dict(self):
+        '''
+        Creates a dictionary corresponding to the object tree.
+
+        Returns
+        -------
+        None.
+
+        Notes
+        -----
+        The same remarks made in the documentation of :py:meth:`add_children`
+        remain valid for this method.
+
+        '''
+        if self.children == None or len(self.children) == 0:
+            attribute_names = ['name',
+                               'category',
+                               'description',
+                               'priority',
+                               'start_date',
+                               'end_date',
+                               'assignee']
+            self.dict = {a: getattr(self, a) for a in attribute_names}
+        else:
+            for child in self.children:
+                child.make_dict()
+                self.dict[child.name] = child.dict
+
+    def to_file(self, filename: str = None):
+        '''
+        Writes the content of the tree into a .txt file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The absolute path of the file where the object tree is saved.
+
+        Returns
+        -------
+        None.
+
+        '''
+        import os
+        access_mode = "w"
+        if not hasattr(self, "file") and filename is None:
+            '''
+            directory = select_directory(
+                title=f"Saving Task Tree {self.name} to .txt File: Select the Directory Where the .txt File is Created")
+            name = self.name if "/" not in self.name else "task-tree"
+            filename = os.path.join(os.path.abspath(directory), name)
+            '''
+            raise FileNotFoundError(f'File name is needed to save task {self.name} into a file.')
+        elif hasattr(self, "file"):
+            filename = self.filename
+        self.filename = filename
+        self.file = open(filename, access_mode, encoding="utf-8")
+        if ".txt" not in filename:
+            filename += ".txt"
+        self.file.write(self.__str__())
+        self.file.close()
