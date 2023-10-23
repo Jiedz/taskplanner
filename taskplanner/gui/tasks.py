@@ -37,7 +37,10 @@ from PyQt5.QtWidgets import \
 from taskplanner.tasks import Task
 import os
 
-class TaskWidget(QScrollArea):
+import sys
+current_path = "/".join(__file__.split('/')[:-1])
+stylesheets_path = os.path.join(current_path, 'stylesheets')
+class TaskWidget(QWidget):
     '''
     This class defines a task widget.
     '''
@@ -52,18 +55,29 @@ class TaskWidget(QScrollArea):
         '''
         self.task, self.main_color = task, main_color
         super().__init__()
+        # Layout
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
-        self.setFixedWidth(500)
-        self.setFixedHeight(500)
+        self.layout.setAlignment(Qt.AlignTop)
+        # Geometry
+        self.setFixedHeight(1000)
+        self.setFixedWidth(1200)
         # Toolbar
         self.make_toolbar()
         # Style
-        import sys
-        current_path = "/".join(sys.modules[self.__class__.__module__].__file__.split('/')[:-1])
-        file = open(os.path.join(current_path, 'stylesheets/TaskWidget.css'))
-        self.setStyleSheet(file.read())
-        file.close()
+        #file = open(os.path.join(stylesheets_path, 'TaskWidget/standard-view/main-layout.css'))
+        #self.setStyleSheet(file.read())
+        #file.close()
+        self.setStyleSheet(
+        '''
+        QWidget
+        {
+            background-color:white;
+            border: 2px solid #D8D9DA;
+            border-radius: 5px;
+            font:Sans Serif;
+        }
+        ''')
     def make_toolbar(self):
         class Toolbar(QWidget):
             '''
@@ -79,8 +93,26 @@ class TaskWidget(QScrollArea):
                 self.task_widget = parent
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
+                # Geometry
+                x, y, w, h = [getattr(self.task_widget.geometry(), x)() for x in ['x',
+                                                                                  'y',
+                                                                                  'width',
+                                                                                  'height']]
+                self.setFixedSize(int(w), int(h * 0.1))
+                # Make sub-widgets
                 self.make_completed_pushbutton()
                 self.make_close_pushbutton()
+                # Style
+                self.setAttribute(Qt.WA_StyledBackground, True)
+                self.setStyleSheet(
+                    '''
+                    QWidget{
+                        background-color:#F1F6F9;
+                        font-size:10pt;
+                        border:0px;
+                        color:#61677A;
+                    }
+                    ''')
 
             def make_completed_pushbutton(self):
                 #Pushbutton to mark the task as completed
@@ -95,16 +127,54 @@ class TaskWidget(QScrollArea):
                         self.completed_pushbutton.setText('Mark Completed')
                         self.task_widget.task.completed = False
                 self.completed_pushbutton.clicked.connect(completed_pushbutton_clicked)
+                # Geometry
+                self.completed_pushbutton.setFixedSize(int(self.width()*0.25),
+                                                       int(self.height()*0.5))
+                # Style
+                self.completed_pushbutton.setStyleSheet(
+                '''
+                QPushButton
+                {
+                    border:2px solid #61677A;
+                    border-radius:5px;
+                }   
+                QPushButton:hover{
+                    background-color:#7AA874;
+                    color:white;
+                }
+                QPushButton:clicked{
+                    background-color:#7AA874;
+                }
+                ''')
 
             def make_close_pushbutton(self):
                 # Pushbutton to close the task view
-                self.close_pushbutton = QPushButton()
+                self.close_pushbutton = QPushButton('X')
                 self.layout.addWidget(self.close_pushbutton)
 
                 def close_pushbutton_clicked():
                     self.task_widget.hide()
 
                 self.close_pushbutton.clicked.connect(close_pushbutton_clicked)
+
+                # Geometry
+                self.close_pushbutton.setFixedSize(int(self.height()*0.5),
+                                                       int(self.height()*0.5))
+                # Style
+                self.close_pushbutton.setStyleSheet(
+                    '''
+                    QPushButton
+                    {
+                        border:2px solid #61677A;
+                        border-radius:5px;
+                    }   
+                    QPushButton:clicked
+                    {
+                        background-color:#7AA874;
+                    }
+                    ''')
+
+
 
         self.toolbar_widget = Toolbar(parent=self)
         self.layout.addWidget(self.toolbar_widget)
