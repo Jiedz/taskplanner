@@ -35,11 +35,8 @@ from PyQt5.QtWidgets import \
     QScrollArea
     )
 from taskplanner.tasks import Task
+from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
 import os
-
-import sys
-current_path = "/".join(__file__.split('/')[:-1])
-stylesheets_path = os.path.join(current_path, 'stylesheets')
 class TaskWidget(QWidget):
     '''
     This class defines a task widget.
@@ -62,22 +59,11 @@ class TaskWidget(QWidget):
         # Geometry
         self.setFixedHeight(1000)
         self.setFixedWidth(1200)
+        # Style
+        self.style = TaskWidgetStyle()
+        self.setStyleSheet(self.style.stylesheets['standard view']['main'])
         # Toolbar
         self.make_toolbar()
-        # Style
-        #file = open(os.path.join(stylesheets_path, 'TaskWidget/standard-view/main-layout.css'))
-        #self.setStyleSheet(file.read())
-        #file.close()
-        self.setStyleSheet(
-        '''
-        QWidget
-        {
-            background-color:white;
-            border: 2px solid #D8D9DA;
-            border-radius: 5px;
-            font:Sans Serif;
-        }
-        ''')
     def make_toolbar(self):
         class Toolbar(QWidget):
             '''
@@ -104,15 +90,9 @@ class TaskWidget(QWidget):
                 self.make_close_pushbutton()
                 # Style
                 self.setAttribute(Qt.WA_StyledBackground, True)
-                self.setStyleSheet(
-                    '''
-                    QWidget{
-                        background-color:#F1F6F9;
-                        font-size:10pt;
-                        border:0px;
-                        color:#61677A;
-                    }
-                    ''')
+                # Style
+                self.style = self.task_widget.style
+                self.setStyleSheet(self.style.stylesheets['standard view']['toolbar']['main'])
 
             def make_completed_pushbutton(self):
                 #Pushbutton to mark the task as completed
