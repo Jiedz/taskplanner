@@ -14,16 +14,16 @@ COLOR_PALETTES = {'light earth':
     }
 }
 
-FONTS = {'elfic':
+FONTS = {'light':
     {
-        'family': 'Cormorant Upright',
+        'family': 'Sans Serif',
         'size - title 1': 20,
         'size - title 2': 16,
         'size - text': 14
     },
-    'fun elegant':
+    'elegant light':
         {
-            'family': 'Arial',
+            'family': 'Liberation Serif',#'Oregano',
             'size - title 1': 20,
             'size - title 2': 16,
             'size - text': 14
@@ -34,9 +34,10 @@ FONTS = {'elfic':
 class TaskWidgetStyle:
     def __init__(self,
                  color_palette: dict = COLOR_PALETTES['light earth'],
-                 font=FONTS['fun elegant']):
+                 font=FONTS['light']):
         self._font, self._color_palette = font, color_palette
-        self.stylesheets = {'standard view':
+        self.stylesheets = {
+                            'standard view':
                                 {
                                     'main':
                                         '''
@@ -45,11 +46,28 @@ class TaskWidgetStyle:
                                             background-color:%s;
                                             border:2px solid %s;
                                             border-radius:5px;
-                                            font:%s;
+                                            font-family:%s;
+                                            color:%s
                                         }
                                         '''%(self.color_palette['main background'],
                                              self.color_palette['highlight'],
-                                             self.font['family']),
+                                             self.font['family'],
+                                             self.color_palette['text']),
+                                    'scroll_area':
+                                        '''
+                                        QWidget
+                                        {
+                                            background-color:%s;
+                                            border:2px solid %s;
+                                            border-radius:5px;
+                                            font-family:%s;
+                                            color:%s
+                                        }
+                                        ''' % (
+                                        self.color_palette['main background'],
+                                        self.color_palette['highlight'],
+                                        self.font['family'],
+                                        self.color_palette['text']),
                                     'toolbar':
                                         {
                                             'main':
@@ -59,14 +77,54 @@ class TaskWidgetStyle:
                                                     background-color:%s;
                                                     border:2px solid %s;
                                                     border-radius:5px;
-                                                    font:%s;
                                                     font-size:%s;
                                                 }
                                                 ''' % (
                                                         self.color_palette['secondary background'],
                                                         self.color_palette['highlight'],
-                                                        self.font['family'],
                                                         self.font['size - title 1'])
+                                                +
+                                                '''
+                                                QPushButton
+                                                {
+                                                    border:2px solid %s;
+                                                    border-radius:5px;
+                                                    font-size:%s;
+                                                    background-color:%s
+                                                }   
+                                                '''%(self.color_palette['highlight'],
+                                                     self.font['size - text'],
+                                                     self.color_palette['secondary background']),
+                                            'completed_pushbutton':
+                                                '''
+                                                QPushButton:hover
+                                                {
+                                                    background-color:%s;
+                                                    color:white;
+                                                }
+                                                QPushButton:checked
+                                                {
+                                                    background-color:%s;
+                                                    color:white;
+                                                }
+                                                '''%(self.color_palette['completed'],
+                                                     self.color_palette['completed']),
+                                            'close_pushbutton':
+                                                '''
+                                                QPushButton:hover
+                                                {
+                                                    background-color:%s;
+                                                    color:white;
+                                                }
+                                                QPushButton:checked
+                                                {
+                                                    background-color:%s;
+                                                    color:white;
+                                                }
+                                                ''' % (self.color_palette['urgent'],
+                                                       self.color_palette['urgent']),
+
+
                                         },
                                 }
                             }
