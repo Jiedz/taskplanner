@@ -32,7 +32,8 @@ from PyQt5.QtWidgets import \
     QBoxLayout,
     QGridLayout,
     QWidget,
-    QScrollArea
+    QScrollArea,
+    QTextEdit
     )
 from taskplanner.tasks import Task
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
@@ -56,32 +57,22 @@ class TaskWidget(QWidget):
         self.task, self.main_color = task, main_color
         super().__init__()
         # Layout
-        self.layout = QHBoxLayout()
+        self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.layout.setAlignment(Qt.AlignTop)
         # Geometry
-        self.setFixedHeight(1000)
-        self.setFixedWidth(1200)
-        self.setFixedWidth(1200)
-        # Scroll area
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self)
-        self.scroll_area.setGeometry(self.geometry())
+        self.setFixedHeight(900)
+        self.setFixedWidth(850)
         # Toolbar
         self.make_toolbar()
+        # Task Name
+        self.make_name_linedit()
+        # Task Description
+        self.make_description_textedit()
         # Style
-        self._style = TaskWidgetStyle()
+        self._style = TaskWidgetStyle(font='elegant light')
         set_style(widget=self,
                   stylesheets=self._style.stylesheets['standard view'])
-
-    def show(self):
-        super().show()
-        self.scroll_area.show()
-
-    def hide(self):
-        super().hide()
-        self.scroll_area.hide()
 
     def make_toolbar(self):
         class Toolbar(QWidget):
@@ -98,15 +89,17 @@ class TaskWidget(QWidget):
                 self.task_widget = parent
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
+                self.layout.setAlignment(Qt.AlignLeft)
                 # Geometry
                 x, y, w, h = [getattr(self.task_widget.geometry(), x)() for x in ['x',
                                                                                   'y',
                                                                                   'width',
                                                                                   'height']]
-                self.setFixedSize(int(w), int(h * 0.1))
-                # Make sub-widgets
+                self.setFixedSize(int(w*0.9), int(h * 0.1))
+                # Path Label
+                self.make_path_label()
+                # Completed button
                 self.make_completed_pushbutton()
-                self.make_close_pushbutton()
                 # Style
                 self.setAttribute(Qt.WA_StyledBackground, True)
 
@@ -116,32 +109,61 @@ class TaskWidget(QWidget):
                 # Pushbutton to mark the task as completed
                 self.completed_pushbutton = QPushButton('Mark Completed')
                 self.layout.addWidget(self.completed_pushbutton)
+                # Geometry
+                self.completed_pushbutton.setFixedSize(int(self.width() * 0.25),
+                                                       int(self.height() * 0.5))
 
-                def completed_pushbutton_clicked():
+                def callback():
                     if self.completed_pushbutton.text() == 'Mark Completed':
                         self.completed_pushbutton.setText('Completed')
                         self.task_widget.task.completed = True
                     else:
                         self.completed_pushbutton.setText('Mark Completed')
                         self.task_widget.task.completed = False
-                self.completed_pushbutton.clicked.connect(completed_pushbutton_clicked)
+                self.completed_pushbutton.clicked.connect(lambda : callback())
+
+            def make_path_label(self):
+                self.path_label = QLabel()
+                self.layout.addWidget(self.path_label)
                 # Geometry
-                self.completed_pushbutton.setFixedSize(int(self.width()*0.25),
-                                                       int(self.height()*0.5))
-
-            def make_close_pushbutton(self):
-                # Pushbutton to close the task view
-                self.close_pushbutton = QPushButton('X')
-                self.layout.addWidget(self.close_pushbutton)
-
-                def close_pushbutton_clicked():
-                    self.task_widget.hide()
-
-                self.close_pushbutton.clicked.connect(close_pushbutton_clicked)
-                # Geometry
-                self.close_pushbutton.setFixedSize(int(self.height()*0.5),
-                                                       int(self.height()*0.5))
+                self.path_label.setFixedSize(int(self.width() * 0.5),
+                                                       int(self.height() * 0.5))
+                text = ''
+                for ancestor in self.task_widget.task.ancestors:
+                    text += f'{ancestor.name}/'
+                self.path_label.setText(text)
 
         self.toolbar = Toolbar(parent=self)
         self.layout.addWidget(self.toolbar)
+
+    def make_name_linedit(self):
+        self.name_linedit = QLineEdit()
+        # Layout
+        self.layout.addWidget(self.name_linedit)
+        self.name_linedit.setAlignment(Qt.AlignLeft)
+        # Geometry
+        self.name_linedit.setFixedSize(int(self.width()*0.6),
+                                       int(self.height()*0.1))
+        def callback():
+            self.task.name = self.name_linedit.text()
+
+        self.name_linedit.textEdited.connect(lambda : callback())
+        self.name_linedit.setText(self.task.name)
+        self.name_linedit.setPlaceholderText("Task Name")
+
+    def make_description_textedit(self):
+        self.description_textedit = QTextEdit()
+        # Layout
+        self.layout.addWidget(self.description_textedit)
+        self.description_textedit.setAlignment(Qt.AlignLeft)
+        # Geometry
+        self.description_textedit.setFixedSize(int(self.width()*0.6),
+                                       int(self.height()*0.2))
+        def callback():
+            self.task.description = self.description_textedit.toPlainText()
+
+        self.description_textedit.textChanged.connect(lambda : callback())
+        self.description_textedit.setText(self.task.description)
+        self.description_textedit.setPlaceholderText("Task description")
+
 

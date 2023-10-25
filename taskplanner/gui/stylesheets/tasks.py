@@ -9,6 +9,7 @@ COLOR_PALETTES = {'light earth':
         'secondary background': '#FCF5ED',
         'urgent': '#CE5A67',
         'text': '#45474B',
+        'text - light':'gray',
         'highlight': '#F4BF96',
         'completed': '#A7D397'
     }
@@ -17,16 +18,16 @@ COLOR_PALETTES = {'light earth':
 FONTS = {'light':
     {
         'family': 'Sans Serif',
-        'size - title 1': 20,
-        'size - title 2': 16,
-        'size - text': 14
+        'size - title 1': '24pt',
+        'size - title 2': '18pt',
+        'size - text': '14pt'
     },
     'elegant light':
         {
             'family': 'Liberation Serif',#'Oregano',
-            'size - title 1': 20,
-            'size - title 2': 16,
-            'size - text': 14
+            'size - title 1': '24pt',
+            'size - title 2': '18pt',
+            'size - text': '14pt'
         }
 }
 
@@ -35,7 +36,14 @@ class TaskWidgetStyle:
     def __init__(self,
                  color_palette: dict = COLOR_PALETTES['light earth'],
                  font=FONTS['light']):
-        self._font, self._color_palette = font, color_palette
+        if type(font) is str:
+            self._font = FONTS[font]
+        else:
+            self._font = font
+        if type(color_palette) is str:
+            self._color_palette = COLOR_PALETTES[color_palette]
+        else:
+            self._color_palette= color_palette
         self.stylesheets = {
                             'standard view':
                                 {
@@ -95,6 +103,7 @@ class TaskWidgetStyle:
                                                 '''%(self.color_palette['highlight'],
                                                      self.font['size - text'],
                                                      self.color_palette['secondary background']),
+
                                             'completed_pushbutton':
                                                 '''
                                                 QPushButton:hover
@@ -109,23 +118,36 @@ class TaskWidgetStyle:
                                                 }
                                                 '''%(self.color_palette['completed'],
                                                      self.color_palette['completed']),
-                                            'close_pushbutton':
+
+                                            'path_label':
                                                 '''
-                                                QPushButton:hover
+                                                QLabel
                                                 {
-                                                    background-color:%s;
-                                                    color:white;
+                                                    font-size:%s;
+                                                    border:None;
                                                 }
-                                                QPushButton:checked
-                                                {
-                                                    background-color:%s;
-                                                    color:white;
-                                                }
-                                                ''' % (self.color_palette['urgent'],
-                                                       self.color_palette['urgent']),
-
-
+                                                '''%(self.font['size - title 2'])
                                         },
+
+                                    'name_linedit':
+                                        '''
+                                        QLineEdit
+                                        {
+                                            font-size:%s;
+                                            border:2px solid %s
+                                        }
+                                        '''%(self.font['size - title 1'],
+                                             self.color_palette['highlight']),
+
+                                    'description_textedit':
+                                        '''
+                                        QTextEdit
+                                        {
+                                            font-size:%s;
+                                            border:2px solid %s
+                                        }
+                                        ''' % (self.font['size - text'],
+                                               self.color_palette['highlight'])
                                 }
                             }
 
