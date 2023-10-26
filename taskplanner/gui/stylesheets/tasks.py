@@ -18,16 +18,16 @@ COLOR_PALETTES = {'light earth':
 FONTS = {'light':
     {
         'family': 'Sans Serif',
-        'size - title 1': '24pt',
-        'size - title 2': '18pt',
-        'size - text': '14pt'
+        'size - title 1': '22pt',
+        'size - title 2': '16pt',
+        'size - text': '12pt'
     },
     'elegant light':
         {
             'family': 'Liberation Serif',#'Oregano',
-            'size - title 1': '24pt',
-            'size - title 2': '18pt',
-            'size - text': '14pt'
+            'size - title 1': '22pt',
+            'size - title 2': '16pt',
+            'size - text': '12pt'
         }
 }
 
@@ -61,21 +61,6 @@ class TaskWidgetStyle:
                                              self.color_palette['highlight'],
                                              self.font['family'],
                                              self.color_palette['text']),
-                                    'scroll_area':
-                                        '''
-                                        QWidget
-                                        {
-                                            background-color:%s;
-                                            border:2px solid %s;
-                                            border-radius:5px;
-                                            font-family:%s;
-                                            color:%s
-                                        }
-                                        ''' % (
-                                        self.color_palette['main background'],
-                                        self.color_palette['highlight'],
-                                        self.font['family'],
-                                        self.color_palette['text']),
                                     'toolbar':
                                         {
                                             'main':
@@ -124,9 +109,11 @@ class TaskWidgetStyle:
                                                 QLabel
                                                 {
                                                     font-size:%s;
+                                                    color:%s;
                                                     border:None;
                                                 }
-                                                '''%(self.font['size - title 2'])
+                                                '''%(self.font['size - text'],
+                                                     self.color_palette['text - light'])
                                         },
 
                                     'name_linedit':

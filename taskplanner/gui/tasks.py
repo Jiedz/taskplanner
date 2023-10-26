@@ -33,7 +33,9 @@ from PyQt5.QtWidgets import \
     QGridLayout,
     QWidget,
     QScrollArea,
-    QTextEdit
+    QTextEdit,
+    QDesktopWidget,
+    QComboBox
     )
 from taskplanner.tasks import Task
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
@@ -47,7 +49,8 @@ class TaskWidget(QWidget):
 
     def __init__(self,
                  task:Task,
-                 main_color:str=None):
+                 main_color:str=None,
+                 parent:QWidget=None):
         """
         :param task: :py:class:'taskplanner.tasks.Task'
             The task associated to this widget
@@ -55,14 +58,19 @@ class TaskWidget(QWidget):
             The main color of this task and all sub-tasks
         """
         self.task, self.main_color = task, main_color
-        super().__init__()
+        super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
         self.layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.layout)
         # Geometry
-        self.setFixedHeight(900)
-        self.setFixedWidth(850)
+        ## Get screen size
+        screen_size = QDesktopWidget().screenGeometry(-1)
+        width, height = int(screen_size.width()*0.4), int(screen_size.height()*0.6)
+        self.setGeometry(int(screen_size.width()/2)-int(width/2),
+                         int(screen_size.height()/2)-int(height/2),
+                         width, # width
+                         height) # height
         # Toolbar
         self.make_toolbar()
         # Task Name
@@ -85,19 +93,21 @@ class TaskWidget(QWidget):
             :return:
             """
             def __init__(self, parent):
-                super().__init__()
+                super().__init__(parent=parent)
                 self.task_widget = parent
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
                 self.layout.setAlignment(Qt.AlignLeft)
                 # Geometry
-                x, y, w, h = [getattr(self.task_widget.geometry(), x)() for x in ['x',
-                                                                                  'y',
-                                                                                  'width',
-                                                                                  'height']]
+                x, y, w, h = [getattr(self.parent().geometry(), x)() for x in ['x',
+                                                                               'y',
+                                                                               'width',
+                                                                               'height']]
                 self.setFixedSize(int(w*0.9), int(h * 0.1))
                 # Path Label
                 self.make_path_label()
+                # Category widget
+                self.make_category_widget()
                 # Completed button
                 self.make_completed_pushbutton()
                 # Style
@@ -110,8 +120,15 @@ class TaskWidget(QWidget):
                 self.completed_pushbutton = QPushButton('Mark Completed')
                 self.layout.addWidget(self.completed_pushbutton)
                 # Geometry
-                self.completed_pushbutton.setFixedSize(int(self.width() * 0.25),
-                                                       int(self.height() * 0.5))
+                x, y, w, h = [getattr(self.geometry(), u)() for u in ['x', 'y', 'width', 'height']]
+                width, height = int(self.width() * 0.2), int(self.height() * 0.5)
+                '''
+                self.completed_pushbutton.setGeometry(x+int(w),
+                                                      y,
+                                                      width,
+                                                      height)
+                '''
+                self.completed_pushbutton.setFixedSize(width, height)
 
                 def callback():
                     if self.completed_pushbutton.text() == 'Mark Completed':
@@ -127,11 +144,73 @@ class TaskWidget(QWidget):
                 self.layout.addWidget(self.path_label)
                 # Geometry
                 self.path_label.setFixedSize(int(self.width() * 0.5),
-                                                       int(self.height() * 0.5))
+                                            int(self.height() * 0.5))
                 text = ''
                 for ancestor in self.task_widget.task.ancestors:
                     text += f'{ancestor.name}/'
                 self.path_label.setText(text)
+
+            def make_category_widget(self):
+                class CategoryWidget(QWidget):
+                    """
+                    This widget contains:
+
+                        - A combobox of category names
+                        - A "+" button to add a new category
+                        - A dialog to add a new category, that pops up when the "+" button is clicked
+                    """
+                    def __init__(self, parent:QWidget):
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QHBoxLayout()
+                        self.setLayout(self.layout)
+                        self.layout.setAlignment(Qt.AlignCenter)
+                        # Geometry
+                        width, height = int(parent.width() * 0.4), int(parent.height() * 0.5)
+                        self.setFixedSize(width, height)
+                        # Categories combobox
+                        self.make_categories_combobox()
+                        # Add category pushbutton
+                        self.make_add_pushbutton()
+                        # Add category dialog
+                        #self.make_add_dialog()
+
+                    def make_categories_combobox(self):
+                        self.categories_combobox = QComboBox()
+                        # Layout
+                        self.layout.addWidget(self.categories_combobox)
+                        # Geometry
+                        width, height = int(self.width() * 0.7), int(self.height()*0.5)
+                        self.categories_combobox.setFixedSize(width, height)
+                        # Add items to list
+                        self.categories_combobox.addItems(['Category 1', 'Category 2'])
+                        # Callback
+                        def item_changed():
+                            self.parent().parent().task.category = self.categories_combobox.currentText()
+
+                        self.categories_combobox.currentIndexChanged.connect(lambda : item_changed())
+
+                    def make_add_pushbutton(self):
+                        # Pushbutton to mark the task as add
+                        self.add_pushbutton = QPushButton()
+                        self.layout.addWidget(self.add_pushbutton)
+                        # Geometry
+                        width, height = int(self.height() * 0.5), int(self.height() * 0.5)
+                        self.add_pushbutton.setFixedSize(width, height)
+
+                        def callback():
+                            raise NotImplementedError
+
+                        self.add_pushbutton.clicked.connect(lambda: callback())
+
+                    def make_add_dialog(self):
+                        raise NotImplementedError
+
+                self.category_widget = CategoryWidget(parent=self)
+                self.layout.addWidget(self.category_widget)
+
+
+
 
         self.toolbar = Toolbar(parent=self)
         self.layout.addWidget(self.toolbar)
