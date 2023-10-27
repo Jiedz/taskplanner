@@ -1,7 +1,7 @@
 '''
 This module define the stylesheets to be used by the task-related widgets.
 '''
-import setuptools
+import setuptools, inspect, os
 
 COLOR_PALETTES = {'light earth':
     {
@@ -12,6 +12,16 @@ COLOR_PALETTES = {'light earth':
         'text - light':'gray',
         'highlight': '#F4BF96',
         'completed': '#A7D397'
+    },
+    'deep purple':
+    {
+        'main background': '#35155D',
+        'secondary background': '#512B81',
+        'urgent': '#9D44C0',
+        'text': '#F0F0F0',
+        'text - light':'#F0F0F0',
+        'highlight': '#4477CE',
+        'completed': '#8CABFF'
     }
 }
 
@@ -34,16 +44,20 @@ FONTS = {'light':
 
 class TaskWidgetStyle:
     def __init__(self,
-                 color_palette: dict = COLOR_PALETTES['light earth'],
-                 font=FONTS['light']):
-        if type(font) is str:
-            self._font = FONTS[font]
-        else:
-            self._font = font
-        if type(color_palette) is str:
-            self._color_palette = COLOR_PALETTES[color_palette]
-        else:
-            self._color_palette= color_palette
+                 color_palette: str = 'light earth',
+                 font='light'):
+        if font not in list(FONTS.keys()):
+            raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
+        self._font = FONTS[font]
+        self.font_name = font
+        if color_palette not in list(COLOR_PALETTES.keys()):
+            raise ValueError(f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
+        self._color_palette = COLOR_PALETTES[color_palette]
+        self.color_palette_name = color_palette
+        # Locate icon path
+        self.icon_path = '/'.join(__file__.split('/')[:-1])
+        self.icon_path = os.path.join(self.icon_path, f'Icons/{self.color_palette_name.replace(" ", "-")}')
+        # Define style sheets
         self.stylesheets = {
                             'standard view':
                                 {
@@ -53,7 +67,7 @@ class TaskWidgetStyle:
                                         {
                                             background-color:%s;
                                             border:2px solid %s;
-                                            border-radius:5px;
+                                            border-radius:10px;
                                             font-family:%s;
                                             color:%s
                                         }
@@ -69,7 +83,7 @@ class TaskWidgetStyle:
                                                 {
                                                     background-color:%s;
                                                     border:2px solid %s;
-                                                    border-radius:5px;
+                                                    border-radius:10px;
                                                     font-size:%s;
                                                 }
                                                 ''' % (
@@ -81,7 +95,7 @@ class TaskWidgetStyle:
                                                 QPushButton
                                                 {
                                                     border:2px solid %s;
-                                                    border-radius:5px;
+                                                    border-radius:10px;
                                                     font-size:%s;
                                                     background-color:%s
                                                 }   
@@ -91,18 +105,17 @@ class TaskWidgetStyle:
 
                                             'completed_pushbutton':
                                                 '''
+                                                QPushButton
+                                                {
+                                                    border-radius:30px;
+                                                }
                                                 QPushButton:hover
                                                 {
                                                     background-color:%s;
                                                     color:white;
+                                                    
                                                 }
-                                                QPushButton:checked
-                                                {
-                                                    background-color:%s;
-                                                    color:white;
-                                                }
-                                                '''%(self.color_palette['completed'],
-                                                     self.color_palette['completed']),
+                                                '''%(self.color_palette['completed']),
 
                                             'path_label':
                                                 '''
@@ -113,7 +126,34 @@ class TaskWidgetStyle:
                                                     border:None;
                                                 }
                                                 '''%(self.font['size - text'],
-                                                     self.color_palette['text - light'])
+                                                     self.color_palette['text - light']),
+                                            'category_widget':
+                                                {
+                                                    'categories_combobox':
+                                                        '''
+                                                        QComboBox
+                                                        {
+                                                            font-size:%s;
+                                                            border:2px solid %s;
+                                                            border-radius:10px;
+                                                        }
+                                                        '''%(self.font['size - text'],
+                                                             self.color_palette['highlight'],
+                                                             ),
+                                                    'add_pushbutton':
+                                                        '''
+                                                        QPushButton
+                                                        {
+                                                            border-radius:20px;
+                                                            border:2px solid %s;
+                                                        }
+                                                        QPushButton:hover
+                                                        {
+                                                            background-color:%s;
+                                                        }
+                                                        '''%(self.color_palette['highlight'],
+                                                             self.color_palette['highlight']),
+                                                }
                                         },
 
                                     'name_linedit':

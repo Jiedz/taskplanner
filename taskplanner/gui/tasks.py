@@ -4,6 +4,7 @@ This module defines a task widget.
 
 #%% Imports
 from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtGui import QIcon
 from PyQt5.Qt import QFont
 from PyQt5.QtWidgets import \
 (
@@ -41,6 +42,7 @@ from taskplanner.tasks import Task
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
 from taskplanner.gui.utilities import set_style
 import os
+import inspect
 class TaskWidget(QWidget):
 
     """
@@ -64,21 +66,23 @@ class TaskWidget(QWidget):
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
         # Geometry
-        ## Get screen size
+        # Get screen size
         screen_size = QDesktopWidget().screenGeometry(-1)
         width, height = int(screen_size.width()*0.4), int(screen_size.height()*0.6)
         self.setGeometry(int(screen_size.width()/2)-int(width/2),
                          int(screen_size.height()/2)-int(height/2),
                          width, # width
                          height) # height
+        # Define style
+        self._style = TaskWidgetStyle(font='light',
+                                      color_palette='deep purple')
         # Toolbar
         self.make_toolbar()
         # Task Name
         self.make_name_linedit()
         # Task Description
         self.make_description_textedit()
-        # Style
-        self._style = TaskWidgetStyle(font='elegant light')
+        # Set style
         set_style(widget=self,
                   stylesheets=self._style.stylesheets['standard view'])
 
@@ -117,26 +121,34 @@ class TaskWidget(QWidget):
 
             def make_completed_pushbutton(self):
                 # Pushbutton to mark the task as completed
-                self.completed_pushbutton = QPushButton('Mark Completed')
+                self.completed_pushbutton = QPushButton()
                 self.layout.addWidget(self.completed_pushbutton)
                 # Geometry
                 x, y, w, h = [getattr(self.geometry(), u)() for u in ['x', 'y', 'width', 'height']]
-                width, height = int(self.width() * 0.2), int(self.height() * 0.5)
-                '''
-                self.completed_pushbutton.setGeometry(x+int(w),
-                                                      y,
-                                                      width,
-                                                      height)
-                '''
+                width, height = int(self.height() * 0.5), int(self.height() * 0.5)
                 self.completed_pushbutton.setFixedSize(width, height)
+                # Icon
+                icon_path = self.parent()._style.icon_path
+                icon_filename = os.path.join(icon_path, 'ok.png')
+                self.completed_pushbutton.setIcon(QIcon(icon_filename))
+
 
                 def callback():
-                    if self.completed_pushbutton.text() == 'Mark Completed':
-                        self.completed_pushbutton.setText('Completed')
+                    if not self.task_widget.task.completed:
                         self.task_widget.task.completed = True
+                        # Change background color
+                        stylesheet = self.parent()._style.stylesheets['standard view']['toolbar']['completed_pushbutton']
+                        stylesheet = stylesheet.replace('border-radius:30px;', f'border-radius:30px;\nbackground-color:{self.parent()._style.color_palette["completed"]};\n')
+                        self.completed_pushbutton.setStyleSheet(stylesheet)
                     else:
-                        self.completed_pushbutton.setText('Mark Completed')
                         self.task_widget.task.completed = False
+                        # Change background color
+                        stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
+                            'completed_pushbutton']
+                        stylesheet = stylesheet.replace(f'border-radius:30px;\nbackground-color:{self.parent()._style.color_palette["completed"]};\n',
+                                                        'border-radius:30px;')
+                        self.completed_pushbutton.setStyleSheet(stylesheet)
+
                 self.completed_pushbutton.clicked.connect(lambda : callback())
 
             def make_path_label(self):
@@ -176,11 +188,11 @@ class TaskWidget(QWidget):
                         #self.make_add_dialog()
 
                     def make_categories_combobox(self):
-                        self.categories_combobox = QComboBox()
+                        self.categories_combobox = QComboBox(parent=self)
                         # Layout
                         self.layout.addWidget(self.categories_combobox)
                         # Geometry
-                        width, height = int(self.width() * 0.7), int(self.height()*0.5)
+                        width, height = int(self.width() * 0.7), int(self.height()*0.7)
                         self.categories_combobox.setFixedSize(width, height)
                         # Add items to list
                         self.categories_combobox.addItems(['Category 1', 'Category 2'])
@@ -195,8 +207,12 @@ class TaskWidget(QWidget):
                         self.add_pushbutton = QPushButton()
                         self.layout.addWidget(self.add_pushbutton)
                         # Geometry
-                        width, height = int(self.height() * 0.5), int(self.height() * 0.5)
+                        width, height = int(self.height() * 0.7), int(self.height() * 0.7)
                         self.add_pushbutton.setFixedSize(width, height)
+                        # Icon
+                        icon_path = self.parent().parent()._style.icon_path
+                        icon_filename = os.path.join(icon_path, 'plus.png')
+                        self.add_pushbutton.setIcon(QIcon(icon_filename))
 
                         def callback():
                             raise NotImplementedError
