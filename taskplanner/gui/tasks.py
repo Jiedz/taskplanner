@@ -40,8 +40,10 @@ from PyQt5.QtWidgets import \
     )
 from taskplanner.tasks import Task
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
-from taskplanner.gui.utilities import set_style
+from taskplanner.gui.utilities import set_style, get_screen_size
+
 import os
+
 import inspect
 class TaskWidget(QWidget):
 
@@ -67,10 +69,10 @@ class TaskWidget(QWidget):
         self.setLayout(self.layout)
         # Geometry
         # Get screen size
-        screen_size = QDesktopWidget().screenGeometry(-1)
-        width, height = int(screen_size.width()*0.4), int(screen_size.height()*0.6)
-        self.setGeometry(int(screen_size.width()/2)-int(width/2),
-                         int(screen_size.height()/2)-int(height/2),
+        screen_size = get_screen_size()
+        width, height = int(screen_size.width*0.4), int(screen_size.height*0.6)
+        self.setGeometry(int(screen_size.width/2)-int(width/2),
+                         int(screen_size.height/2)-int(height/2),
                          width, # width
                          height) # height
         # Define style
@@ -132,21 +134,20 @@ class TaskWidget(QWidget):
                 icon_filename = os.path.join(icon_path, 'ok.png')
                 self.completed_pushbutton.setIcon(QIcon(icon_filename))
 
-
                 def callback():
                     if not self.task_widget.task.completed:
                         self.task_widget.task.completed = True
                         # Change background color
                         stylesheet = self.parent()._style.stylesheets['standard view']['toolbar']['completed_pushbutton']
-                        stylesheet = stylesheet.replace('border-radius:30px;', f'border-radius:30px;\nbackground-color:{self.parent()._style.color_palette["completed"]};\n')
+                        stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */\n'%(self.parent()._style.color_palette["completed"]))
                         self.completed_pushbutton.setStyleSheet(stylesheet)
                     else:
                         self.task_widget.task.completed = False
                         # Change background color
                         stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
                             'completed_pushbutton']
-                        stylesheet = stylesheet.replace(f'border-radius:30px;\nbackground-color:{self.parent()._style.color_palette["completed"]};\n',
-                                                        'border-radius:30px;')
+                        stylesheet = stylesheet.replace('background-color:%s;/* main */\n'%(self.parent()._style.color_palette["completed"]),
+                                                        '/* background-color */')
                         self.completed_pushbutton.setStyleSheet(stylesheet)
 
                 self.completed_pushbutton.clicked.connect(lambda : callback())

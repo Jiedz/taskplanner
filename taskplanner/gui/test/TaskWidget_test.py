@@ -6,7 +6,7 @@ import sys
 
 task = Task()
 # Set some ancestors
-parent_task = Task(name='Parent ')
+parent_task = Task(name='Parent')
 task.set_parent_task(parent_task)
 grandparent_task = Task(name='Granparent')
 parent_task.set_parent_task(grandparent_task)

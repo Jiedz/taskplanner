@@ -1,7 +1,8 @@
 '''
 This module define the stylesheets to be used by the task-related widgets.
 '''
-import setuptools, inspect, os
+import setuptools, inspect, os, sys
+from taskplanner.gui.utilities import get_screen_size
 
 COLOR_PALETTES = {'light earth':
     {
@@ -57,6 +58,8 @@ class TaskWidgetStyle:
         # Locate icon path
         self.icon_path = '/'.join(__file__.split('/')[:-1])
         self.icon_path = os.path.join(self.icon_path, f'Icons/{self.color_palette_name.replace(" ", "-")}')
+        # Get screen size
+        screen_size = get_screen_size()
         # Define style sheets
         self.stylesheets = {
                             'standard view':
@@ -107,7 +110,8 @@ class TaskWidgetStyle:
                                                 '''
                                                 QPushButton
                                                 {
-                                                    border-radius:30px;
+                                                    /* background-color */
+                                                    border-radius:%spx;
                                                 }
                                                 QPushButton:hover
                                                 {
@@ -115,7 +119,8 @@ class TaskWidgetStyle:
                                                     color:white;
                                                     
                                                 }
-                                                '''%(self.color_palette['completed']),
+                                                '''%(int(screen_size.width/120),
+                                                    self.color_palette['completed']),
 
                                             'path_label':
                                                 '''
@@ -144,14 +149,15 @@ class TaskWidgetStyle:
                                                         '''
                                                         QPushButton
                                                         {
-                                                            border-radius:20px;
+                                                            border-radius:%spx;
                                                             border:2px solid %s;
                                                         }
                                                         QPushButton:hover
                                                         {
                                                             background-color:%s;
                                                         }
-                                                        '''%(self.color_palette['highlight'],
+                                                        '''%(int(screen_size.width/180),
+                                                            self.color_palette['highlight'],
                                                              self.color_palette['highlight']),
                                                 }
                                         },

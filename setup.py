@@ -9,7 +9,8 @@ def readme():
     
 requirements = ['numpy', 
                 'anytree',
-                'pyqt5']
+                'pyqt5',
+                'screeninfo']
 
 setup(name='taskplanner',
       version='1',

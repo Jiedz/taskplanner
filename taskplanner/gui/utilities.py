@@ -20,3 +20,7 @@ def set_style(widget, stylesheets):
                               stylesheets=stylesheets[widget_name])
             except Exception as e:
                 print(e)
+
+from screeninfo import get_monitors
+def get_screen_size():
+    return get_monitors()[0]
