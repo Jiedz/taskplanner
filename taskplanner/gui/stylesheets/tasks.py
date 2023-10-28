@@ -30,14 +30,14 @@ FONTS = {'light':
     {
         'family': 'Sans Serif',
         'size - title 1': '22pt',
-        'size - title 2': '16pt',
+        'size - title 2': '18pt',
         'size - text': '12pt'
     },
     'elegant light':
         {
             'family': 'Liberation Serif',#'Oregano',
             'size - title 1': '22pt',
-            'size - title 2': '16pt',
+            'size - title 2': '18pt',
             'size - text': '12pt'
         }
 }
@@ -105,6 +105,35 @@ class TaskWidgetStyle:
                                                 '''%(self.color_palette['highlight'],
                                                      self.font['size - text'],
                                                      self.color_palette['secondary background']),
+                                            'path_label':
+                                                '''
+                                                QLabel
+                                                {
+                                                    font-size:%s;
+                                                    color:%s;
+                                                    border:None;
+                                                }
+                                                ''' % (self.font['size - text'],
+                                                       self.color_palette['text - light']),
+                                            'priority_widget':
+                                                {
+                                                    'icon_pushbutton':
+                                                        '''
+                                                        QPushButton
+                                                        {
+                                                            border-radius:%s;
+                                                        }
+                                                        '''%(int(screen_size.width / 180)),
+                                                    'combobox':
+                                                        '''
+                                                        QComboBox
+                                                        {
+                                                            font-size:%s;
+                                                            border-radius:%s;
+                                                        }
+                                                        '''%(self.font['size - text'],
+                                                             int(screen_size.width / 180))
+                                                },
 
                                             'completed_pushbutton':
                                                 '''
@@ -122,54 +151,43 @@ class TaskWidgetStyle:
                                                 '''%(int(screen_size.width/120),
                                                     self.color_palette['completed']),
 
-                                            'path_label':
+                                        },
+                                    'category_widget':
+                                        {
+                                            'categories_combobox':
                                                 '''
-                                                QLabel
+                                                QComboBox
                                                 {
                                                     font-size:%s;
-                                                    color:%s;
-                                                    border:None;
+                                                    border:2px solid %s;
+                                                    border-radius:10px;
                                                 }
-                                                '''%(self.font['size - text'],
-                                                     self.color_palette['text - light']),
-                                            'category_widget':
+                                                ''' % (self.font['size - text'],
+                                                       self.color_palette['highlight'],
+                                                       ),
+                                            'add_pushbutton':
+                                                '''
+                                                QPushButton
                                                 {
-                                                    'categories_combobox':
-                                                        '''
-                                                        QComboBox
-                                                        {
-                                                            font-size:%s;
-                                                            border:2px solid %s;
-                                                            border-radius:10px;
-                                                        }
-                                                        '''%(self.font['size - text'],
-                                                             self.color_palette['highlight'],
-                                                             ),
-                                                    'add_pushbutton':
-                                                        '''
-                                                        QPushButton
-                                                        {
-                                                            border-radius:%spx;
-                                                            border:2px solid %s;
-                                                        }
-                                                        QPushButton:hover
-                                                        {
-                                                            background-color:%s;
-                                                        }
-                                                        '''%(int(screen_size.width/180),
-                                                            self.color_palette['highlight'],
-                                                             self.color_palette['highlight']),
+                                                    border-radius:%spx;
+                                                    border:2px solid %s;
                                                 }
+                                                QPushButton:hover
+                                                {
+                                                    background-color:%s;
+                                                }
+                                                ''' % (int(screen_size.width / 180),
+                                                       self.color_palette['highlight'],
+                                                       self.color_palette['highlight']),
                                         },
-
-                                    'name_linedit':
+                                    'name_textedit':
                                         '''
-                                        QLineEdit
+                                        QTextEdit
                                         {
                                             font-size:%s;
                                             border:2px solid %s
                                         }
-                                        '''%(self.font['size - title 1'],
+                                        '''%(self.font['size - title 2'],
                                              self.color_palette['highlight']),
 
                                     'description_textedit':

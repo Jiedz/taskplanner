@@ -7,9 +7,10 @@ from anytree import Node, RenderTree
 from inspect import currentframe, getargvalues
 from datetime import datetime, date
 from logging import warning
+from signalslot import Signal
 
 # %% Task
-PRIORITY_LEVELS = ["low", "medium", "high"]
+PRIORITY_LEVELS = ["low", "medium", "high", "urgent"]
 
 
 class Task(Node):
@@ -63,10 +64,14 @@ class Task(Node):
         for a in attribute_names:
             # Initialize the internal attributes to 'None'
             setattr(self, f"_{a}", None)
+        # Set up signals for change of attribute value
+        for a in attribute_names + ['completed']:
+            setattr(self, f'{a}_changed', Signal())
         for a in attribute_names:
             # Set the corresponding properties to the passed argument values
             setattr(self, a, argvalues.locals[a])
         self._completed = False
+
 
     @property
     def start_date(self):
@@ -83,6 +88,7 @@ class Task(Node):
                 if value > self.end_date:
                     assert ValueError('Start date ({value}) is greater than end date ({self.end_date})')
             self._start_date = value
+            self.start_date_changed.emit()
 
     @property
     def end_date(self):
@@ -99,6 +105,7 @@ class Task(Node):
                 if value < self.start_date:
                     assert ValueError('end date ({value}) is smaller than start date ({self.start_date})')
             self._end_date = value
+            self.end_date_changed.emit()
 
     @property
     def priority(self):
@@ -109,6 +116,7 @@ class Task(Node):
         if value not in PRIORITY_LEVELS:
             raise ValueError(f"Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}")
         self._priority = value
+        self.priority_changed.emit()
 
     @property
     def completed(self):
@@ -119,6 +127,7 @@ class Task(Node):
         if type(value) is not bool:
             raise TypeError('Attribute "completed" must be a boolean')
         self._completed = value
+        self.completed_changed.emit()
 
     @property
     def is_top_level(self):
