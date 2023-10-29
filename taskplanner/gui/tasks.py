@@ -80,10 +80,12 @@ class TaskWidget(QWidget):
                                       color_palette='deep purple')
         # Toolbar
         self.make_toolbar()
-        # Category widget
-        self.make_category_widget()
         # Task Name
         self.make_name_textedit()
+        # Category
+        self.make_category_widget()
+        # Assignee
+        self.make_assignee_widget()
         # Task Description
         self.make_description_textedit()
         self.layout.addStretch()
@@ -288,16 +290,74 @@ class TaskWidget(QWidget):
                 # Geometry
                 # Icon pushbutton
                 self.make_icon_pushbutton()
+                # Assignee combobox
+                self.make_combobox()
+                # Add pushbutton
+                self.make_add_pushbutton()
+                # New Linedit
+                self.make_new_textedit()
+                self.layout.addStretch()
+
 
             def make_icon_pushbutton(self):
                 self.icon_pushbutton = QPushButton()
                 self.layout.addWidget(self.icon_pushbutton)
                 # Icon
-                icon_path = self.parent().parent()._style.icon_path
+                icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'assignee.png')
                 self.icon_pushbutton.setIcon(QIcon(icon_filename))
+
+            def make_combobox(self):
+                self.combobox = QComboBox()
+                # Layout
+                self.layout.addWidget(self.combobox)
+                self.combobox.setMinimumWidth(int(0.2 * self.parent().width()))
+                # Add items to list
+                self.combobox.addItems(['Assignee 1', 'Assignee 2'])
+
+                # Callback
+                def item_changed():
+                    self.parent().task.assignee = self.combobox.currentText()
+
+                self.combobox.currentIndexChanged.connect(lambda: item_changed())
+
+            def make_add_pushbutton(self):
+                # Pushbutton to mark the task as add
+                self.add_pushbutton = QPushButton()
+                self.layout.addWidget(self.add_pushbutton)
+                # Icon
+                icon_path = self.parent()._style.icon_path
+                icon_filename = os.path.join(icon_path, 'plus.png')
+                self.add_pushbutton.setIcon(QIcon(icon_filename))
+
+                def callback():
+                    # Show the new assignee linedit
+                    self.new_textedit.setParent(self)
+
+                self.add_pushbutton.clicked.connect(lambda: callback())
+
+            def make_new_textedit(self):
+                # textedit to define a new assignee when the 'plus' button is clicked
+                self.new_textedit = QTextEdit()
+                # Layout
+                self.layout.addWidget(self.new_textedit)
+                self.new_textedit.setMaximumSize(int(0.6 * self.parent().width()),
+                                                  int(0.07 * self.parent().height()))
+
+                def callback():
+                    if '\n' in self.new_textedit.toPlainText():
+                        self.new_textedit.setParent(None)
+                    else:
+                        self.parent().task.name = self.new_textedit.toPlainText()
+
+                self.new_textedit.textChanged.connect(lambda: callback())
+                self.new_textedit.setPlaceholderText("New Assignee")
+                self.new_textedit.setParent(None)
+
+
         self.assignee_widget = AssigneeWidget(parent=self)
-        
+        self.layout.addWidget(self.assignee_widget)
+
     def make_name_textedit(self):
         self.name_textedit = QTextEdit()
         # Layout

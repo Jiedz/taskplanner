@@ -192,6 +192,17 @@ class TaskWidgetStyle:
                                         '''%(self.font['size - title 2'],
                                              self.color_palette['highlight'],
                                              int(screen_size.width / 220)),
+                                    'assignee_widget':
+                                        {
+                                            'icon_pushbutton':
+                                            '''
+                                            QPushButton
+                                            {
+                                                border: 0px;
+                                                /* border-radius:%s; */
+                                            }
+                                            ''' % (int(screen_size.width / 220)),
+                                        },
 
                                     'description_textedit':
                                         '''
