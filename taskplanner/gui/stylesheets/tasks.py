@@ -121,9 +121,10 @@ class TaskWidgetStyle:
                                                         '''
                                                         QPushButton
                                                         {
-                                                            border-radius:%s;
+                                                            border: 0px;
+                                                            /* border-radius:%s; */
                                                         }
-                                                        '''%(int(screen_size.width / 180)),
+                                                        ''' % (int(screen_size.width / 220)),
                                                     'combobox':
                                                         '''
                                                         QComboBox
@@ -131,8 +132,8 @@ class TaskWidgetStyle:
                                                             font-size:%s;
                                                             border-radius:%s;
                                                         }
-                                                        '''%(self.font['size - text'],
-                                                             int(screen_size.width / 180))
+                                                        ''' % (self.font['size - text'],
+                                                             int(screen_size.width / 220))
                                                 },
 
                                             'completed_pushbutton':
@@ -160,11 +161,11 @@ class TaskWidgetStyle:
                                                 {
                                                     font-size:%s;
                                                     border:2px solid %s;
-                                                    border-radius:10px;
+                                                    border-radius:%spx;
                                                 }
                                                 ''' % (self.font['size - text'],
                                                        self.color_palette['highlight'],
-                                                       ),
+                                                       int(screen_size.width / 220)),
                                             'add_pushbutton':
                                                 '''
                                                 QPushButton
@@ -176,7 +177,7 @@ class TaskWidgetStyle:
                                                 {
                                                     background-color:%s;
                                                 }
-                                                ''' % (int(screen_size.width / 180),
+                                                ''' % (int(screen_size.width / 220),
                                                        self.color_palette['highlight'],
                                                        self.color_palette['highlight']),
                                         },
@@ -185,20 +186,24 @@ class TaskWidgetStyle:
                                         QTextEdit
                                         {
                                             font-size:%s;
-                                            border:2px solid %s
+                                            border:2px solid %s;
+                                            border-radius:%s;
                                         }
                                         '''%(self.font['size - title 2'],
-                                             self.color_palette['highlight']),
+                                             self.color_palette['highlight'],
+                                             int(screen_size.width / 220)),
 
                                     'description_textedit':
                                         '''
                                         QTextEdit
                                         {
                                             font-size:%s;
-                                            border:2px solid %s
+                                            border:2px solid %s;
+                                            border-radius:%s;
                                         }
                                         ''' % (self.font['size - text'],
-                                               self.color_palette['highlight'])
+                                               self.color_palette['highlight'],
+                                               int(screen_size.width / 220))
                                 }
                             }
 

@@ -143,7 +143,7 @@ class TaskWidget(QWidget):
                         self.make_icon_pushbutton()
                         # Combobox
                         self.make_combobox()
-                        self.layout.addStretch(0)
+                        self.layout.addStretch()
 
                     def make_icon_pushbutton(self):
                         self.icon_pushbutton = QPushButton()
@@ -217,7 +217,7 @@ class TaskWidget(QWidget):
 
                 - A combobox of category names
                 - A "+" button to add a new category
-                - A dialog to add a new category, that pops up when the "+" button is clicked
+                - A linedit that pops up when the "+" button is clicked
             """
 
             def __init__(self, parent: QWidget):
@@ -268,6 +268,36 @@ class TaskWidget(QWidget):
         self.category_widget = CategoryWidget(parent=self)
         self.layout.addWidget(self.category_widget)
 
+    def make_assignee_widget(self):
+        class AssigneeWidget(QWidget):
+            """
+            This widget contains:
+
+                - An icon symbolizing assignee
+                - A combobox containing assignee names
+                - a '+' button to add an assignee
+                - a linedit that pops up when the '+' button is clicked
+            """
+            def __init__(self,
+                         parent:QWidget):
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QHBoxLayout()
+                self.layout.setAlignment(Qt.AlignLeft)
+                self.setLayout(self.layout)
+                # Geometry
+                # Icon pushbutton
+                self.make_icon_pushbutton()
+
+            def make_icon_pushbutton(self):
+                self.icon_pushbutton = QPushButton()
+                self.layout.addWidget(self.icon_pushbutton)
+                # Icon
+                icon_path = self.parent().parent()._style.icon_path
+                icon_filename = os.path.join(icon_path, 'assignee.png')
+                self.icon_pushbutton.setIcon(QIcon(icon_filename))
+        self.assignee_widget = AssigneeWidget(parent=self)
+        
     def make_name_textedit(self):
         self.name_textedit = QTextEdit()
         # Layout
