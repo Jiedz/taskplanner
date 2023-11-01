@@ -2,3 +2,4 @@ numpy
 anytree
 pyqt5
 screeninfo
+signalslot
