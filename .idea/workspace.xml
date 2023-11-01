@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8f674270-a58a-40c1-8377-19a523b9d94e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/taskplanner.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/taskplanner.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/taskplanner.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner.egg-info/PKG-INFO" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/stylesheets/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/tasks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

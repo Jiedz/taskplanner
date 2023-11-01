@@ -152,7 +152,8 @@ class TaskWidget(QWidget):
                         self.layout.addWidget(self.icon_pushbutton)
                         # Icon
                         icon_path = self.parent().parent()._style.icon_path
-                        icon_filename = os.path.join(icon_path, 'ring-bell.png')
+                        icon_filename = os.path.join(icon_path,
+                                                     'ring-bell.png')
                         self.icon_pushbutton.setIcon(QIcon(icon_filename))
 
                     def make_combobox(self):
@@ -185,7 +186,8 @@ class TaskWidget(QWidget):
                                                          int(0.05*self.parent().width()))
                 # Icon
                 icon_path = self.parent()._style.icon_path
-                icon_filename = os.path.join(icon_path, 'ok.png')
+                icon_filename = os.path.join(icon_path,
+                                             'ok.png')
                 self.completed_pushbutton.setIcon(QIcon(icon_filename))
 
                 def switch_background(completed:bool):
