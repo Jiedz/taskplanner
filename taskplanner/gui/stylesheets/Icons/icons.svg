@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="14.007995mm"
-   height="13.536062mm"
-   viewBox="0 0 14.007993 13.536062"
+   width="10.060382mm"
+   height="13.324801mm"
+   viewBox="0 0 10.060381 13.324801"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
@@ -27,9 +27,9 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="4.3994184"
-     inkscape:cx="274.01349"
-     inkscape:cy="111.71931"
+     inkscape:zoom="2.1997092"
+     inkscape:cx="-104.33197"
+     inkscape:cy="0.22730277"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="0"
@@ -39,8 +39,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid4221"
-       originx="-300.99245"
-       originy="-101.24219" />
+       originx="-302.54787"
+       originy="-120.68978" />
   </sodipodi:namedview>
   <defs
      id="defs2">
@@ -85,7 +85,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-300.99254,-101.2422)">
+     transform="translate(-302.54802,-120.68979)">
     <circle
        style="fill:none;fill-opacity:0.932262;fill-rule:evenodd;stroke:#b52c01;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="path31"
@@ -118,7 +118,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13368">Light Earth</tspan></text>
+         id="tspan39259">Light Earth</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,44.294093,57.975136)"
@@ -126,7 +126,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13370">Normal</tspan></text>
+         id="tspan39261">Normal</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,121.46105,56.694899)"
@@ -134,7 +134,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-7);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13372">Hover</tspan></text>
+         id="tspan39263">Hover</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.932262;stroke:#b52c00;stroke-width:0.665;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="rect11925"
@@ -165,7 +165,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-35);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13374">Deep Purple</tspan></text>
+         id="tspan39265">Deep Purple</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,303.49947,54.952067)"
@@ -173,7 +173,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13376">Normal</tspan></text>
+         id="tspan39267">Normal</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,380.66643,53.671827)"
@@ -181,7 +181,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-7-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan13378">Hover</tspan></text>
+         id="tspan39269">Hover</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.932262;stroke:#b52c00;stroke-width:0.665;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="rect11925-3"
@@ -261,13 +261,30 @@
     <circle
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path6359"
-       cx="384.29245"
-       cy="121.67645"
+       cx="384.29248"
+       cy="124.3223"
        r="3" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 382.32301,124.35418 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61458"
+       style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 382.32301,127.00002 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61459"
        id="path12407"
        sodipodi:nodetypes="cccc" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path6359-3"
+       cx="307.56329"
+       cy="124.32229"
+       r="3"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/assignee.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <path
+       style="fill:none;stroke:#fdfbf4;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 305.59384,127.00001 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61458"
+       id="path12407-6"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/assignee.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
 </svg>
