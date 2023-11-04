@@ -117,27 +117,6 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (self.font['size - text'],
                                                        self.color_palette['text - light']),
-                                            'priority_widget':
-                                                {
-                                                    'icon_pushbutton':
-                                                        '''
-                                                        QPushButton
-                                                        {
-                                                            border: 0px;
-                                                            /* border-radius:%s; */
-                                                        }
-                                                        ''' % (int(screen_size.width / 220)),
-                                                    'combobox':
-                                                        '''
-                                                        QComboBox
-                                                        {
-                                                            font-size:%s;
-                                                            border-radius:%s;
-                                                        }
-                                                        ''' % (self.font['size - text'],
-                                                             int(screen_size.width / 220))
-                                                },
-
                                             'completed_pushbutton':
                                                 '''
                                                 QPushButton
@@ -157,6 +136,14 @@ class TaskWidgetStyle:
                                         },
                                     'category_widget':
                                         {
+                                            'icon_pushbutton':
+                                                '''
+                                                QPushButton
+                                                {
+                                                    border: 0px;
+                                                    /* border-radius:%s; */
+                                                }
+                                                ''' % (int(screen_size.width / 220)),
                                             'categories_combobox':
                                                 '''
                                                 QComboBox
@@ -183,17 +170,49 @@ class TaskWidgetStyle:
                                                        self.color_palette['highlight'],
                                                        self.color_palette['highlight']),
                                         },
-                                    'name_textedit':
-                                        '''
-                                        QTextEdit
+                                    'priority_widget':
                                         {
-                                            font-size:%s;
-                                            border:2px solid %s;
-                                            border-radius:%s;
-                                        }
-                                        '''%(self.font['size - title 2'],
-                                             self.color_palette['highlight'],
-                                             int(screen_size.width / 220)),
+                                            'icon_pushbutton':
+                                                '''
+                                                QPushButton
+                                                {
+                                                    border: 0px;
+                                                    /* border-radius:%s; */
+                                                }
+                                                ''' % (int(screen_size.width / 220)),
+                                            'combobox':
+                                                '''
+                                                QComboBox
+                                                {
+                                                    font-size:%s;
+                                                    border-radius:%s;
+                                                }
+                                                ''' % (self.font['size - text'],
+                                                       int(screen_size.width / 220))
+                                        },
+                                    'name_widget':
+                                        {
+                                            'icon_pushbutton':
+                                            '''
+                                            QPushButton
+                                                {
+                                                    border: 0px;
+                                                    /* border-radius:%s; */
+                                                }
+                                            ''' % (int(screen_size.width / 220)),
+                                            'textedit':
+                                                '''
+                                                QTextEdit
+                                                {
+                                                    font-size:%s;
+                                                    border:2px solid %s;
+                                                    border-radius:%s;
+                                                }
+                                                ''' % (
+                                                self.font['size - title 2'],
+                                                self.color_palette['highlight'],
+                                                int(screen_size.width / 220)),
+                                        },
                                     'assignee_widget':
                                         {
                                             'icon_pushbutton':
