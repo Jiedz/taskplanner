@@ -330,6 +330,7 @@ class TaskWidget(QWidget):
                 # Icon
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'plus.png')
+                print(icon_filename)
                 self.add_pushbutton.setIcon(QIcon(icon_filename))
 
                 def callback():

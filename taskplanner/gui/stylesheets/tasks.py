@@ -58,7 +58,7 @@ class TaskWidgetStyle:
         # Locate icon path
         self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
         self.icon_path = os.path.join(self.icon_path,
-                                      'Icon',
+                                      'Icons',
                                       self.color_palette_name.replace(" ", "-"))
         # Get screen size
         screen_size = get_screen_size()
