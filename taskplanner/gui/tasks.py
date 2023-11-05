@@ -455,6 +455,7 @@ class TaskWidget(QWidget):
             This widget contains:
                 - An icon symbolizing a subtask
                 - A list of SubtaskWidget, each corresponding to a subtask
+                - A textedit, to add a new subtask with a given name
             """
             def __init__(self,
                          parent: QWidget):
@@ -464,6 +465,10 @@ class TaskWidget(QWidget):
                 self.setLayout(self.layout)
                 # Icon
                 self.make_icon_pushbutton()
+                # New Textedit
+                self.make_new_textedit()
+                # Subtasks
+                self.make_subtask_widgets()
 
             def make_icon_pushbutton(self):
                 self.icon_pushbutton = QPushButton()
@@ -476,7 +481,160 @@ class TaskWidget(QWidget):
                 icon_filename = os.path.join(icon_path, 'subtask.png')
                 self.icon_pushbutton.setIcon(QIcon(icon_filename))
 
+            def make_new_textedit(self):
+                self.new_textedit = QTextEdit()
+                # Layout
+                self.layout.addWidget(self.new_textedit)
+                # Geometry
+                self.new_textedit.setMaximumSize(int(self.parent().width()*0.5),
+                                                 int(self.parent().height()*0.05))
+
+                def callback():
+                    raise NotImplementedError
+
+                self.new_textedit.textChanged.connect(lambda: callback())
+                self.new_textedit.setPlaceholderText("New Subtask")
+
+            def make_subtask_widgets(self):
+                class SubtaskWidget(QWidget):
+                    """
+                    This widget contains:
+
+                        - A textedit containing the
+                    """
+
         self.subtask_list_widget = SubtaskListWidget(parent=self)
         self.layout.addWidget(self.subtask_list_widget)
+
+class TaskWidgetSimple(QWidget):
+    """
+    This widget contains:
+
+        - A pushbutton containing the name of the widget
+        - The priority level
+        - The end date
+        - A pushbutton that enables to view the subtasks
+
+    When the name pushbutton is clicked, the TaskWidget associated to the task is created and shown.
+    """
+    def __init__(self,
+                 task: Task,
+                 parent: QWidget,
+                 expandable:bool=True):
+        """
+
+        :param task:
+            the task associated to this widget
+        :param parent:
+            the parent widget
+        :param expandable:
+            If 'True', the pushbutton allowing to list the subtasks is shown.
+        """
+        self.task = task
+        super().__init__(parent=parent)
+        # Layout
+        self.layout = QVBoxLayout()
+        self.layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.layout)
+        # Define style
+        self._style = TaskWidgetStyle(font='light',
+                                      color_palette='deep purple')
+        # This task
+        self.make_this_task_widget()
+        # Set style
+        set_style(widget=self,
+                  stylesheets=self._style.stylesheets['simple view'])
+
+    def make_this_task_widget(self):
+        class ThisTaskWidget(QWidget):
+            """
+            This task contains:
+                - A pushbutton containing the name of the widget
+                - The priority level
+                - The end date
+                - A pushbutton that enables to view the subtasks
+            """
+            def __init__(self,
+                         parent: QWidget,
+                         task: Task,
+                         expandable: bool = True):
+                """
+                :param task:
+                    the task associated to this widget
+                :param parent:
+                    the parent widget
+                :param expandable:
+                    If 'True', the pushbutton allowing to list the subtasks is shown.
+                """
+                self.task = task
+                self._expandable = expandable
+                super().__init__(self,
+                                 parent=parent)
+                # Layout
+                self.layout = QHBoxLayout()
+                self.layout.setAlignment(Qt.AlignLeft)
+                self.setLayout(self.layout)
+                # Name
+                self.make_name_pushbutton()
+                # Priority
+                self.make_priority_label()
+                # End date
+                self.make_end_date_label()
+                # Expand pushbutton
+                self.make_expand_pushbutton()
+                self.layout.addStretch()
+
+            @property
+            def expandable(self):
+                return self._expandable
+            @expandable.setter
+            def expandable(self, value: bool):
+                if type(value) is not bool:
+                    raise ValueError(f'Invalid value {value} for property "expanable". Value must be of type bool.')
+                self._expandable = True
+                self.expand_pushbutton.show()
+
+            @property
+            def expand(self):
+                return self._expanded
+
+            def make_name_label(self):
+                self.name_pushbutton = QPushButton(self.task.name)
+                self.layout.addWidget(self.name_pushbutton)
+                # Geometry
+                # Callback
+                def callback():
+                    task_widget = TaskWidget(task=self.task)
+                    task_widget.show()
+                self.name_pushbutton.clicked.connect(callback)
+
+            def make_priority_label(self):
+                self.priority_label = QLabel(self.task.priority)
+                self.layout.addWidget(self.priority_label)
+                # Geometry
+
+            def make_end_date_label(self):
+                year, month, day = self.task.end_date.year, \
+                                   self.task.end_date.month, \
+                                   self.task.end_date.day
+                self.end_date_label = QLabel(f'{day}/{month}/{year}')
+                self.layout.addWidget(self.priority_label)
+                # Geometry
+
+            def make_expand_pushbutton(self):
+                self._expanded = False
+                self.expandable_pushbutton = QPushButton()
+                self.layout.addWidget(self.expandable_pushbutton)
+                # Geometry
+                # Icon
+                icon_path = self.parent()._style.icon_path
+                icon_filename = os.path.join(icon_path,
+                                             'expand.png')
+                self.completed_pushbutton.setIcon(QIcon(icon_filename))
+                # Callback
+                def callback():
+                    raise NotImplementedError
+
+
 
 

@@ -8,6 +8,7 @@ task = Task()
 # Set some ancestors
 parent_task = Task(name='aaaaaaaaaaaaaaaaaaaaa')
 task.set_parent_task(parent_task)
+print(task.end_date.year)
 grandparent_task = Task(name='Gbbbbbbbbbbbbbbb')
 parent_task.set_parent_task(grandparent_task)
 # Build application

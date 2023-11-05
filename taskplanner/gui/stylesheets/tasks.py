@@ -236,6 +236,10 @@ class TaskWidgetStyle:
                                         ''' % (self.font['size - text'],
                                                self.color_palette['highlight'],
                                                int(screen_size.width / 220))
+                                },
+                            'simple view':
+                                {
+
                                 }
                             }
 
