@@ -1,60 +1,37 @@
-'''
+"""
 This module defines a task widget.
-'''
-
-#%% Imports
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QIcon
-from PyQt5.Qt import QFont
-from PyQt5.QtWidgets import \
-(
-    QApplication,
-    QCheckBox,
-    QComboBox,
-    QDateEdit,
-    QDateTimeEdit,
-    QDial,
-    QDoubleSpinBox,
-    QFontComboBox,
-    QFormLayout,
-    QHBoxLayout,
-    QLabel,
-    QLCDNumber,
-    QLineEdit,
-    QMainWindow,
-    QProgressBar,
-    QPushButton,
-    QRadioButton,
-    QSlider,
-    QSpinBox,
-    QTabWidget,
-    QTimeEdit,
-    QVBoxLayout,
-    QBoxLayout,
-    QGridLayout,
-    QWidget,
-    QScrollArea,
-    QTextEdit,
-    QDesktopWidget,
-    QComboBox
-    )
-from taskplanner.tasks import Task
-from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
-from taskplanner.gui.utilities import set_style, get_screen_size
+"""
 
 import os
 
-import inspect
-class TaskWidget(QWidget):
+# %% Imports
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import \
+    (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+    QTextEdit,
+    QComboBox
+)
 
+from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
+from taskplanner.gui.utilities import set_style, get_screen_size
+from taskplanner.tasks import Task
+
+
+class TaskWidget(QWidget):
     """
     This class defines a task widget.
     """
 
     def __init__(self,
-                 task:Task,
-                 main_color:str=None,
-                 parent:QWidget=None):
+                 task: Task,
+                 main_color: str = None,
+                 parent: QWidget = None):
         """
         :param task: :py:class:'taskplanner.tasks.Task'
             The task associated to this widget
@@ -70,11 +47,11 @@ class TaskWidget(QWidget):
         # Geometry
         # Get screen size
         screen_size = get_screen_size()
-        width, height = int(screen_size.width*0.4), int(screen_size.height*0.6)
-        self.setGeometry(int(screen_size.width/2)-int(width/2),
-                         int(screen_size.height/2)-int(height/2),
-                         width, # width
-                         height) # height
+        width, height = int(screen_size.width * 0.4), int(screen_size.height * 0.6)
+        self.setGeometry(int(screen_size.width / 2) - int(width / 2),
+                         int(screen_size.height / 2) - int(height / 2),
+                         width,  # width
+                         height)  # height
         # Define style
         self._style = TaskWidgetStyle(font='light',
                                       color_palette='deep purple')
@@ -107,6 +84,7 @@ class TaskWidget(QWidget):
 
             :return:
             """
+
             def __init__(self, parent):
                 super().__init__(parent=parent)
                 self.task_widget = parent
@@ -134,21 +112,22 @@ class TaskWidget(QWidget):
                 # Pushbutton to mark the task as completed
                 self.completed_pushbutton = QPushButton()
                 self.layout.addWidget(self.completed_pushbutton)
-                self.completed_pushbutton.setMinimumSize(int(0.05*self.parent().width()),
-                                                         int(0.05*self.parent().width()))
+                self.completed_pushbutton.setMinimumSize(int(0.05 * self.parent().width()),
+                                                         int(0.05 * self.parent().width()))
                 # Icon
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path,
                                              'ok.png')
                 self.completed_pushbutton.setIcon(QIcon(icon_filename))
 
-                def switch_background(completed:bool):
+                def switch_background(completed: bool):
                     stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
                         'completed_pushbutton']
                     if completed:
                         # Change background color
                         stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */\n' % (
-                        self.parent()._style.color_palette["completed"]))
+                            self.parent()._style.color_palette["completed"]))
+                        print(stylesheet)
                     else:
                         stylesheet = stylesheet.replace(
                             'background-color:%s;/* main */\n' % (self.parent()._style.color_palette["completed"]),
@@ -158,10 +137,14 @@ class TaskWidget(QWidget):
                 def callback():
                     self.parent().task._completed = not self.parent().task.completed
                     switch_background(self.parent().task.completed)
+                    print(self.parent().task.completed)
 
+                # Set Current Value
+                switch_background(self.parent().task.completed)
+                print(self.parent().task.completed)
                 self.completed_pushbutton.clicked.connect(lambda: callback())
-                self.parent().task.completed_changed.connect(lambda **kwargs: switch_background(self.parent().task.completed))
-
+                self.parent().task.completed_changed.connect(
+                    lambda **kwargs: switch_background(self.parent().task.completed))
 
         self.toolbar = Toolbar(parent=self)
         self.layout.addWidget(self.toolbar)
@@ -200,12 +183,11 @@ class TaskWidget(QWidget):
                 icon_filename = os.path.join(icon_path, 'categories.png')
                 self.icon_pushbutton.setIcon(QIcon(icon_filename))
 
-
             def make_categories_combobox(self):
                 self.categories_combobox = QComboBox(parent=self)
                 # Layout
                 self.layout.addWidget(self.categories_combobox)
-                self.categories_combobox.setMinimumWidth(int(0.3*self.parent().width()))
+                self.categories_combobox.setMinimumWidth(int(0.3 * self.parent().width()))
                 # Add items to list
                 self.categories_combobox.addItems(['Category 1', 'Category 2'])
 
@@ -296,9 +278,9 @@ class TaskWidget(QWidget):
 
                 self.combobox.currentIndexChanged.connect(lambda: callback())
                 self.parent().task.priority_changed.connect(lambda **kwargs:
-                                                                     self.combobox.setCurrentText(
-                                                                         self.parent().task.priority.title()
-                                                                     ))
+                                                            self.combobox.setCurrentText(
+                                                                self.parent().task.priority.title()
+                                                            ))
 
         self.priority_widget = PriorityWidget(parent=self)
         self.layout.addWidget(self.priority_widget)
@@ -313,8 +295,9 @@ class TaskWidget(QWidget):
                 - a '+' button to add an assignee
                 - a linedit that pops up when the '+' button is clicked
             """
+
             def __init__(self,
-                         parent:QWidget):
+                         parent: QWidget):
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QHBoxLayout()
@@ -375,7 +358,8 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.new_textedit)
                 self.new_textedit.setMaximumSize(int(0.6 * self.parent().width()),
-                                                  int(0.07 * self.parent().height()))
+                                                 int(0.07 * self.parent().height()))
+
                 def callback():
                     if '\n' in self.new_textedit.toPlainText():
                         self.new_textedit.hide()
@@ -385,7 +369,6 @@ class TaskWidget(QWidget):
                 self.new_textedit.textChanged.connect(lambda: callback())
                 self.new_textedit.setPlaceholderText("New Assignee")
                 self.new_textedit.hide()
-
 
         self.assignee_widget = AssigneeWidget(parent=self)
         self.layout.addWidget(self.assignee_widget)
@@ -397,6 +380,7 @@ class TaskWidget(QWidget):
                 - An icon indicating a top-level task
                 - A textedit containing the task's name
             """
+
             def __init__(self,
                          parent: QWidget):
                 super().__init__(parent=parent)
@@ -426,14 +410,16 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.textedit)
                 # Geometry
-                self.textedit.setMinimumSize(int(self.width()*0.8),
+                self.textedit.setMinimumSize(int(self.width() * 0.8),
                                              int(self.height()))
+
                 def callback():
                     self.parent().task.name = self.textedit.toPlainText()
 
-                self.textedit.textChanged.connect(lambda : callback())
+                self.textedit.textChanged.connect(lambda: callback())
                 self.textedit.setText(self.parent().task.name)
                 self.textedit.setPlaceholderText("Task Name")
+
         self.name_widget = NameWidget(parent=self)
         self.layout.addWidget(self.name_widget)
 
@@ -441,11 +427,12 @@ class TaskWidget(QWidget):
         self.description_textedit = QTextEdit()
         # Layout
         self.layout.addWidget(self.description_textedit)
-        #self.description_textedit.setAlignment(Qt.AlignLeft)
+
+        # self.description_textedit.setAlignment(Qt.AlignLeft)
         def callback():
             self.task.description = self.description_textedit.toPlainText()
 
-        self.description_textedit.textChanged.connect(lambda : callback())
+        self.description_textedit.textChanged.connect(lambda: callback())
         self.description_textedit.setText(self.task.description)
         self.description_textedit.setPlaceholderText("Task description")
 
@@ -457,6 +444,7 @@ class TaskWidget(QWidget):
                 - A list of SubtaskWidget, each corresponding to a subtask
                 - A textedit, to add a new subtask with a given name
             """
+
             def __init__(self,
                          parent: QWidget):
                 super().__init__(parent=parent)
@@ -474,8 +462,8 @@ class TaskWidget(QWidget):
                 self.icon_pushbutton = QPushButton()
                 self.layout.addWidget(self.icon_pushbutton)
                 # Geometry
-                self.icon_pushbutton.setMaximumSize(int(self.parent().width()*0.03),
-                                                    int(self.parent().width()*0.1))
+                self.icon_pushbutton.setMaximumSize(int(self.parent().width() * 0.03),
+                                                    int(self.parent().width() * 0.1))
                 # Icon
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'subtask.png')
@@ -486,8 +474,8 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.new_textedit)
                 # Geometry
-                self.new_textedit.setMaximumSize(int(self.parent().width()*0.5),
-                                                 int(self.parent().height()*0.05))
+                self.new_textedit.setMaximumSize(int(self.parent().width() * 0.5),
+                                                 int(self.parent().height() * 0.05))
 
                 def callback():
                     raise NotImplementedError
@@ -496,39 +484,34 @@ class TaskWidget(QWidget):
                 self.new_textedit.setPlaceholderText("New Subtask")
 
             def make_subtask_widgets(self):
-                class SubtaskWidget(QWidget):
-                    """
-                    This widget contains:
+                self.subtask_widgets = []
+                for subtask in self.parent().task.children:
+                    widget = TaskWidgetSimple(parent=self,
+                                              task=subtask)
+                    self.layout.addWidget(widget)
+                    self.subtask_widgets += [widget]
 
-                        - A textedit containing the
-                    """
 
         self.subtask_list_widget = SubtaskListWidget(parent=self)
         self.layout.addWidget(self.subtask_list_widget)
 
+
 class TaskWidgetSimple(QWidget):
     """
-    This widget contains:
-
-        - A pushbutton containing the name of the widget
-        - The priority level
-        - The end date
-        - A pushbutton that enables to view the subtasks
-
-    When the name pushbutton is clicked, the TaskWidget associated to the task is created and shown.
+    This widget contains a tree of widgets representing all the subtasks contained in the input task.
     """
+
     def __init__(self,
                  task: Task,
-                 parent: QWidget,
-                 expandable:bool=True):
+                 parent: QWidget = None,
+                 hide: bool = False):
         """
-
         :param task:
             the task associated to this widget
         :param parent:
             the parent widget
-        :param expandable:
-            If 'True', the pushbutton allowing to list the subtasks is shown.
+        :param hide:
+            If 'True', the widget is hidden
         """
         self.task = task
         super().__init__(parent=parent)
@@ -540,101 +523,101 @@ class TaskWidgetSimple(QWidget):
         self._style = TaskWidgetStyle(font='light',
                                       color_palette='deep purple')
         # This task
-        self.make_this_task_widget()
+        self.task_line_widget = TaskLineWidget(parent=self,
+                                               task=self.task)
+        self.layout.addWidget(self.task_line_widget)
+        setattr(self.task, 'widget_simple', self.task_line_widget)
+        # Subtasks
+        for child in self.task.children:
+            subtask_widget = TaskWidgetSimple(parent=self,
+                                              task=child,
+                                              hide=True)
+            self.layout.addWidget(subtask_widget)
+            setattr(child, 'widget_simple', subtask_widget)
         # Set style
         set_style(widget=self,
                   stylesheets=self._style.stylesheets['simple view'])
+        if hide:
+            self.hide()
 
-    def make_this_task_widget(self):
-        class ThisTaskWidget(QWidget):
-            """
-            This task contains:
-                - A pushbutton containing the name of the widget
-                - The priority level
-                - The end date
-                - A pushbutton that enables to view the subtasks
-            """
-            def __init__(self,
-                         parent: QWidget,
-                         task: Task,
-                         expandable: bool = True):
-                """
-                :param task:
-                    the task associated to this widget
-                :param parent:
-                    the parent widget
-                :param expandable:
-                    If 'True', the pushbutton allowing to list the subtasks is shown.
-                """
-                self.task = task
-                self._expandable = expandable
-                super().__init__(self,
-                                 parent=parent)
-                # Layout
-                self.layout = QHBoxLayout()
-                self.layout.setAlignment(Qt.AlignLeft)
-                self.setLayout(self.layout)
-                # Name
-                self.make_name_pushbutton()
-                # Priority
-                self.make_priority_label()
-                # End date
-                self.make_end_date_label()
-                # Expand pushbutton
-                self.make_expand_pushbutton()
-                self.layout.addStretch()
+class TaskLineWidget(QWidget):
+    """
+    This widget contains:
+        - A pushbutton containing the name of the widget
+        - The priority level
+        - The end date
+        - A pushbutton that enables to view the subtasks
+    """
 
-            @property
-            def expandable(self):
-                return self._expandable
-            @expandable.setter
-            def expandable(self, value: bool):
-                if type(value) is not bool:
-                    raise ValueError(f'Invalid value {value} for property "expanable". Value must be of type bool.')
-                self._expandable = True
-                self.expand_pushbutton.show()
+    def __init__(self,
+                 parent: QWidget,
+                 task: Task):
+        """
+        :param task:
+            the task associated to this widget
+        :param parent:
+            the parent widget
+        """
+        self.task = task
+        super().__init__(parent=parent)
+        # Layout
+        self.layout = QHBoxLayout()
+        self.layout.setAlignment(Qt.AlignLeft)
+        self.setLayout(self.layout)
+        # Name
+        self.make_name_pushbutton()
+        # Priority
+        self.make_priority_label()
+        # End date
+        self.make_end_date_label()
+        # Expand pushbutton
+        if self.task.children != ():
+            self.make_expand_pushbutton()
+        self.layout.addStretch()
 
-            @property
-            def expand(self):
-                return self._expanded
+    def make_name_pushbutton(self):
+        self.name_pushbutton = QPushButton(self.task.name)
+        self.layout.addWidget(self.name_pushbutton)
 
-            def make_name_label(self):
-                self.name_pushbutton = QPushButton(self.task.name)
-                self.layout.addWidget(self.name_pushbutton)
-                # Geometry
-                # Callback
-                def callback():
-                    task_widget = TaskWidget(task=self.task)
-                    task_widget.show()
-                self.name_pushbutton.clicked.connect(callback)
+        # Geometry
+        # Callback
+        def callback():
+            task_widget = TaskWidget(task=self.task)
+            task_widget.show()
 
-            def make_priority_label(self):
-                self.priority_label = QLabel(self.task.priority)
-                self.layout.addWidget(self.priority_label)
-                # Geometry
+        self.name_pushbutton.clicked.connect(callback)
 
-            def make_end_date_label(self):
-                year, month, day = self.task.end_date.year, \
-                                   self.task.end_date.month, \
-                                   self.task.end_date.day
-                self.end_date_label = QLabel(f'{day}/{month}/{year}')
-                self.layout.addWidget(self.priority_label)
-                # Geometry
+    def make_priority_label(self):
+        self.priority_label = QLabel(self.task.priority)
+        self.layout.addWidget(self.priority_label)
+        # Geometry
 
-            def make_expand_pushbutton(self):
-                self._expanded = False
-                self.expandable_pushbutton = QPushButton()
-                self.layout.addWidget(self.expandable_pushbutton)
-                # Geometry
-                # Icon
-                icon_path = self.parent()._style.icon_path
-                icon_filename = os.path.join(icon_path,
-                                             'expand.png')
-                self.completed_pushbutton.setIcon(QIcon(icon_filename))
-                # Callback
-                def callback():
-                    raise NotImplementedError
+    def make_end_date_label(self):
+        year, month, day = self.task.end_date.year, \
+            self.task.end_date.month, \
+            self.task.end_date.day
+        self.end_date_label = QLabel(f'{day}/{month}/{year}')
+        self.layout.addWidget(self.end_date_label)
+        # Geometry
 
+    def make_expand_pushbutton(self):
+        self.expand_pushbutton = QPushButton()
+        self.layout.addWidget(self.expand_pushbutton)
+        # Geometry
+        # Icon
+        icon_path = self.parent()._style.icon_path
+        icon_filename = os.path.join(icon_path,
+                                     'expand.png')
+        self.expand_pushbutton.setIcon(QIcon(icon_filename))
 
+        # Callback
+        def callback():
+            for child in self.task.children:
+                if child.widget_simple.isVisible():
+                    child.widget_simple.hide()
+                else:
+                    child.widget_simple.show()
+
+        self.expand_pushbutton.clicked.connect(callback)
 
 

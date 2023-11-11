@@ -2,11 +2,12 @@
 This module describes a task and the relation between parent and children tasks.
 '''
 
+from datetime import date
+from inspect import currentframe, getargvalues
+from logging import warning
+
 # %% Imports
 from anytree import Node, RenderTree
-from inspect import currentframe, getargvalues
-from datetime import datetime, date
-from logging import warning
 from signalslot import Signal
 
 # %% Task
@@ -30,14 +31,14 @@ class Task(Node):
     '''
 
     def __init__(self,
-                 parent=None,
+                 parent: object = None,
                  name: str = "A Task",
-                 category="No Category",
-                 description="",
-                 priority="medium",
+                 category: object = "No Category",
+                 description: object = "",
+                 priority: object = "medium",
                  start_date: date = date.today(),
                  end_date: date = None,
-                 assignee=None):
+                 assignee: object = None) -> object:
         '''
         :param parent: py:class:'anytree.Node', optional
             The parent of the current task. If 'None', the task is considered as a top-level task.
@@ -240,7 +241,6 @@ class Task(Node):
         None.
 
         '''
-        import os
         access_mode = "w"
         if not hasattr(self, "file") and filename is None:
             '''

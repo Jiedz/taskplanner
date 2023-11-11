@@ -1,7 +1,8 @@
-'''
+"""
 This module define the stylesheets to be used by the task-related widgets.
-'''
-import setuptools, inspect, os, sys
+"""
+import os
+
 from taskplanner.gui.utilities import get_screen_size
 
 COLOR_PALETTES = {'light earth':
@@ -10,20 +11,20 @@ COLOR_PALETTES = {'light earth':
         'secondary background': '#FCF5ED',
         'urgent': '#CE5A67',
         'text': '#45474B',
-        'text - light':'gray',
+        'text - light': 'gray',
         'highlight': '#F4BF96',
         'completed': '#A7D397'
     },
     'deep purple':
-    {
-        'main background': '#35155D',
-        'secondary background': '#512B81',
-        'urgent': '#9D44C0',
-        'text': '#F0F0F0',
-        'text - light':'#F0F0F0',
-        'highlight': '#4477CE',
-        'completed': '#8CABFF'
-    }
+        {
+            'main background': '#35155D',
+            'secondary background': '#512B81',
+            'urgent': '#9D44C0',
+            'text': '#F0F0F0',
+            'text - light': '#F0F0F0',
+            'highlight': '#4477CE',
+            'completed': '#8CABFF'
+        }
 }
 
 FONTS = {'light':
@@ -35,7 +36,7 @@ FONTS = {'light':
     },
     'elegant light':
         {
-            'family': 'Liberation Serif',#'Oregano',
+            'family': 'Liberation Serif',  # 'Oregano',
             'size - title 1': '22pt',
             'size - title 2': '18pt',
             'size - text': '12pt'
@@ -52,7 +53,8 @@ class TaskWidgetStyle:
         self._font = FONTS[font]
         self.font_name = font
         if color_palette not in list(COLOR_PALETTES.keys()):
-            raise ValueError(f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
+            raise ValueError(
+                f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
         self._color_palette = COLOR_PALETTES[color_palette]
         self.color_palette_name = color_palette
         # Locate icon path
@@ -64,10 +66,10 @@ class TaskWidgetStyle:
         screen_size = get_screen_size()
         # Define style sheets
         self.stylesheets = {
-                            'standard view':
-                                {
-                                    'main':
-                                        '''
+            'standard view':
+                {
+                    'main':
+                        '''
                                         QWidget
                                         {
                                             background-color:%s;
@@ -76,14 +78,14 @@ class TaskWidgetStyle:
                                             font-family:%s;
                                             color:%s
                                         }
-                                        '''%(self.color_palette['main background'],
-                                             self.color_palette['highlight'],
-                                             self.font['family'],
-                                             self.color_palette['text']),
-                                    'toolbar':
-                                        {
-                                            'main':
-                                                '''
+                                        ''' % (self.color_palette['main background'],
+                                               self.color_palette['highlight'],
+                                               self.font['family'],
+                                               self.color_palette['text']),
+                    'toolbar':
+                        {
+                            'main':
+                                '''
                                                 QWidget
                                                 {
                                                     background-color:%s;
@@ -92,11 +94,11 @@ class TaskWidgetStyle:
                                                     font-size:%s;
                                                 }
                                                 ''' % (
-                                                        self.color_palette['secondary background'],
-                                                        self.color_palette['highlight'],
-                                                        self.font['size - title 1'])
-                                                +
-                                                '''
+                                    self.color_palette['secondary background'],
+                                    self.color_palette['highlight'],
+                                    self.font['size - title 1'])
+                                +
+                                '''
                                                 QPushButton
                                                 {
                                                     border:2px solid %s;
@@ -104,11 +106,11 @@ class TaskWidgetStyle:
                                                     font-size:%s;
                                                     background-color:%s
                                                 }   
-                                                '''%(self.color_palette['highlight'],
-                                                     self.font['size - text'],
-                                                     self.color_palette['secondary background']),
-                                            'path_label':
-                                                '''
+                                                ''' % (self.color_palette['highlight'],
+                                                       self.font['size - text'],
+                                                       self.color_palette['secondary background']),
+                            'path_label':
+                                '''
                                                 QLabel
                                                 {
                                                     font-size:%s;
@@ -117,8 +119,8 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (self.font['size - text'],
                                                        self.color_palette['text - light']),
-                                            'completed_pushbutton':
-                                                '''
+                            'completed_pushbutton':
+                                '''
                                                 QPushButton
                                                 {
                                                     /* background-color */
@@ -130,22 +132,22 @@ class TaskWidgetStyle:
                                                     color:white;
                                                     
                                                 }
-                                                '''%(int(screen_size.width/120),
-                                                    self.color_palette['completed']),
+                                                ''' % (int(screen_size.width / 120),
+                                                       self.color_palette['completed']),
 
-                                        },
-                                    'category_widget':
-                                        {
-                                            'icon_pushbutton':
-                                                '''
+                        },
+                    'category_widget':
+                        {
+                            'icon_pushbutton':
+                                '''
                                                 QPushButton
                                                 {
                                                     border: 0px;
                                                     /* border-radius:%s; */
                                                 }
                                                 ''' % (int(screen_size.width / 220)),
-                                            'categories_combobox':
-                                                '''
+                            'categories_combobox':
+                                '''
                                                 QComboBox
                                                 {
                                                     font-size:%s;
@@ -155,8 +157,8 @@ class TaskWidgetStyle:
                                                 ''' % (self.font['size - text'],
                                                        self.color_palette['highlight'],
                                                        int(screen_size.width / 220)),
-                                            'add_pushbutton':
-                                                '''
+                            'add_pushbutton':
+                                '''
                                                 QPushButton
                                                 {
                                                     border-radius:%spx;
@@ -169,19 +171,19 @@ class TaskWidgetStyle:
                                                 ''' % (int(screen_size.width / 220),
                                                        self.color_palette['highlight'],
                                                        self.color_palette['highlight']),
-                                        },
-                                    'priority_widget':
-                                        {
-                                            'icon_pushbutton':
-                                                '''
+                        },
+                    'priority_widget':
+                        {
+                            'icon_pushbutton':
+                                '''
                                                 QPushButton
                                                 {
                                                     border: 0px;
                                                     /* border-radius:%s; */
                                                 }
                                                 ''' % (int(screen_size.width / 220)),
-                                            'combobox':
-                                                '''
+                            'combobox':
+                                '''
                                                 QComboBox
                                                 {
                                                     font-size:%s;
@@ -189,19 +191,19 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (self.font['size - text'],
                                                        int(screen_size.width / 220))
-                                        },
-                                    'name_widget':
-                                        {
-                                            'icon_pushbutton':
-                                            '''
+                        },
+                    'name_widget':
+                        {
+                            'icon_pushbutton':
+                                '''
                                             QPushButton
                                                 {
                                                     border: 0px;
                                                     /* border-radius:%s; */
                                                 }
                                             ''' % (int(screen_size.width / 220)),
-                                            'textedit':
-                                                '''
+                            'textedit':
+                                '''
                                                 QTextEdit
                                                 {
                                                     font-size:%s;
@@ -209,24 +211,24 @@ class TaskWidgetStyle:
                                                     border-radius:%s;
                                                 }
                                                 ''' % (
-                                                self.font['size - title 2'],
-                                                self.color_palette['highlight'],
-                                                int(screen_size.width / 220)),
-                                        },
-                                    'assignee_widget':
-                                        {
-                                            'icon_pushbutton':
-                                            '''
+                                    self.font['size - title 2'],
+                                    self.color_palette['highlight'],
+                                    int(screen_size.width / 220)),
+                        },
+                    'assignee_widget':
+                        {
+                            'icon_pushbutton':
+                                '''
                                             QPushButton
                                             {
                                                 border: 0px;
                                                 /* border-radius:%s; */
                                             }
                                             ''' % (int(screen_size.width / 220)),
-                                        },
+                        },
 
-                                    'description_textedit':
-                                        '''
+                    'description_textedit':
+                        '''
                                         QTextEdit
                                         {
                                             font-size:%s;
@@ -236,12 +238,12 @@ class TaskWidgetStyle:
                                         ''' % (self.font['size - text'],
                                                self.color_palette['highlight'],
                                                int(screen_size.width / 220))
-                                },
-                            'simple view':
-                                {
+                },
+            'simple view':
+                {
 
-                                }
-                            }
+                }
+        }
 
     @property
     def font(self):
