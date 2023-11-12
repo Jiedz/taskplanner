@@ -62,17 +62,46 @@ class Task(Node):
         argvalues = getargvalues(currentframe())
         attribute_names = argvalues.args
         attribute_names.remove('parent')
+        attribute_names.remove('self')
         for a in attribute_names:
             # Initialize the internal attributes to 'None'
             setattr(self, f"_{a}", None)
         # Set up signals for change of attribute value
-        for a in attribute_names + ['completed']:
+        for a in attribute_names + ['completed',
+                                    'children',
+                                    'parent']:
             setattr(self, f'{a}_changed', Signal())
         for a in attribute_names:
             # Set the corresponding properties to the passed argument values
             setattr(self, a, argvalues.locals[a])
         self._completed = False
 
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+        if hasattr(self, 'name_changed'):
+            pass#self.name_changed.emit()
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+        #self.description_changed.emit()
+
+    @property
+    def category(self):
+        return self._category
+
+    @category.setter
+    def category(self, value):
+        self._category = value
+        self.category_changed.emit()
 
     @property
     def start_date(self):

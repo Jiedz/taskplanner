@@ -124,24 +124,22 @@ class TaskWidget(QWidget):
                     stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
                         'completed_pushbutton']
                     if completed:
-                        # Change background color
-                        stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */\n' % (
+                        stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */' % (
                             self.parent()._style.color_palette["completed"]))
-                        print(stylesheet)
                     else:
                         stylesheet = stylesheet.replace(
-                            'background-color:%s;/* main */\n' % (self.parent()._style.color_palette["completed"]),
+                            'background-color:%s;/* main */' % (self.parent()._style.color_palette["completed"]),
                             '/* background-color */')
+                    self.parent()._style.stylesheets['standard view']['toolbar'][
+                        'completed_pushbutton'] = stylesheet
                     self.completed_pushbutton.setStyleSheet(stylesheet)
 
                 def callback():
                     self.parent().task._completed = not self.parent().task.completed
                     switch_background(self.parent().task.completed)
-                    print(self.parent().task.completed)
 
                 # Set Current Value
                 switch_background(self.parent().task.completed)
-                print(self.parent().task.completed)
                 self.completed_pushbutton.clicked.connect(lambda: callback())
                 self.parent().task.completed_changed.connect(
                     lambda **kwargs: switch_background(self.parent().task.completed))
@@ -195,7 +193,13 @@ class TaskWidget(QWidget):
                 def item_changed():
                     self.parent().task.category = self.categories_combobox.currentText()
 
+                def change_item():
+                    self.categories_combobox.setCurrentText(self.parent().task.category)
+
+                self.parent().task.category_changed.connect(lambda **kwargs: change_item())
                 self.categories_combobox.currentIndexChanged.connect(lambda: item_changed())
+                # Set Initial Value
+                change_item()
 
             def make_add_pushbutton(self):
                 # Pushbutton to mark the task as add
@@ -274,13 +278,18 @@ class TaskWidget(QWidget):
                                         'Urgent'])
 
                 def callback():
-                    self.parent().task._priority = self.combobox.currentText().lower()
+                    # Update task
+                    self.parent().task.priority = self.combobox.currentText().lower()
 
+                def inv_callback():
+                    # Update widget
+                    self.combobox.setCurrentText(self.parent().task.priority.title())
+
+                # Connect task and widget
+                self.parent().task.priority_changed.connect(lambda **kwargs: inv_callback())
                 self.combobox.currentIndexChanged.connect(lambda: callback())
-                self.parent().task.priority_changed.connect(lambda **kwargs:
-                                                            self.combobox.setCurrentText(
-                                                                self.parent().task.priority.title()
-                                                            ))
+                # Set initial value
+                inv_callback()
 
         self.priority_widget = PriorityWidget(parent=self)
         self.layout.addWidget(self.priority_widget)
@@ -331,10 +340,21 @@ class TaskWidget(QWidget):
                 self.combobox.addItems(['Assignee 1', 'Assignee 2'])
 
                 # Callback
-                def item_changed():
+                def callback():
+                    # Update task
                     self.parent().task.assignee = self.combobox.currentText()
 
-                self.combobox.currentIndexChanged.connect(lambda: item_changed())
+                def inv_callback():
+                    if self.parent().task.assignee is None:
+                        callback()
+                    # Update widget
+                    self.combobox.setCurrentText(self.parent().task.assignee)
+
+                # Connect task and widget
+                self.parent().task.assignee_changed.connect(lambda **kwargs: inv_callback())
+                self.combobox.currentIndexChanged.connect(lambda: callback())
+                # Set initial value
+                inv_callback()
 
             def make_add_pushbutton(self):
                 # Pushbutton to mark the task as add
@@ -414,10 +434,18 @@ class TaskWidget(QWidget):
                                              int(self.height()))
 
                 def callback():
+                    # Update task
                     self.parent().task.name = self.textedit.toPlainText()
 
+                def inv_callback():
+                    # Update widget
+                    self.textedit.setText(self.parent().task.name)
+
+                # Connect task and widget
                 self.textedit.textChanged.connect(lambda: callback())
-                self.textedit.setText(self.parent().task.name)
+                self.parent().task.name_changed.connect(lambda **kwargs: inv_callback())
+                # Set initial value
+                inv_callback()
                 self.textedit.setPlaceholderText("Task Name")
 
         self.name_widget = NameWidget(parent=self)
@@ -428,12 +456,19 @@ class TaskWidget(QWidget):
         # Layout
         self.layout.addWidget(self.description_textedit)
 
-        # self.description_textedit.setAlignment(Qt.AlignLeft)
         def callback():
+            # Update taks
             self.task.description = self.description_textedit.toPlainText()
 
+        def inv_callback():
+            # Update widget
+            self.description_textedit.setText(self.task.description)
+
+        # Connect task and widget
         self.description_textedit.textChanged.connect(lambda: callback())
-        self.description_textedit.setText(self.task.description)
+        self.task.description_changed.connect(lambda **kwargs: inv_callback())
+        # Set initial value
+        inv_callback()
         self.description_textedit.setPlaceholderText("Task description")
 
     def make_subtask_list_widget(self):
@@ -526,19 +561,23 @@ class TaskWidgetSimple(QWidget):
         self.task_line_widget = TaskLineWidget(parent=self,
                                                task=self.task)
         self.layout.addWidget(self.task_line_widget)
-        setattr(self.task, 'widget_simple', self.task_line_widget)
         # Subtasks
-        for child in self.task.children:
-            subtask_widget = TaskWidgetSimple(parent=self,
-                                              task=child,
-                                              hide=True)
-            self.layout.addWidget(subtask_widget)
-            setattr(child, 'widget_simple', subtask_widget)
+        self.make_subtasks_widget()
+
         # Set style
         set_style(widget=self,
                   stylesheets=self._style.stylesheets['simple view'])
         if hide:
             self.hide()
+
+    def make_subtasks_widget(self):
+        self.subtask_widgets = []
+        for child in self.task.children:
+            subtask_widget = TaskWidgetSimple(parent=self,
+                                              task=child,
+                                              hide=True)
+            self.layout.addWidget(subtask_widget)
+            self.subtask_widgets += [subtask_widget]
 
 class TaskLineWidget(QWidget):
     """
@@ -576,7 +615,7 @@ class TaskLineWidget(QWidget):
         self.layout.addStretch()
 
     def make_name_pushbutton(self):
-        self.name_pushbutton = QPushButton(self.task.name)
+        self.name_pushbutton = QPushButton()
         self.layout.addWidget(self.name_pushbutton)
 
         # Geometry
@@ -585,20 +624,44 @@ class TaskLineWidget(QWidget):
             task_widget = TaskWidget(task=self.task)
             task_widget.show()
 
+        def update_widget():
+            print(self.task.name)
+            self.name_pushbutton.setText(self.task.name)
+
+        # Connect task and widget
         self.name_pushbutton.clicked.connect(callback)
+        self.task.name_changed.connect(lambda **kwargs: update_widget())
+        # Set initial text
+        update_widget()
 
     def make_priority_label(self):
-        self.priority_label = QLabel(self.task.priority)
+        self.priority_label = QLabel()
         self.layout.addWidget(self.priority_label)
         # Geometry
 
+        def update_widget():
+            self.priority_label.setText(self.task.priority)
+
+        # Connect task and widget
+        self.task.priority_changed.connect(lambda **kwargs: update_widget())
+        # Set initial text
+        update_widget()
+
     def make_end_date_label(self):
-        year, month, day = self.task.end_date.year, \
-            self.task.end_date.month, \
-            self.task.end_date.day
-        self.end_date_label = QLabel(f'{day}/{month}/{year}')
+        self.end_date_label = QLabel()
         self.layout.addWidget(self.end_date_label)
         # Geometry
+
+        def update_widget():
+            year, month, day = self.task.end_date.year, \
+                self.task.end_date.month, \
+                self.task.end_date.day
+            self.end_date_label.setText(f'{day}/{month}/{year}')
+
+        # Connect task and widget
+        self.task.end_date_changed.connect(lambda **kwargs: update_widget())
+        # Set initial text
+        update_widget()
 
     def make_expand_pushbutton(self):
         self.expand_pushbutton = QPushButton()
@@ -612,11 +675,11 @@ class TaskLineWidget(QWidget):
 
         # Callback
         def callback():
-            for child in self.task.children:
-                if child.widget_simple.isVisible():
-                    child.widget_simple.hide()
+            for subtask_widget in self.parent().subtask_widgets:
+                if subtask_widget.isVisible():
+                    subtask_widget.hide()
                 else:
-                    child.widget_simple.show()
+                    subtask_widget.show()
 
         self.expand_pushbutton.clicked.connect(callback)
 
