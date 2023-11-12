@@ -582,16 +582,9 @@ class TaskWidget(QWidget):
                         cursor.clearSelection()
                         # Add new subtask
                         self.parent().task.add_children_tasks(new_task)
-                        self.parent().task._print()
-
-
-                def inv_callback():
-                    self.parent().__init__(task = self.parent().task,
-                                           parent = self.parent().parent())
-                    raise NotImplementedError("Need to implement automatic update of a TaskWidgetSimple")
+                        #self.parent().task._print()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
-                self.parent().task.children_changed.connect(lambda **kwargs: inv_callback())
                 self.new_textedit.setPlaceholderText("New Subtask")
 
             def make_subtask_widgets(self):
@@ -602,9 +595,15 @@ class TaskWidget(QWidget):
                     self.layout.addWidget(widget)
                     self.subtask_widgets += [widget]
 
-
         self.subtask_list_widget = SubtaskListWidget(parent=self)
         self.layout.addWidget(self.subtask_list_widget)
+
+        def update_widget():
+            self.subtask_list_widget.hide()
+            self.make_subtask_list_widget()
+
+        # Connect task and widget
+        self.task.children_changed.connect(lambda **kwargs: update_widget())
 
 
 class TaskWidgetSimple(QWidget):

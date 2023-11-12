@@ -218,10 +218,30 @@ class Task(Node):
             warning(
                 f"Task {self.name}: adding parent {self.parent.name} as child! New parent will now be the next ancestor.")
             parent = self.parent.parent
+        # Store all attributes
+        attribute_names = ['name',
+                          'category',
+                          'description',
+                          'priority',
+                          'start_date',
+                          'end_date',
+                          'assignee',
+                          'name']
+        attributes = {a: getattr(self, a) for a in attribute_names}
+        for name in attribute_names:
+           attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
         super().__init__(name=self.name,
                          parent=parent,
                          children=all_children)
+        for name in list(attributes.keys()):
+            setattr(self, name, attributes[name])
+        self._connect_children_changed()
         self.children_changed.emit()
+
+    def _connect_children_changed(self):
+        for child in self.children:
+            child.children_changed.connect(lambda **kwargs: self.children_changed.emit())
+            child._connect_children_changed()
 
     def __str__(self):
         '''
@@ -268,8 +288,12 @@ class Task(Node):
                                'priority',
                                'start_date',
                                'end_date',
-                               'assignee']
+                               'assignee',
+                               'name']
             self.dict = {a: getattr(self, a) for a in attribute_names}
+            for name in attribute_names:
+                self.dict[f'{name}_changed'] = getattr(self, f'{name}_changed')
+
         else:
             for child in self.children:
                 child.make_dict()
