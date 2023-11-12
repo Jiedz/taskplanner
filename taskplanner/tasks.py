@@ -84,7 +84,8 @@ class Task(Node):
     def name(self, value):
         self._name = value
         if hasattr(self, 'name_changed'):
-            pass#self.name_changed.emit()
+            self.name_changed.emit()
+
     @property
     def description(self):
         return self._description
@@ -92,7 +93,7 @@ class Task(Node):
     @description.setter
     def description(self, value):
         self._description = value
-        #self.description_changed.emit()
+        self.description_changed.emit()
 
     @property
     def category(self):
@@ -102,6 +103,15 @@ class Task(Node):
     def category(self, value):
         self._category = value
         self.category_changed.emit()
+
+    @property
+    def assignee(self):
+        return self._assignee
+
+    @assignee.setter
+    def assignee(self, value):
+        self._assignee = value
+        self.assignee_changed.emit()
 
     @property
     def start_date(self):
@@ -161,11 +171,19 @@ class Task(Node):
 
     @property
     def is_top_level(self):
-        '''
+        """
         It returns 'True' if and only if this task has no parent tasks.
         :return:
-        '''
-        return self.parent is None
+        """
+        return self.is_root
+
+    @property
+    def is_bottom_level(self):
+        """
+        It returns 'True' if and only if the task has no subtasks
+        :return:
+        """
+        return self.is_leaf
 
     def set_parent_task(self, parent):
         '''
@@ -203,6 +221,7 @@ class Task(Node):
         super().__init__(name=self.name,
                          parent=parent,
                          children=all_children)
+        self.children_changed.emit()
 
     def __str__(self):
         '''

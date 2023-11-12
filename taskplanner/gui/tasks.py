@@ -6,7 +6,7 @@ import os
 
 # %% Imports
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -135,7 +135,7 @@ class TaskWidget(QWidget):
                     self.completed_pushbutton.setStyleSheet(stylesheet)
 
                 def callback():
-                    self.parent().task._completed = not self.parent().task.completed
+                    self.parent().task.completed = not self.parent().task.completed
                     switch_background(self.parent().task.completed)
 
                 # Set Current Value
@@ -439,7 +439,31 @@ class TaskWidget(QWidget):
 
                 def inv_callback():
                     # Update widget
+                    """
+                    This function is only called when the task's property is
+                    changed outside this widget. If widget signals are not blocked
+                    at the time of updating the widget, an infinite recursion is triggered
+                    between task update and widget update.
+                    """
+                    self.textedit.blockSignals(True)
                     self.textedit.setText(self.parent().task.name)
+                    self.textedit.blockSignals(False)
+                    """
+                    For some reason, the cursor is normally reset to the start of the 
+                    widget. One then needs to move the cursor to the end and then reset the cursor
+                    """
+                    # Move cursor to the end
+                    cursor = self.textedit.textCursor()
+                    cursor.movePosition(cursor.Right,
+                                        cursor.MoveAnchor,
+                                        len(self.parent().task.name))
+                    """
+                    For some other reason, all text is also automatically selected, so one needs to
+                    clear the selection.
+                    """
+                    cursor.clearSelection()
+                    # Reset cursor
+                    self.textedit.setTextCursor(cursor)
 
                 # Connect task and widget
                 self.textedit.textChanged.connect(lambda: callback())
@@ -462,7 +486,31 @@ class TaskWidget(QWidget):
 
         def inv_callback():
             # Update widget
+            """
+            This function is only called when the task's property is
+            changed outside this widget. If widget signals are not blocked
+            at the time of updating the widget, an infinite recursion is triggered
+            between task update and widget update.
+            """
+            self.description_textedit.blockSignals(True)
             self.description_textedit.setText(self.task.description)
+            self.description_textedit.blockSignals(False)
+            """
+            For some reason, the cursor is normally reset to the start of the 
+            widget. One then needs to move the cursor to the end and then reset the cursor
+            """
+            # Move cursor to the end
+            cursor = self.description_textedit.textCursor()
+            cursor.movePosition(cursor.Right,
+                                cursor.MoveAnchor,
+                                len(self.task.description))
+            """
+            For some other reason, all text is also automatically selected, so one needs to
+            clear the selection.
+            """
+            cursor.clearSelection()
+            # Reset cursor
+            self.description_textedit.setTextCursor(cursor)
 
         # Connect task and widget
         self.description_textedit.textChanged.connect(lambda: callback())
@@ -513,9 +561,37 @@ class TaskWidget(QWidget):
                                                  int(self.parent().height() * 0.05))
 
                 def callback():
-                    raise NotImplementedError
+                    if '\n' in self.new_textedit.toPlainText():
+                        new_task = Task(name=self.new_textedit.toPlainText()[:-1])
+                        self.new_textedit.blockSignals(True)
+                        self.new_textedit.setText('')
+                        self.new_textedit.blockSignals(False)
+                        """
+                        For some reason, the cursor is normally reset to the start of the 
+                        widget. One then needs to move the cursor to the end and then reset the cursor
+                        """
+                        # Move cursor to the end
+                        cursor = self.new_textedit.textCursor()
+                        cursor.movePosition(cursor.Left,
+                                            cursor.MoveAnchor,
+                                            0)
+                        """
+                        For some other reason, all text is also automatically selected, so one needs to
+                        clear the selection.
+                        """
+                        cursor.clearSelection()
+                        # Add new subtask
+                        self.parent().task.add_children_tasks(new_task)
+                        self.parent().task._print()
+
+
+                def inv_callback():
+                    self.parent().__init__(task = self.parent().task,
+                                           parent = self.parent().parent())
+                    raise NotImplementedError("Need to implement automatic update of a TaskWidgetSimple")
 
                 self.new_textedit.textChanged.connect(lambda: callback())
+                self.parent().task.children_changed.connect(lambda **kwargs: inv_callback())
                 self.new_textedit.setPlaceholderText("New Subtask")
 
             def make_subtask_widgets(self):
@@ -603,6 +679,8 @@ class TaskLineWidget(QWidget):
         self.layout = QHBoxLayout()
         self.layout.setAlignment(Qt.AlignLeft)
         self.setLayout(self.layout)
+        # Completed pushbutton
+        self.make_completed_pushbutton()
         # Name
         self.make_name_pushbutton()
         # Priority
@@ -610,10 +688,45 @@ class TaskLineWidget(QWidget):
         # End date
         self.make_end_date_label()
         # Expand pushbutton
-        if self.task.children != ():
+        if not self.task.is_bottom_level:
             self.make_expand_pushbutton()
         self.layout.addStretch()
 
+    def make_completed_pushbutton(self):
+        # Pushbutton to mark the task as completed
+        self.completed_pushbutton = QPushButton()
+        self.layout.addWidget(self.completed_pushbutton)
+        self.completed_pushbutton.setMinimumSize(int(0.05 * self.parent().width()),
+                                                 int(0.05 * self.parent().width()))
+        # Icon
+        icon_path = self.parent()._style.icon_path
+        icon_filename = os.path.join(icon_path,
+                                     'ok.png')
+        self.completed_pushbutton.setIcon(QIcon(icon_filename))
+
+        def switch_background(completed: bool):
+            stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
+                'completed_pushbutton']
+            if completed:
+                stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */' % (
+                    self.parent()._style.color_palette["completed"]))
+            else:
+                stylesheet = stylesheet.replace(
+                    'background-color:%s;/* main */' % (self.parent()._style.color_palette["completed"]),
+                    '/* background-color */')
+            self.parent()._style.stylesheets['standard view']['toolbar'][
+                'completed_pushbutton'] = stylesheet
+            self.completed_pushbutton.setStyleSheet(stylesheet)
+
+        def callback():
+            self.task.completed = not self.task.completed
+            switch_background(self.task.completed)
+
+        # Set Current Value
+        switch_background(self.task.completed)
+        self.completed_pushbutton.clicked.connect(lambda: callback())
+        self.task.completed_changed.connect(
+            lambda **kwargs: switch_background(self.task.completed))
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()
         self.layout.addWidget(self.name_pushbutton)
@@ -625,7 +738,6 @@ class TaskLineWidget(QWidget):
             task_widget.show()
 
         def update_widget():
-            print(self.task.name)
             self.name_pushbutton.setText(self.task.name)
 
         # Connect task and widget
