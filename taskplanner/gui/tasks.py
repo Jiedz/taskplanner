@@ -15,7 +15,8 @@ from PyQt5.QtWidgets import \
     QVBoxLayout,
     QWidget,
     QTextEdit,
-    QComboBox
+    QComboBox,
+    QScrollArea
 )
 
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
@@ -510,9 +511,7 @@ class TaskWidget(QWidget):
             """
             cursor.clearSelection()
             # Reset cursor
-            self.description_textedit.setTextCursor(cursor)
-
-        # Connect task and widget
+            self.description_textedit.setTextCursor(cursor)# Connect task and widget
         self.description_textedit.textChanged.connect(lambda: callback())
         self.task.description_changed.connect(lambda **kwargs: inv_callback())
         # Set initial value
@@ -539,7 +538,13 @@ class TaskWidget(QWidget):
                 # New Textedit
                 self.make_new_textedit()
                 # Subtasks
+                self.subtask_widgets = []
                 self.make_subtask_widgets()
+
+                slots = [slot for slot in self.parent().task.children_changed._slots if 'SubtaskListWidget.' in str(slot)]
+                for slot in slots:
+                    self.parent().task.children_changed.disconnect(slot)
+                self.parent().task.children_changed.connect(lambda **kwargs: self.update_subtasks())
 
             def make_icon_pushbutton(self):
                 self.icon_pushbutton = QPushButton()
@@ -582,28 +587,40 @@ class TaskWidget(QWidget):
                         cursor.clearSelection()
                         # Add new subtask
                         self.parent().task.add_children_tasks(new_task)
-                        #self.parent().task._print()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
                 self.new_textedit.setPlaceholderText("New Subtask")
 
             def make_subtask_widgets(self):
-                self.subtask_widgets = []
                 for subtask in self.parent().task.children:
-                    widget = TaskWidgetSimple(parent=self,
-                                              task=subtask)
-                    self.layout.addWidget(widget)
-                    self.subtask_widgets += [widget]
+                    if subtask not in [widget.task for widget in self.subtask_widgets]:
+                        widget = TaskWidgetSimple(parent=self,
+                                                  task=subtask)
+                        self.layout.addWidget(widget)
+                        self.subtask_widgets += [widget]
+
+            def update_subtasks(self):
+                self.make_subtask_widgets()
+
+        ''' This is a temporary solution that causes all open TaskWidget instances to close and reopen.
+        def update_widget():
+            geometry = self.geometry()
+            self.close()
+            self.__init__(task=self.task,
+                          parent=self.parent())
+            self.show()
+            self.setGeometry(geometry)
+
+
+        slots = [slot for slot in self.task.children_changed._slots if 'TaskWidget.' in str(slot)]
+        for slot in slots:
+            self.task.children_changed.disconnect(slot)
+        self.task.children_changed.connect(lambda **kwargs: update_widget())
+        '''
 
         self.subtask_list_widget = SubtaskListWidget(parent=self)
         self.layout.addWidget(self.subtask_list_widget)
 
-        def update_widget():
-            self.subtask_list_widget.hide()
-            self.make_subtask_list_widget()
-
-        # Connect task and widget
-        self.task.children_changed.connect(lambda **kwargs: update_widget())
 
 
 class TaskWidgetSimple(QWidget):
@@ -637,7 +654,8 @@ class TaskWidgetSimple(QWidget):
                                                task=self.task)
         self.layout.addWidget(self.task_line_widget)
         # Subtasks
-        self.make_subtasks_widget()
+        self.subtask_widgets = []
+        self.make_subtasks()
 
         # Set style
         set_style(widget=self,
@@ -645,14 +663,25 @@ class TaskWidgetSimple(QWidget):
         if hide:
             self.hide()
 
-    def make_subtasks_widget(self):
-        self.subtask_widgets = []
-        for child in self.task.children:
-            subtask_widget = TaskWidgetSimple(parent=self,
-                                              task=child,
-                                              hide=True)
-            self.layout.addWidget(subtask_widget)
-            self.subtask_widgets += [subtask_widget]
+        slots = [slot for slot in self.task.children_changed._slots if 'TaskWidget.' in str(slot)]
+        for slot in slots:
+            self.task.children_changed.disconnect(slot)
+        self.task.children_changed.connect(lambda **kwargs: self.update_widget())
+
+    def update_widget(self):
+        self.make_subtasks()
+        if not self.task.is_bottom_level:
+            self.task_line_widget.expand_pushbutton.show()
+        else:
+            self.task_line_widget.expand_pushbutton.hide()
+    def make_subtasks(self):
+        for subtask in self.task.children:
+            if subtask not in [widget.task for widget in self.subtask_widgets]:
+                subtask_widget = TaskWidgetSimple(parent=self,
+                                                  task=subtask,
+                                                  hide=not self.task_line_widget.expanded)
+                self.layout.addWidget(subtask_widget)
+                self.subtask_widgets += [subtask_widget]
 
 class TaskLineWidget(QWidget):
     """
@@ -687,8 +716,8 @@ class TaskLineWidget(QWidget):
         # End date
         self.make_end_date_label()
         # Expand pushbutton
-        if not self.task.is_bottom_level:
-            self.make_expand_pushbutton()
+        self.expanded = False
+        self.make_expand_pushbutton()
         self.layout.addStretch()
 
     def make_completed_pushbutton(self):
@@ -786,6 +815,7 @@ class TaskLineWidget(QWidget):
 
         # Callback
         def callback():
+            self.expanded = not self.expanded
             for subtask_widget in self.parent().subtask_widgets:
                 if subtask_widget.isVisible():
                     subtask_widget.hide()
@@ -793,5 +823,7 @@ class TaskLineWidget(QWidget):
                     subtask_widget.show()
 
         self.expand_pushbutton.clicked.connect(callback)
+        if self.task.is_bottom_level:
+            self.expand_pushbutton.hide()
 
 

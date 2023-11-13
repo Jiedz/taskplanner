@@ -220,28 +220,25 @@ class Task(Node):
             parent = self.parent.parent
         # Store all attributes
         attribute_names = ['name',
-                          'category',
-                          'description',
-                          'priority',
-                          'start_date',
-                          'end_date',
-                          'assignee',
-                          'name']
+                           'category',
+                           'description',
+                           'priority',
+                           'start_date',
+                           'end_date',
+                           'assignee']
         attributes = {a: getattr(self, a) for a in attribute_names}
         for name in attribute_names:
-           attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
+            attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
         super().__init__(name=self.name,
                          parent=parent,
                          children=all_children)
         for name in list(attributes.keys()):
             setattr(self, name, attributes[name])
-        self._connect_children_changed()
+        # Signal a change of children
         self.children_changed.emit()
-
-    def _connect_children_changed(self):
-        for child in self.children:
-            child.children_changed.connect(lambda **kwargs: self.children_changed.emit())
-            child._connect_children_changed()
+        # Propagate the signal to all ancestors
+        for a in self.ancestors:
+            a.children_changed.emit()
 
     def __str__(self):
         '''
