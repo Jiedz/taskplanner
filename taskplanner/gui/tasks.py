@@ -598,6 +598,10 @@ class TaskWidget(QWidget):
                                                   task=subtask)
                         self.layout.addWidget(widget)
                         self.subtask_widgets += [widget]
+                # Remove non-existent sub-tasks
+                for widget in self.subtask_widgets:
+                    if widget.task not in self.parent().task.children:
+                        widget.hide()
 
             def update_subtasks(self):
                 self.make_subtask_widgets()
@@ -675,6 +679,7 @@ class TaskWidgetSimple(QWidget):
         else:
             self.task_line_widget.expand_pushbutton.hide()
     def make_subtasks(self):
+        # Add new subtasks
         for subtask in self.task.children:
             if subtask not in [widget.task for widget in self.subtask_widgets]:
                 subtask_widget = TaskWidgetSimple(parent=self,
@@ -682,6 +687,10 @@ class TaskWidgetSimple(QWidget):
                                                   hide=not self.task_line_widget.expanded)
                 self.layout.addWidget(subtask_widget)
                 self.subtask_widgets += [subtask_widget]
+        # Remove non-existent sub-tasks
+        for widget in self.subtask_widgets:
+            if widget.task not in self.task.children:
+                widget.hide()
 
 class TaskLineWidget(QWidget):
     """
@@ -715,6 +724,8 @@ class TaskLineWidget(QWidget):
         self.make_priority_label()
         # End date
         self.make_end_date_label()
+        # Remove pushbutton
+        self.make_remove_pushbutton()
         # Expand pushbutton
         self.expanded = False
         self.make_expand_pushbutton()
@@ -825,5 +836,21 @@ class TaskLineWidget(QWidget):
         self.expand_pushbutton.clicked.connect(callback)
         if self.task.is_bottom_level:
             self.expand_pushbutton.hide()
+
+    def make_remove_pushbutton(self):
+        self.remove_pushbutton = QPushButton()
+        self.layout.addWidget(self.remove_pushbutton)
+        # Geometry
+        # Icon
+        icon_path = self.parent()._style.icon_path
+        icon_filename = os.path.join(icon_path,
+                                     'minus.png')
+        self.remove_pushbutton.setIcon(QIcon(icon_filename))
+
+        # Callback
+        def callback():
+            self.task.parent.remove_children_tasks(self.task)
+
+        self.remove_pushbutton.clicked.connect(callback)
 
 

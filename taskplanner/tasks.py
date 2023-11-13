@@ -240,6 +240,47 @@ class Task(Node):
         for a in self.ancestors:
             a.children_changed.emit()
 
+    def remove_children_tasks(self, *children):
+        '''
+        Removes children tasks, if existent, specified as positional arguments.
+
+        :param children: arguments of type :py:class:'anytree.Node'
+            children tasks in the form of positional arguments
+        :return:
+        '''
+        if self in children:
+            raise ValueError(f'Cannot add task {self.name} to its own children.')
+        existent_children = tuple(set(self.children) and set(children))
+        for child in existent_children:
+            child.parent = None
+        all_children = tuple(set(self.children) - set(children))
+        parent = self.parent
+        if self.parent in all_children:
+            warning(
+                f"Task {self.name}: adding parent {self.parent.name} as child! New parent will now be the next ancestor.")
+            parent = self.parent.parent
+        # Store all attributes
+        attribute_names = ['name',
+                           'category',
+                           'description',
+                           'priority',
+                           'start_date',
+                           'end_date',
+                           'assignee']
+        attributes = {a: getattr(self, a) for a in attribute_names}
+        for name in attribute_names:
+            attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
+        super().__init__(name=self.name,
+                         parent=parent,
+                         children=all_children)
+        for name in list(attributes.keys()):
+            setattr(self, name, attributes[name])
+        # Signal a change of children
+        self.children_changed.emit()
+        # Propagate the signal to all ancestors
+        for a in self.ancestors:
+            a.children_changed.emit()
+
     def __str__(self):
         '''
         Returns a string representation of the tree, showing its nodes and
