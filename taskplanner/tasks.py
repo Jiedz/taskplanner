@@ -201,6 +201,13 @@ class Task(Node):
         super().__init__(name=self.name,
                          parent=parent,
                          children=self.children)
+        # Propagate to all children
+        def signal_to_children(task):
+            task.parent_changed.emit()
+            for child in task.children:
+                signal_to_children(child)
+        signal_to_children(self)
+
 
     def add_children_tasks(self, *children):
         '''
@@ -249,10 +256,10 @@ class Task(Node):
         :return:
         '''
         if self in children:
-            raise ValueError(f'Cannot add task {self.name} to its own children.')
+            raise ValueError(f'Cannot remove task {self.name} from its own children.')
         existent_children = tuple(set(self.children) and set(children))
         for child in existent_children:
-            child.parent = None
+            child.set_parent_task(None)
         all_children = tuple(set(self.children) - set(children))
         parent = self.parent
         if self.parent in all_children:
