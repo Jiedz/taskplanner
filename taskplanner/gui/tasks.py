@@ -3,9 +3,10 @@ This module defines a task widget.
 """
 
 import os
+from datetime import date as dt
 
 # %% Imports
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtWidgets import \
     (
@@ -17,7 +18,8 @@ from PyQt5.QtWidgets import \
     QTextEdit,
     QComboBox,
     QScrollArea,
-    QMainWindow
+    QMainWindow,
+    QCalendarWidget,
 )
 
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
@@ -51,7 +53,7 @@ class TaskWidget(QWidget):
         # Geometry
         # Get screen size
         screen_size = get_screen_size()
-        width, height = int(screen_size.width * 0.4), int(screen_size.height * 0.6)
+        width, height = int(screen_size.width * 0.3), int(screen_size.height * 0.6)
         self.setGeometry(int(screen_size.width / 2) - int(width / 2),
                          int(screen_size.height / 2) - int(height / 2),
                          width,  # width
@@ -74,6 +76,12 @@ class TaskWidget(QWidget):
         ## Textedit
         self.name_widget.textedit.setFixedHeight(int(self.height()*0.1))
         self.name_widget.textedit.setMinimumWidth(int(self.width()*0.6))
+        # Horizontal layout that contains the (category, priority, assignee) layout and the (start date, end date) widgets
+        self.middle_layout_horizontal = QHBoxLayout()
+        self.layout.addLayout(self.middle_layout_horizontal)
+        # Vertical layout for category, priority, assignee
+        self.middle_layout_vertical = QVBoxLayout()
+        self.middle_layout_horizontal.addLayout(self.middle_layout_vertical)
         # Category
         self.make_category_widget()
         ## Combobox
@@ -90,15 +98,20 @@ class TaskWidget(QWidget):
         self.assignee_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         ## New textedit
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
+        # Start and end date widgets
+        self.make_date_widgets()
+        self.middle_layout_horizontal.addStretch()
+        ## Start date
         # Task Description
         self.make_description_textedit()
         self.description_textedit.setMaximumWidth(int(self.width()*0.8))
         self.description_textedit.setMinimumHeight(int(self.height() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
-        ## Icon Pushbutton
-        self.subtask_list_widget.icon_pushbutton.setMaximumSize(int(self.height()*0.05),
-                                                                int(self.height()*0.1))
+        self.subtask_list_widget.setMaximumWidth(int(self.width()*2))
+        ## Icon pushbutton
+        self.subtask_list_widget.icon_pushbutton.setFixedSize(int(self.height()*0.05),
+                                                              int(self.height()*0.05))
         ## New textedit
         self.subtask_list_widget.new_textedit.setFixedWidth(int(self.width()*0.5))
         self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()))
@@ -139,7 +152,6 @@ class TaskWidget(QWidget):
                 # Path widget
                 self.make_path_widget()
                 self.layout.addStretch()
-                # Start and end data widgets
                 # Completed button
                 self.make_completed_pushbutton()
                 # Style
@@ -218,7 +230,6 @@ class TaskWidget(QWidget):
                 self.path_widget = PathWidget(task=self.task,
                                               parent=self)
                 self.layout.addWidget(self.path_widget)
-
 
             def make_completed_pushbutton(self):
                 # Pushbutton to mark the task as completed
@@ -354,7 +365,7 @@ class TaskWidget(QWidget):
 
         self.category_widget = CategoryWidget(task=self.task,
                                               parent=self)
-        self.layout.addWidget(self.category_widget)
+        self.middle_layout_vertical.addWidget(self.category_widget)
 
     def make_priority_widget(self):
         class PriorityWidget(QWidget):
@@ -419,7 +430,7 @@ class TaskWidget(QWidget):
 
         self.priority_widget = PriorityWidget(task=self.task,
                                               parent=self)
-        self.layout.addWidget(self.priority_widget)
+        self.middle_layout_vertical.addWidget(self.priority_widget)
 
     def make_assignee_widget(self):
         class AssigneeWidget(QWidget):
@@ -524,7 +535,118 @@ class TaskWidget(QWidget):
 
         self.assignee_widget = AssigneeWidget(task=self.task,
                                               parent=self)
-        self.layout.addWidget(self.assignee_widget)
+        self.middle_layout_vertical.addWidget(self.assignee_widget)
+
+    def make_date_widgets(self):
+        class DateWidget(QWidget):
+            """
+            This widget contains:
+                - An icon symbolizing the type of time mode (start, end, ...)
+                - A label indicating the selected date
+                - A calendar widget that allows the user to select a day
+            """
+            def __init__(self,
+                         task: Task,
+                         parent: QWidget = None,
+                         time_mode: str = 'start'):
+                """
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                :param time_mode: str, optional
+                    The time mode, e.g., 'start', 'end'.
+                """
+                TIME_MODES = ['start', 'end']
+                if time_mode not in TIME_MODES:
+                    raise ValueError(f'Unrecognized time more {time_mode}. Possible time modes are {tuple(TIME_MODES)}')
+                self.task = task
+                self.time_mode = time_mode
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QHBoxLayout()
+                self.setLayout(self.layout)
+                # Icon pushbutton
+                self.make_icon_pushbutton()
+                # Label
+                self.make_label()
+                # Calendar widget
+                self.make_calendar_widget()
+
+            def make_icon_pushbutton(self):
+                self.icon_pushbutton = QPushButton()
+                # Layout
+                self.layout.addWidget(self.icon_pushbutton)
+                # Icon
+                icon_path = self.parent()._style.icon_path
+                name = 'start' if self.time_mode=='start' else 'stop'
+                icon_filename = os.path.join(icon_path, f'{name}-time.png')
+                self.icon_pushbutton.setIcon(QIcon(icon_filename))
+
+                def callback():
+                    self.calendar_widget.show()
+
+                self.icon_pushbutton.clicked.connect(callback)
+
+            def make_label(self):
+                self.label = QLabel()
+                # Layout
+                self.layout.addWidget(self.label)
+                # Geometry
+                self.label.setMaximumHeight(int(self.height()))
+
+                def update_label():
+                    date = getattr(self.task, f'{self.time_mode}_date')
+                    self.label.setText(f'{date.day}/{date.month}/{date.year}')
+
+                getattr(self.task, f'{self.time_mode}_date_changed').connect(lambda **kwargs: update_label())
+                update_label()
+
+
+
+            def make_calendar_widget(self):
+                self.calendar_widget = QCalendarWidget()
+                self.calendar_widget.setGridVisible(True)
+                # Geometry
+                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                           'y',
+                                                                           'width',
+                                                                           'height']]
+                self.calendar_widget.setWindowTitle(f'{self.time_mode.title()} Date')
+                self.calendar_widget.setGeometry(int(x+1.5*w),
+                                                 int(y+h/2),
+                                                 self.calendar_widget.width(),
+                                                 self.calendar_widget.height())
+
+                def callback():
+                    # Get date from calendar
+                    date = self.calendar_widget.selectedDate()
+                    # Set date to task
+                    old_date = getattr(self.task, f'{self.time_mode}_date')
+                    task_date = dt(date.year(),
+                                   date.month(),
+                                   date.day())
+                    try:
+                        setattr(self.task, f'{self.time_mode}_date', task_date)
+                    except ValueError:
+                        self.calendar_widget.setSelectedDate(QDate(old_date.year,
+                                                                   old_date.month,
+                                                                   old_date.day))
+                        callback()
+                    # Hide calendar
+                    self.calendar_widget.hide()
+
+                self.calendar_widget.clicked.connect(callback)
+
+        self.start_date_widget = DateWidget(task=self.task,
+                                            parent=self,
+                                            time_mode='start')
+        self.middle_layout_horizontal.addWidget(self.start_date_widget)
+        self.end_date_widget = DateWidget(task=self.task,
+                                          parent=self,
+                                          time_mode='end')
+        self.middle_layout_horizontal.addWidget(self.end_date_widget)
+
 
     def make_name_widget(self):
         class NameWidget(QWidget):

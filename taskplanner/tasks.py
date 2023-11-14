@@ -126,7 +126,7 @@ class Task(Node):
                 raise TypeError(f'Invalid start date type {type(value)}. Accepted types are ("datetime.date")')
             if self.end_date is not None:
                 if value > self.end_date:
-                    assert ValueError('Start date ({value}) is greater than end date ({self.end_date})')
+                    raise ValueError(f'Start date ({value}) is greater than end date ({self.end_date})')
             self._start_date = value
             self.start_date_changed.emit()
 
@@ -143,7 +143,7 @@ class Task(Node):
                 raise TypeError(f'Invalid end date type {type(value)}. Accepted types are ("datetime.date")')
             if self.end_date is not None:
                 if value < self.start_date:
-                    assert ValueError('end date ({value}) is smaller than start date ({self.start_date})')
+                    raise ValueError(f'end date ({value}) is smaller than start date ({self.start_date})')
             self._end_date = value
             self.end_date_changed.emit()
 
