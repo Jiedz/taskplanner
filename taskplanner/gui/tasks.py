@@ -16,7 +16,8 @@ from PyQt5.QtWidgets import \
     QWidget,
     QTextEdit,
     QComboBox,
-    QScrollArea
+    QScrollArea,
+    QMainWindow
 )
 
 from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
@@ -58,24 +59,56 @@ class TaskWidget(QWidget):
         # Define style
         self._style = TaskWidgetStyle(font='light',
                                       color_palette='deep purple')
+        # Scroll area
+        self.scrollarea = QScrollArea()
+        self.scrollarea.setWidgetResizable(True)
+        self.scrollarea.setGeometry(self.geometry())
+        self.scrollarea.setWidget(self)
         # Toolbar
         self.make_toolbar()
+        self.toolbar.setMinimumHeight(int(self.height()*0.08))
+        self.toolbar.completed_pushbutton.setFixedSize(int(self.toolbar.height()*0.7),
+                                                         int(self.toolbar.height()*0.7))
         # Task Name
         self.make_name_widget()
+        ## Textedit
+        self.name_widget.textedit.setFixedHeight(int(self.height()*0.1))
+        self.name_widget.textedit.setMinimumWidth(int(self.width()*0.6))
         # Category
         self.make_category_widget()
+        ## Combobox
+        self.category_widget.combobox.setMinimumWidth(int(self.width()*0.2))
+        ## New textedit
+        self.category_widget.new_textedit.setMaximumHeight(int(self.category_widget.combobox.height() * 2))
         # Priority
         self.make_priority_widget()
+        ## Combobox
+        self.priority_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         # Assignee
         self.make_assignee_widget()
+        ## Combobox
+        self.assignee_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
+        ## New textedit
+        self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
         # Task Description
         self.make_description_textedit()
+        self.description_textedit.setMaximumWidth(int(self.width()*0.8))
+        self.description_textedit.setMinimumHeight(int(self.height() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
-        self.layout.addStretch()
+        ## Icon Pushbutton
+        self.subtask_list_widget.icon_pushbutton.setMaximumSize(int(self.height()*0.05),
+                                                                int(self.height()*0.1))
+        ## New textedit
+        self.subtask_list_widget.new_textedit.setFixedWidth(int(self.width()*0.5))
+        self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()))
         # Set style
         set_style(widget=self,
                   stylesheets=self._style.stylesheets['standard view'])
+
+    def show(self):
+        super().show()
+        self.scrollarea.show()
 
     def make_toolbar(self):
         class Toolbar(QWidget):
@@ -103,9 +136,10 @@ class TaskWidget(QWidget):
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
                 self.layout.setAlignment(Qt.AlignLeft)
-                # Path Label
+                # Path widget
                 self.make_path_widget()
                 self.layout.addStretch()
+                # Start and end data widgets
                 # Completed button
                 self.make_completed_pushbutton()
                 # Style
@@ -167,7 +201,11 @@ class TaskWidget(QWidget):
                             task_widget.show()
 
                         def update_widget():
-                            pushbutton.setText(supertask.name)
+                            n_max = min([len(supertask.name), 20])
+                            text = supertask.name[:n_max]
+                            if n_max == 20:
+                                text += '...'
+                            pushbutton.setText(text)
 
                         # Connect task and widget
                         pushbutton.clicked.connect(callback)
@@ -186,8 +224,6 @@ class TaskWidget(QWidget):
                 # Pushbutton to mark the task as completed
                 self.completed_pushbutton = QPushButton()
                 self.layout.addWidget(self.completed_pushbutton)
-                self.completed_pushbutton.setMinimumSize(int(0.05 * self.parent().width()),
-                                                         int(0.05 * self.parent().width()))
                 # Icon
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path,
@@ -250,7 +286,7 @@ class TaskWidget(QWidget):
                 # Icon
                 self.make_icon_pushbutton()
                 # Categories combobox
-                self.make_categories_combobox()
+                self.make_combobox()
                 # Add category pushbutton
                 self.make_add_pushbutton()
                 # New Textedit
@@ -265,23 +301,22 @@ class TaskWidget(QWidget):
                 icon_filename = os.path.join(icon_path, 'categories.png')
                 self.icon_pushbutton.setIcon(QIcon(icon_filename))
 
-            def make_categories_combobox(self):
-                self.categories_combobox = QComboBox(parent=self)
+            def make_combobox(self):
+                self.combobox = QComboBox(parent=self)
                 # Layout
-                self.layout.addWidget(self.categories_combobox)
-                self.categories_combobox.setMinimumWidth(int(0.3 * self.parent().width()))
+                self.layout.addWidget(self.combobox)
                 # Add items to list
-                self.categories_combobox.addItems(['Category 1', 'Category 2'])
+                self.combobox.addItems(['Category 1', 'Category 2'])
 
                 # Callback
                 def item_changed():
-                    self.task.category = self.categories_combobox.currentText()
+                    self.task.category = self.combobox.currentText()
 
                 def change_item():
-                    self.categories_combobox.setCurrentText(self.task.category)
+                    self.combobox.setCurrentText(self.task.category)
 
                 self.task.category_changed.connect(lambda **kwargs: change_item())
-                self.categories_combobox.currentIndexChanged.connect(lambda: item_changed())
+                self.combobox.currentIndexChanged.connect(lambda: item_changed())
                 # Set Initial Value
                 change_item()
 
@@ -306,8 +341,6 @@ class TaskWidget(QWidget):
                 self.new_textedit = QTextEdit()
                 # Layout
                 self.layout.addWidget(self.new_textedit)
-                self.new_textedit.setMaximumSize(int(0.6 * self.parent().width()),
-                                                 int(0.07 * self.parent().height()))
 
                 def callback():
                     if '\n' in self.new_textedit.toPlainText():
@@ -364,7 +397,6 @@ class TaskWidget(QWidget):
             def make_combobox(self):
                 self.combobox = QComboBox()
                 self.layout.addWidget(self.combobox)
-                self.combobox.setMinimumWidth(int(0.15 * self.parent().width()))
                 # Set priority levels
                 self.combobox.addItems(['Low',
                                         'Medium',
@@ -438,7 +470,6 @@ class TaskWidget(QWidget):
                 self.combobox = QComboBox()
                 # Layout
                 self.layout.addWidget(self.combobox)
-                self.combobox.setMinimumWidth(int(0.2 * self.parent().width()))
                 # Add items to list
                 self.combobox.addItems(['Assignee 1', 'Assignee 2'])
 
@@ -480,8 +511,6 @@ class TaskWidget(QWidget):
                 self.new_textedit = QTextEdit()
                 # Layout
                 self.layout.addWidget(self.new_textedit)
-                self.new_textedit.setMaximumSize(int(0.6 * self.parent().width()),
-                                                 int(0.07 * self.parent().height()))
 
                 def callback():
                     if '\n' in self.new_textedit.toPlainText():
@@ -520,9 +549,6 @@ class TaskWidget(QWidget):
                 self.layout = QHBoxLayout()
                 self.layout.setAlignment(Qt.AlignLeft)
                 self.setLayout(self.layout)
-                # Geometry
-                self.setMaximumSize(int(0.8 * self.parent().width()),
-                                    int(0.1 * self.parent().height()))
                 # Icon
                 self.make_icon_pushbutton()
                 # Textedit
@@ -541,9 +567,6 @@ class TaskWidget(QWidget):
                 self.textedit = QTextEdit()
                 # Layout
                 self.layout.addWidget(self.textedit)
-                # Geometry
-                self.textedit.setMinimumSize(int(self.width() * 0.8),
-                                             int(self.height()))
 
                 def callback():
                     # Update task
@@ -592,6 +615,7 @@ class TaskWidget(QWidget):
         self.description_textedit = QTextEdit()
         # Layout
         self.layout.addWidget(self.description_textedit)
+        # Geometry
 
         def callback():
             # Update taks
@@ -670,8 +694,6 @@ class TaskWidget(QWidget):
                 self.icon_pushbutton = QPushButton()
                 self.layout.addWidget(self.icon_pushbutton)
                 # Geometry
-                self.icon_pushbutton.setMaximumSize(int(self.parent().width() * 0.03),
-                                                    int(self.parent().width() * 0.1))
                 # Icon
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'subtask.png')
@@ -682,8 +704,6 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.new_textedit)
                 # Geometry
-                self.new_textedit.setMaximumSize(int(self.parent().width() * 0.5),
-                                                 int(self.parent().height() * 0.05))
 
                 def callback():
                     if '\n' in self.new_textedit.toPlainText():
@@ -842,8 +862,6 @@ class TaskLineWidget(QWidget):
         # Pushbutton to mark the task as completed
         self.completed_pushbutton = QPushButton()
         self.layout.addWidget(self.completed_pushbutton)
-        self.completed_pushbutton.setMinimumSize(int(0.05 * self.parent().width()),
-                                                 int(0.05 * self.parent().width()))
         # Icon
         icon_path = self.parent()._style.icon_path
         icon_filename = os.path.join(icon_path,

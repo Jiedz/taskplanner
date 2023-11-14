@@ -82,6 +82,65 @@ class TaskWidgetStyle:
                                                self.color_palette['highlight'],
                                                self.font['family'],
                                                self.color_palette['text']),
+                    'scrollarea':
+                    '''
+                        QScrollArea
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar:vertical
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar:horizontal
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar:handle:vertical
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar:handle:horizontal
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar:handle
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                        QScrollBar::groove 
+                        {
+                            background-color:%s;
+                            border:2px solid %s;
+                            border-radius:10px;
+                        }
+                    ''' % (self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           self.color_palette['main background'],
+                           self.color_palette['highlight'],
+                           ),
                     'toolbar':
                         {
                             'main':
@@ -146,7 +205,7 @@ class TaskWidgetStyle:
                                                     /* border-radius:%s; */
                                                 }
                                                 ''' % (int(screen_size.width / 220)),
-                            'categories_combobox':
+                            'combobox':
                                 '''
                                                 QComboBox
                                                 {
