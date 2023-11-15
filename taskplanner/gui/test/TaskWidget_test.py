@@ -1,5 +1,6 @@
 from taskplanner.tasks import Task
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
+from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
 
 from PyQt5.QtWidgets import QApplication, QFontComboBox
 import sys
@@ -18,7 +19,9 @@ task1._print()
 # Build application
 app = QApplication(sys.argv)
 # Task widget - standard view
-task_widget = TaskWidget(task=task1)
+style = TaskWidgetStyle(color_palette='deep purple')
+task_widget = TaskWidget(task=task1,
+                         style=style)
 task_widget.show()
 task1.priority = 'high'
 # Show Fonts

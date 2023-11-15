@@ -35,7 +35,8 @@ class TaskWidget(QWidget):
     def __init__(self,
                  task: Task,
                  main_color: str = None,
-                 parent: QWidget = None):
+                 parent: QWidget = None,
+                 style: TaskWidgetStyle = TaskWidgetStyle()):
         """
         :param task: :py:class:'taskplanner.tasks.Task'
             The task associated to this widget
@@ -43,6 +44,8 @@ class TaskWidget(QWidget):
             The main color of this task and all sub-tasks
         :param parent: :py:class:'QWidget', optional
             The parent widget
+        :param style: :py:class:'TaskWidgetStyle', optional
+            The widget's style
         """
         self.task, self.main_color = task, main_color
         super().__init__(parent=parent)
@@ -53,29 +56,27 @@ class TaskWidget(QWidget):
         # Geometry
         # Get screen size
         screen_size = get_screen_size()
-        width, height = int(screen_size.width * 0.3), int(screen_size.height * 0.6)
+        width, height = int(screen_size.width * 0.4), int(screen_size.height * 0.6)
         self.setGeometry(int(screen_size.width / 2) - int(width / 2),
                          int(screen_size.height / 2) - int(height / 2),
                          width,  # width
                          height)  # height
         # Define style
-        self._style = TaskWidgetStyle(font='light',
-                                      color_palette='deep purple')
+        self._style = style
         # Scroll area
         self.scrollarea = QScrollArea()
         self.scrollarea.setWidgetResizable(True)
         self.scrollarea.setGeometry(self.geometry())
         self.scrollarea.setWidget(self)
-        # Toolbar
-        self.make_toolbar()
-        self.toolbar.setMinimumHeight(int(self.height()*0.08))
-        self.toolbar.completed_pushbutton.setFixedSize(int(self.toolbar.height()*0.7),
-                                                         int(self.toolbar.height()*0.7))
-        # Task Name
-        self.make_name_widget()
+        # Path widget
+        if not self.task.is_top_level:
+            self.make_path_widget()
+        # Title widget
+        self.make_title_widget()
+        self.title_widget.setMinimumHeight(int(self.height()*0.08))
         ## Textedit
-        self.name_widget.textedit.setFixedHeight(int(self.height()*0.1))
-        self.name_widget.textedit.setMinimumWidth(int(self.width()*0.6))
+        self.title_widget.textedit.setFixedHeight(int(self.height()*0.1))
+        self.title_widget.textedit.setMinimumWidth(int(self.width()*0.6))
         # Horizontal layout that contains the (category, priority, assignee) layout and the (start date, end date) widgets
         self.middle_layout_horizontal = QHBoxLayout()
         self.layout.addLayout(self.middle_layout_horizontal)
@@ -87,7 +88,7 @@ class TaskWidget(QWidget):
         ## Combobox
         self.category_widget.combobox.setMinimumWidth(int(self.width()*0.2))
         ## New textedit
-        self.category_widget.new_textedit.setMaximumHeight(int(self.category_widget.combobox.height() * 2))
+        self.category_widget.new_textedit.setMaximumHeight(int(self.category_widget.combobox.height() * 1))
         # Priority
         self.make_priority_widget()
         ## Combobox
@@ -98,13 +99,13 @@ class TaskWidget(QWidget):
         self.assignee_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         ## New textedit
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
+        self.middle_layout_horizontal.addStretch()
         # Start and end date widgets
         self.make_date_widgets()
-        self.middle_layout_horizontal.addStretch()
         ## Start date
         # Task Description
         self.make_description_textedit()
-        self.description_textedit.setMaximumWidth(int(self.width()*0.8))
+        self.description_textedit.setMaximumWidth(int(self.width()*1))
         self.description_textedit.setMinimumHeight(int(self.height() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
@@ -123,20 +124,17 @@ class TaskWidget(QWidget):
         super().show()
         self.scrollarea.show()
 
-    def make_toolbar(self):
-        class Toolbar(QWidget):
+    def make_path_widget(self):
+        class PathWidget(QWidget):
             """
-            The toolbar contains:
-
-                - A pushbutton to mark the task as completed
-                - A pushbutton to close the Task view
-
-            :return:
+            This widget contains:
+                - A pushbutton for each super-task
+                - A "/" label between each pair of super-tasks, as a separator
             """
 
             def __init__(self,
                          task: Task,
-                         parent: QWidget):
+                         parent: QWidget = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
@@ -145,129 +143,148 @@ class TaskWidget(QWidget):
                 """
                 super().__init__(parent=parent)
                 self.task = task
-                self.task_widget = parent
+                # Layout
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
-                self.layout.setAlignment(Qt.AlignLeft)
-                # Path widget
-                self.make_path_widget()
+                # Geometry
+                # Icon pushbutton
+                self.make_icon_pushbutton()
+                # Push buttons and Labels
+                self.separator_label = QLabel()
+                self.separator_label.setText('|')
+                self.supertask_pushbuttons = []
+                self.make_path()
                 self.layout.addStretch()
-                # Completed button
-                self.make_completed_pushbutton()
-                # Style
-                self.setAttribute(Qt.WA_StyledBackground, True)
+                slots = [slot for slot in self.task.parent_changed._slots if
+                         'PathWidget.' in str(slot)]
+                for slot in slots:
+                    self.task.parent_changed.disconnect(slot)
+                self.task.parent_changed.connect(lambda **kwargs: self.make_path())
 
-            def make_path_widget(self):
-                class PathWidget(QWidget):
-                    """
-                    This widget contains:
-                        - A pushbutton for each super-task
-                        - A "/" label between each pair of super-tasks, as a separator
-                    """
-                    def __init__(self,
-                                 task: Task,
-                                 parent: QWidget = None):
-                        """
-                        :param task: :py:class:'taskplanner.tasks.Task'
-                            The task associated to this widget
-                        :param parent: :py:class:'QWidget', optional
-                            The parent widget
-                        """
-                        super().__init__(parent=parent)
-                        self.task = task
-                        # Layout
-                        self.layout = QHBoxLayout()
-                        self.setLayout(self.layout)
-                        # Geometry
-                        # Push buttons and Labels
-                        self.separator_label = QLabel()
-                        self.separator_label.setText('|')
-                        self.supertask_pushbuttons = []
-                        self.make_path()
-                        self.layout.addStretch()
-                        slots = [slot for slot in self.task.parent_changed._slots if
-                                 'PathWidget.' in str(slot)]
-                        for slot in slots:
-                            self.task.parent_changed.disconnect(slot)
-                        self.task.parent_changed.connect(lambda **kwargs: self.make_path())
-
-                    def make_path(self):
-                        for supertask in self.task.ancestors:
-                            if supertask not in [widget.task for widget in self.supertask_pushbuttons]:
-                                pushbutton = self.make_supertask_pushbutton(supertask=supertask)
-                                self.layout.addWidget(pushbutton)
-                                self.supertask_pushbuttons += [pushbutton]
-                        for widget in self.supertask_pushbuttons:
-                            if widget.task not in self.task.ancestors:
-                                widget.hide()
-                                self.supertask_pushbuttons.remove(widget)
-
-                    def make_supertask_pushbutton(self,
-                                                  supertask: Task):
-                        pushbutton = QPushButton()
-                        setattr(pushbutton, 'task', supertask)
-                        # Geometry
-                        # Callback
-                        def callback():
-                            task_widget = TaskWidget(task=supertask)
-                            task_widget.show()
-
-                        def update_widget():
-                            n_max = min([len(supertask.name), 20])
-                            text = supertask.name[:n_max]
-                            if n_max == 20:
-                                text += '...'
-                            pushbutton.setText(text)
-
-                        # Connect task and widget
-                        pushbutton.clicked.connect(callback)
-                        supertask.name_changed.connect(lambda **kwargs: update_widget())
-                        # Set initial text
-                        update_widget()
-                        return pushbutton
-
-
-                self.path_widget = PathWidget(task=self.task,
-                                              parent=self)
-                self.layout.addWidget(self.path_widget)
-
-            def make_completed_pushbutton(self):
-                # Pushbutton to mark the task as completed
-                self.completed_pushbutton = QPushButton()
-                self.layout.addWidget(self.completed_pushbutton)
+            def make_icon_pushbutton(self):
+                self.icon_pushbutton = QPushButton()
+                self.layout.addWidget(self.icon_pushbutton)
                 # Icon
                 icon_path = self.parent()._style.icon_path
-                icon_filename = os.path.join(icon_path,
-                                             'ok.png')
-                self.completed_pushbutton.setIcon(QIcon(icon_filename))
+                icon_filename = os.path.join(icon_path, 'task.png')
+                self.icon_pushbutton.setIcon(QIcon(icon_filename))
 
-                def switch_background(completed: bool):
-                    stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
-                        'completed_pushbutton']
-                    if completed:
-                        stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */' % (
-                            self.parent()._style.color_palette["completed"]))
-                    else:
-                        stylesheet = stylesheet.replace(
-                            'background-color:%s;/* main */' % (self.parent()._style.color_palette["completed"]),
-                            '/* background-color */')
-                    self.parent()._style.stylesheets['standard view']['toolbar'][
-                        'completed_pushbutton'] = stylesheet
-                    self.completed_pushbutton.setStyleSheet(stylesheet)
+            def make_path(self):
+                for supertask in self.task.ancestors:
+                    if supertask not in [widget.task for widget in self.supertask_pushbuttons]:
+                        pushbutton = self.make_supertask_pushbutton(supertask=supertask)
+                        self.layout.addWidget(pushbutton)
+                        self.supertask_pushbuttons += [pushbutton]
+                for widget in self.supertask_pushbuttons:
+                    if widget.task not in self.task.ancestors:
+                        widget.hide()
+                        self.supertask_pushbuttons.remove(widget)
+
+            def make_supertask_pushbutton(self,
+                                          supertask: Task):
+                pushbutton = QPushButton()
+                setattr(pushbutton, 'task', supertask)
+
+                # Geometry
+                # Callback
+                def callback():
+                    task_widget = TaskWidget(task=supertask,
+                                             style=self.parent().parent()._style)
+                    task_widget.show()
+
+                def update_widget():
+                    n_max = min([len(supertask.name), 20])
+                    text = supertask.name[:n_max]
+                    if n_max == 20:
+                        text += '...'
+                    pushbutton.setText(text)
+
+                # Connect task and widget
+                pushbutton.clicked.connect(callback)
+                supertask.name_changed.connect(lambda **kwargs: update_widget())
+                # Set initial text
+                update_widget()
+                return pushbutton
+
+        self.path_widget = PathWidget(task=self.task,
+                                      parent=self)
+        self.layout.addWidget(self.path_widget)
+
+    def make_title_widget(self):
+        class TitleWidget(QWidget):
+            """
+            This widget contains:
+                - An icon indicating a top-level task
+                - A textedit containing the task's name
+            """
+
+            def __init__(self,
+                         task: Task,
+                         parent: QWidget = None):
+                """
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                """
+                super().__init__(parent=parent)
+                self.task = task
+                # Layout
+                self.layout = QHBoxLayout()
+                self.layout.setAlignment(Qt.AlignLeft)
+                self.setLayout(self.layout)
+                # Textedit
+                self.make_textedit()
+                self.layout.addStretch()
+
+
+            def make_textedit(self):
+                self.textedit = QTextEdit()
+                # Layout
+                self.layout.addWidget(self.textedit)
 
                 def callback():
-                    self.task.completed = not self.task.completed
-                    switch_background(self.task.completed)
+                    # Update task
+                    self.task.name = self.textedit.toPlainText()
 
-                # Set Current Value
-                switch_background(self.task.completed)
-                self.completed_pushbutton.clicked.connect(lambda: callback())
-                self.task.completed_changed.connect(
-                    lambda **kwargs: switch_background(self.task.completed))
+                def inv_callback():
+                    # Update widget
+                    """
+                    This function is only called when the task's property is
+                    changed outside this widget. If widget signals are not blocked
+                    at the time of updating the widget, an infinite recursion is triggered
+                    between task update and widget update.
+                    """
+                    self.textedit.blockSignals(True)
+                    self.textedit.setText(self.task.name)
+                    self.textedit.blockSignals(False)
+                    """
+                    For some reason, the cursor is normally reset to the start of the 
+                    widget. One then needs to move the cursor to the end and then reset the cursor
+                    """
+                    # Move cursor to the end
+                    cursor = self.textedit.textCursor()
+                    cursor.movePosition(cursor.Right,
+                                        cursor.MoveAnchor,
+                                        len(self.task.name))
+                    """
+                    For some other reason, all text is also automatically selected, so one needs to
+                    clear the selection.
+                    """
+                    cursor.clearSelection()
+                    # Reset cursor
+                    self.textedit.setTextCursor(cursor)
 
-        self.toolbar = Toolbar(task=self.task,
-                               parent=self)
-        self.layout.addWidget(self.toolbar)
+                # Connect task and widget
+                self.textedit.textChanged.connect(lambda: callback())
+                self.task.name_changed.connect(lambda **kwargs: inv_callback())
+                # Set initial value
+                inv_callback()
+                self.textedit.setPlaceholderText("Task Name")
+
+        self.title_widget = TitleWidget(task=self.task,
+                                        parent=self)
+        self.layout.addWidget(self.title_widget)
 
     def make_category_widget(self):
         class CategoryWidget(QWidget):
@@ -647,92 +664,6 @@ class TaskWidget(QWidget):
                                           time_mode='end')
         self.middle_layout_horizontal.addWidget(self.end_date_widget)
 
-
-    def make_name_widget(self):
-        class NameWidget(QWidget):
-            """
-            This widget contains:
-                - An icon indicating a top-level task
-                - A textedit containing the task's name
-            """
-
-            def __init__(self,
-                         task: Task,
-                         parent: QWidget = None):
-                """
-                :param task: :py:class:'taskplanner.tasks.Task'
-                    The task associated to this widget
-                :param parent: :py:class:'QWidget', optional
-                    The parent widget
-                """
-                super().__init__(parent=parent)
-                self.task = task
-                # Layout
-                self.layout = QHBoxLayout()
-                self.layout.setAlignment(Qt.AlignLeft)
-                self.setLayout(self.layout)
-                # Icon
-                self.make_icon_pushbutton()
-                # Textedit
-                self.make_textedit()
-                self.layout.addStretch()
-
-            def make_icon_pushbutton(self):
-                self.icon_pushbutton = QPushButton()
-                self.layout.addWidget(self.icon_pushbutton)
-                # Icon
-                icon_path = self.parent()._style.icon_path
-                icon_filename = os.path.join(icon_path, 'task.png')
-                self.icon_pushbutton.setIcon(QIcon(icon_filename))
-
-            def make_textedit(self):
-                self.textedit = QTextEdit()
-                # Layout
-                self.layout.addWidget(self.textedit)
-
-                def callback():
-                    # Update task
-                    self.task.name = self.textedit.toPlainText()
-
-                def inv_callback():
-                    # Update widget
-                    """
-                    This function is only called when the task's property is
-                    changed outside this widget. If widget signals are not blocked
-                    at the time of updating the widget, an infinite recursion is triggered
-                    between task update and widget update.
-                    """
-                    self.textedit.blockSignals(True)
-                    self.textedit.setText(self.task.name)
-                    self.textedit.blockSignals(False)
-                    """
-                    For some reason, the cursor is normally reset to the start of the 
-                    widget. One then needs to move the cursor to the end and then reset the cursor
-                    """
-                    # Move cursor to the end
-                    cursor = self.textedit.textCursor()
-                    cursor.movePosition(cursor.Right,
-                                        cursor.MoveAnchor,
-                                        len(self.task.name))
-                    """
-                    For some other reason, all text is also automatically selected, so one needs to
-                    clear the selection.
-                    """
-                    cursor.clearSelection()
-                    # Reset cursor
-                    self.textedit.setTextCursor(cursor)
-
-                # Connect task and widget
-                self.textedit.textChanged.connect(lambda: callback())
-                self.task.name_changed.connect(lambda **kwargs: inv_callback())
-                # Set initial value
-                inv_callback()
-                self.textedit.setPlaceholderText("Task Name")
-
-        self.name_widget = NameWidget(task=self.task,
-                                      parent=self)
-        self.layout.addWidget(self.name_widget)
-
     def make_description_textedit(self):
         self.description_textedit = QTextEdit()
         # Layout
@@ -857,7 +788,8 @@ class TaskWidget(QWidget):
                 for subtask in self.task.children:
                     if subtask not in [widget.task for widget in self.subtask_widgets]:
                         widget = TaskWidgetSimple(parent=self,
-                                                  task=subtask)
+                                                  task=subtask,
+                                                  style=self.parent()._style)
                         self.layout.addWidget(widget)
                         self.subtask_widgets += [widget]
                 # Remove non-existent sub-tasks
@@ -883,7 +815,8 @@ class TaskWidgetSimple(QWidget):
     def __init__(self,
                  task: Task,
                  parent: QWidget = None,
-                 hide: bool = False):
+                 hide: bool = False,
+                 style: TaskWidgetStyle = TaskWidgetStyle()):
         """
         :param task:
             the task associated to this widget
@@ -899,11 +832,11 @@ class TaskWidgetSimple(QWidget):
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
         # Define style
-        self._style = TaskWidgetStyle(font='light',
-                                      color_palette='deep purple')
+        self._style = style
         # This task
         self.task_line_widget = TaskLineWidget(parent=self,
-                                               task=self.task)
+                                               task=self.task,
+                                               style=self._style)
         self.layout.addWidget(self.task_line_widget)
         # Subtasks
         self.subtask_widgets = []
@@ -932,7 +865,8 @@ class TaskWidgetSimple(QWidget):
             if subtask not in [widget.task for widget in self.subtask_widgets]:
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
-                                                  hide=not self.task_line_widget.expanded)
+                                                  hide=not self.task_line_widget.expanded,
+                                                  style=self._style)
                 self.layout.addWidget(subtask_widget)
                 self.subtask_widgets += [subtask_widget]
         # Remove non-existent sub-tasks
@@ -952,14 +886,18 @@ class TaskLineWidget(QWidget):
 
     def __init__(self,
                  parent: QWidget,
-                 task: Task):
+                 task: Task,
+                 style: TaskWidgetStyle = TaskWidgetStyle()):
         """
         :param task:
             the task associated to this widget
         :param parent:
             the parent widget
+        :param style: :py:class:'TaskWidgetStyle', optional
+            The widget's style
         """
         self.task = task
+        self._style = style
         super().__init__(parent=parent)
         # Layout
         self.layout = QHBoxLayout()
@@ -1020,7 +958,8 @@ class TaskLineWidget(QWidget):
         # Geometry
         # Callback
         def callback():
-            task_widget = TaskWidget(task=self.task)
+            task_widget = TaskWidget(task=self.task,
+                                     style=self._style)
             task_widget.show()
 
         def update_widget():

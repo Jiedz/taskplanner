@@ -15,6 +15,16 @@ COLOR_PALETTES = {'light earth':
         'highlight': '#F4BF96',
         'completed': '#A7D397'
     },
+    'light blue':
+        {
+            'main background': '#F6F1F1',
+            'secondary background': '#AFD3E2',
+            'urgent': '#CE5A67',
+            'text': '#476072',
+            'text - light': '#AAAAAA',
+            'highlight': '#0077b6',
+            'completed': '#38b000'
+        },
     'deep purple':
         {
             'main background': '#35155D',
@@ -148,13 +158,12 @@ class TaskWidgetStyle:
                                                 QWidget
                                                 {
                                                     background-color:%s;
-                                                    border:2px solid %s;
+                                                    border:None;
                                                     border-radius:10px;
                                                     font-size:%s;
                                                 }
                                                 ''' % (
                                     self.color_palette['secondary background'],
-                                    self.color_palette['highlight'],
                                     self.font['size - title 1'])
                                 +
                                 '''
