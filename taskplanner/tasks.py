@@ -11,7 +11,7 @@ from anytree import Node, RenderTree
 from signalslot import Signal
 
 # %% Task
-PRIORITY_LEVELS = ["low", "medium", "high", "urgent"]
+PRIORITY_LEVELS = ["low", "high", "urgent"]
 PROGRESS_LEVELS = ['not started', 'in progress', 'completed']
 
 
@@ -36,7 +36,7 @@ class Task(Node):
                  name: str = "A Task",
                  category: object = "No Category",
                  description: object = "",
-                 priority: object = "medium",
+                 priority: object = "low",
                  start_date: date = date.today(),
                  end_date: date = None,
                  assignee: object = None) -> object:

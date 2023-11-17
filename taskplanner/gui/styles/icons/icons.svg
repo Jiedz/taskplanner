@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="20mm"
-   height="20mm"
-   viewBox="0 0 19.999997 19.999999"
+   width="18.644632mm"
+   height="18.016479mm"
+   viewBox="0 0 18.64463 18.01648"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
@@ -30,10 +30,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.0698767"
-     inkscape:cx="-5.1407793"
-     inkscape:cy="-92.066684"
-     inkscape:window-width="1850"
+     inkscape:zoom="1.5254917"
+     inkscape:cx="-19.338028"
+     inkscape:cy="-50.803293"
+     inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
      inkscape:window-y="0"
@@ -42,8 +42,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid4221"
-       originx="-282.09675"
-       originy="-132.99282" />
+       originx="-266.38708"
+       originy="-219.67931" />
   </sodipodi:namedview>
   <defs
      id="defs2">
@@ -135,17 +135,41 @@
          x="289.05783"
          y="99.218887" />
     </clipPath>
+    <rect
+       x="-55.119431"
+       y="-161.47572"
+       width="332.6622"
+       height="43.458912"
+       id="rect2697-3-6-3-7-0-2-9-6" />
+    <rect
+       x="-55.119431"
+       y="-161.47572"
+       width="332.6622"
+       height="43.458912"
+       id="rect2697-3-6-3-7-0-2-9-6-5" />
+    <rect
+       x="-55.119431"
+       y="-161.47572"
+       width="332.6622"
+       height="43.458912"
+       id="rect2697-3-6-3-7-0-2-9-6-5-6" />
+    <rect
+       x="-55.119431"
+       y="-161.47572"
+       width="332.6622"
+       height="43.458912"
+       id="rect2697-3-6-3-7-0-2-9-6-5-6-1" />
   </defs>
   <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Background"
-     transform="translate(18.295216,151.52454)">
+     transform="translate(34.004622,64.838028)">
     <circle
        style="fill:#050541;fill-opacity:1;fill-rule:evenodd;stroke:#fdfbf4;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path31-9-6-2-6-3"
-       cx="88.998108"
-       cy="211.31505"
+       cx="91.262817"
+       cy="361.2294"
        r="10"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/plus.png"
        inkscape:export-xdpi="96"
@@ -155,23 +179,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-282.09756,-132.993)">
-    <path
-       style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 307.76903,35.595427 v 13.22917"
-       id="path4120-1"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
-       inkscape:export-xdpi="96"
-       inkscape:export-ydpi="96" />
-    <path
-       style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 314.38361,42.210017 H 301.15445"
-       id="path4120-3-2"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
-       inkscape:export-xdpi="96"
-       inkscape:export-ydpi="96" />
+     transform="translate(-266.38818,-219.67951)">
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,306.82912,37.392987)"
@@ -179,7 +187,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-35);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan163510">Dark Material</tspan></text>
+         id="tspan20038">Dark Material</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,303.49947,54.952067)"
@@ -187,7 +195,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan163512">Normal</tspan></text>
+         id="tspan20040">Normal</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,197.89613,55.068191)"
@@ -195,7 +203,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan163514">Description</tspan></text>
+         id="tspan20042">Description</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.19698,79.141419)"
@@ -203,7 +211,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan163516">add</tspan></text>
+         id="tspan20044">add</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.44235,118.53791)"
@@ -211,7 +219,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan163518">progress - completed</tspan></text>
+         id="tspan20046">progress - completed</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,380.66643,53.671827)"
@@ -219,7 +227,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-7-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan163520">Hover</tspan></text>
+         id="tspan20048">Hover</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.932262;stroke:#b52c00;stroke-width:1.82273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="rect11925-3"
@@ -255,8 +263,8 @@
     <circle
        style="fill:#00003e;fill-opacity:0.979536;fill-rule:evenodd;stroke:#fdfbf4;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path31-9-6-2"
-       cx="386.75711"
-       cy="423.37241"
+       cx="389.02182"
+       cy="573.28674"
        r="10"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/plus.png"
        inkscape:export-xdpi="96"
@@ -266,29 +274,29 @@
        id="rect1012-7"
        width="0.79372573"
        height="1.3229288"
-       x="-603.3075"
-       y="-12.934851"
+       x="-719.60431"
+       y="81.693375"
        transform="matrix(-0.64278762,-0.76604443,-0.76604443,0.64278762,0,0)" />
     <rect
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:1.90937;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect1012-7-5"
        width="0.79372573"
        height="1.3229288"
-       x="-2.0636613"
-       y="-592.04523"
+       x="-96.691887"
+       y="-708.34204"
        transform="matrix(0.76604443,-0.64278762,-0.64278762,-0.76604443,0,0)" />
     <circle
        style="fill:#050541;fill-opacity:1;fill-rule:evenodd;stroke:#fdfbf4;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path31-9-6-2-6"
-       cx="388.06799"
-       cy="460.77524"
+       cx="390.3327"
+       cy="610.68958"
        r="10"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/plus.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:#00003e;fill-opacity:0.979536;stroke:#fdfbf4;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 393.47398,423.28664 H 380.24482"
+       d="M 395.73869,573.201 H 382.50953"
        id="path4120-3-2-6-0"
        sodipodi:nodetypes="cc"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/plus.png"
@@ -296,7 +304,7 @@
        inkscape:export-ydpi="96" />
     <path
        style="fill:none;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 306.91671,248.70833 6.55103,-0.0538 h 6.57531 c -1.85208,-0.79375 -2.19183,-3.05815 -2.63908,-4.19597 -1.37181,-3.48997 -2.03001,-4.90657 -3.53083,-4.99703 -1.64429,-0.0991 -2.89725,1.75834 -4.09703,5.22101 -0.47815,1.37998 -1.2719,3.23206 -2.8594,4.02581 z"
+       d="m 309.18142,398.62269 6.55103,-0.0538 h 6.57531 c -1.85208,-0.79375 -2.19183,-3.05815 -2.63908,-4.19597 -1.37181,-3.48997 -2.03001,-4.90657 -3.53083,-4.99703 -1.64429,-0.0991 -2.89725,1.75834 -4.09703,5.22101 -0.47815,1.37998 -1.2719,3.23206 -2.8594,4.02581 z"
        id="path13229-1"
        sodipodi:nodetypes="cccsssc"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/ring-bell.png"
@@ -305,46 +313,98 @@
     <circle
        style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-width:0.665001;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="path17741-2"
-       cx="313.60162"
-       cy="250.70616"
+       cx="315.86633"
+       cy="400.62051"
        r="1.3229166"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/ring-bell.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 383.74875,248.76214 6.55103,-0.0538 h 6.57531 c -1.85208,-0.79375 -2.19183,-3.05815 -2.63908,-4.19597 -1.37181,-3.48997 -2.03001,-4.90657 -3.53083,-4.99703 -1.64429,-0.0991 -2.89725,1.75834 -4.09703,5.22101 -0.47815,1.37998 -1.2719,3.23206 -2.8594,4.02581 z"
+       d="m 386.01346,398.6765 6.55103,-0.0538 h 6.57531 c -1.85208,-0.79375 -2.19183,-3.05815 -2.63908,-4.19597 -1.37181,-3.48997 -2.03001,-4.90657 -3.53083,-4.99703 -1.64429,-0.0991 -2.89725,1.75834 -4.09703,5.22101 -0.47815,1.37998 -1.2719,3.23206 -2.8594,4.02581 z"
        id="path13229-1-7"
        sodipodi:nodetypes="cccsssc" />
     <circle
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:0.665001;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.980392"
        id="path17741-2-0"
-       cx="390.43365"
-       cy="250.75998"
+       cx="392.69836"
+       cy="400.67435"
        r="1.3229166" />
+    <g
+       id="g13520"
+       style="fill:none;fill-opacity:1;stroke:#ededec;stroke-opacity:1"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/priority_low.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <path
+         style="fill:none;fill-opacity:1;stroke:#ededec;stroke-width:1.68371;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 269.83487,177.0329 8.71941,-0.0716 h 8.75174 c -2.46512,-1.0565 -2.91733,-4.07041 -3.51261,-5.58485 -1.82587,-4.64515 -2.70194,-6.53064 -4.69954,-6.65104 -2.18855,-0.1319 -3.85623,2.34034 -5.45314,6.94917 -0.63642,1.83675 -1.6929,4.30185 -3.80586,5.35835 z"
+         id="path13229-1-7-0"
+         sodipodi:nodetypes="cccsssc" />
+      <circle
+         style="fill:none;fill-opacity:1;stroke:#ededec;stroke-width:0.885116;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         id="path17741-2-0-9"
+         cx="278.73251"
+         cy="179.69202"
+         r="1.760802" />
+    </g>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#e5720f;stroke-width:1.68371;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 268.55294,202.4064 8.71941,-0.0716 h 8.75174 c -2.46512,-1.0565 -2.91733,-4.07041 -3.51261,-5.58485 -1.82587,-4.64515 -2.70194,-6.53064 -4.69954,-6.65104 -2.18855,-0.1319 -3.85623,2.34034 -5.45314,6.94917 -0.63642,1.83675 -1.6929,4.30185 -3.80586,5.35835 z"
+       id="path13229-1-7-0-3"
+       sodipodi:nodetypes="cccsssc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/priority_high.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <circle
+       style="fill:#d6751b;fill-opacity:1;stroke:#e5720f;stroke-width:0.885116;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="path17741-2-0-9-6"
+       cx="277.45059"
+       cy="205.06552"
+       r="1.760802"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/priority_high.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#a30101;stroke-width:1.68371;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.988235"
+       d="m 267.23003,232.83352 8.71941,-0.0716 h 8.75174 c -2.46512,-1.0565 -2.91733,-4.07041 -3.51261,-5.58485 -1.82587,-4.64515 -2.70194,-6.53064 -4.69954,-6.65104 -2.18855,-0.1319 -3.85623,2.34034 -5.45314,6.94917 -0.63642,1.83675 -1.6929,4.30185 -3.80586,5.35835 z"
+       id="path13229-1-7-0-3-0"
+       sodipodi:nodetypes="cccsssc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/priority_urgent.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <circle
+       style="fill:#a30101;fill-opacity:1;stroke:#a30101;stroke-width:0.885116;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.988235"
+       id="path17741-2-0-9-6-6"
+       cx="276.12769"
+       cy="235.49263"
+       r="1.760802"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/priority_urgent.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path6359"
-       cx="391.52203"
-       cy="265.16617"
+       cx="393.78674"
+       cy="415.08054"
        r="3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 389.55255,267.84388 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61459"
+       d="m 391.81726,417.75824 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61459"
        id="path12407"
        sodipodi:nodetypes="cccc" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path6359-3"
-       cx="314.79285"
-       cy="265.16614"
+       cx="317.05756"
+       cy="415.08051"
        r="3"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/assignee.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:none;stroke:#fdfbf4;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 312.82338,267.84387 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61458"
+       d="m 315.08809,417.75823 -2.64584,6.61458 h 9.26042 l -2.64583,-6.61458"
        id="path12407-6"
        sodipodi:nodetypes="cccc"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/assignee.png"
@@ -352,7 +412,7 @@
        inkscape:export-ydpi="96" />
     <g
        id="g60424"
-       transform="translate(4.5360904,152.75012)">
+       transform="translate(6.8008026,302.66448)">
       <g
          id="g4549"
          transform="translate(1.984425,23.8125)">
@@ -400,7 +460,7 @@
     <g
        id="g4370-0"
        style="fill:#000000;fill-opacity:1"
-       transform="translate(7.1821186,203.02098)">
+       transform="translate(9.4468308,352.93534)">
       <path
          style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 383.64598,146.84376 -7.27604,-3.96875 7.27604,-3.30729 v 0"
@@ -413,7 +473,7 @@
     <g
        id="g4370-6-75"
        style="fill:none;fill-opacity:1"
-       transform="translate(7.182117,201.03661)">
+       transform="translate(9.4468292,350.95097)">
       <path
          style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 383.64598,146.84376 -7.27604,-3.96875 7.27604,-3.30729 v 0"
@@ -426,7 +486,7 @@
     <g
        id="g4370-6-3-2"
        style="fill:none;fill-opacity:1"
-       transform="translate(7.182117,199.05223)">
+       transform="translate(9.4468292,348.96659)">
       <path
          style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 383.64598,146.84376 -7.27604,-3.96875 7.27604,-3.30729 v 0"
@@ -439,7 +499,7 @@
     <g
        id="g4370-9"
        style="fill:none;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1"
-       transform="translate(-70.870106,180.53137)"
+       transform="translate(-68.605394,330.44573)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/task.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
@@ -455,7 +515,7 @@
     <g
        id="g4370-6-7"
        style="fill:none;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1"
-       transform="translate(-70.870107,178.54699)"
+       transform="translate(-68.605395,328.46135)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/task.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
@@ -471,7 +531,7 @@
     <g
        id="g4370-6-3-3"
        style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1"
-       transform="translate(-70.870107,176.56262)"
+       transform="translate(-68.605395,326.47698)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/task.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
@@ -486,7 +546,7 @@
     </g>
     <g
        id="g56288"
-       transform="translate(4.5360904,152.75012)">
+       transform="translate(6.8008026,302.66448)">
       <g
          id="g4370-9-4"
          style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1"
@@ -541,36 +601,36 @@
        id="rect22611"
        width="6"
        height="6"
-       x="382.89044"
-       y="291.6564" />
+       x="385.15515"
+       y="441.57077" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.265;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect22611-6"
        width="6"
        height="6"
-       x="391.58389"
-       y="291.6564" />
+       x="393.8486"
+       y="441.57077" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.265;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect22611-6-2"
        width="6"
        height="6"
-       x="382.89044"
-       y="300.91681" />
+       x="385.15515"
+       y="450.83118" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.265;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect22611-6-2-6"
        width="6"
        height="6"
-       x="391.58389"
-       y="300.91681" />
+       x="393.8486"
+       y="450.83118" />
     <rect
        style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect22611-1"
        width="6"
        height="6"
-       x="305.45294"
-       y="291.6564"
+       x="307.71765"
+       y="441.57077"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/categories.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
@@ -579,8 +639,8 @@
        id="rect22611-6-8"
        width="6"
        height="6"
-       x="314.14639"
-       y="291.6564"
+       x="316.4111"
+       y="441.57077"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/categories.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
@@ -589,8 +649,8 @@
        id="rect22611-6-2-7"
        width="6"
        height="6"
-       x="305.45294"
-       y="300.91681"
+       x="307.71765"
+       y="450.83118"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/categories.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
@@ -599,22 +659,22 @@
        id="rect22611-6-2-6-9"
        width="6"
        height="6"
-       x="314.14639"
-       y="300.91681"
+       x="316.4111"
+       y="450.83118"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/categories.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:none;fill-opacity:0.980392;stroke:#000000;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 393.47395,365.07828 -7.9375,-6.61459 v 0"
+       d="m 395.73866,514.99264 -7.9375,-6.61459 v 0"
        id="path946" />
     <path
        style="fill:none;fill-opacity:0.980392;stroke:#000000;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 393.47395,365.07828 -7.9375,6.61459 v 0"
+       d="m 395.73866,514.99264 -7.9375,6.61459 v 0"
        id="path946-3" />
     <g
        id="g9720"
-       transform="rotate(90,315.82296,325.03642)">
+       transform="rotate(90,241.99813,401.12596)">
       <path
          style="fill:none;fill-opacity:0.980392;stroke:#000000;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 388.93776,252.6771 -7.9375,-6.61459 v 0"
@@ -626,7 +686,7 @@
     </g>
     <g
        id="g9720-5"
-       transform="rotate(90,279.11202,288.98692)"
+       transform="rotate(90,205.28719,365.07646)"
        style="stroke:#fdfbf4;stroke-opacity:1"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/subtask-widget_expanded.png"
        inkscape:export-xdpi="96"
@@ -642,21 +702,21 @@
     </g>
     <path
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 316.74476,364.41683 -7.9375,-6.61459 v 0"
+       d="m 319.00947,514.33119 -7.9375,-6.61459 v 0"
        id="path946-6"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/subtask-widget_not-expanded.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:1.265;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 316.74476,364.41683 -7.9375,6.61459 v 0"
+       d="m 319.00947,514.33119 -7.9375,6.61459 v 0"
        id="path946-3-7"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/subtask-widget_not-expanded.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <path
        style="fill:#000000;fill-opacity:0;stroke:#fdfbf4;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 320.71353,425.271 H 307.48437"
+       d="M 322.97824,575.18536 H 309.74908"
        id="path4120-3-2-3"
        sodipodi:nodetypes="cc"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/minus.png"
@@ -677,7 +737,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan163522">progress - in progress</tspan></text>
+         id="tspan20050">progress - in progress</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,107.56306 -5.31455,10.83186"
@@ -705,7 +765,15 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan163524">progress - not started</tspan></text>
+         id="tspan20052">progress - not started</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,193.36846,210.28156)"
+       id="text2695-6-0-6-5-6-6-2-7"
+       style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
+         x="-55.119141"
+         y="-135.52347"
+         id="tspan20054">priority - low</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,139.31306 -5.31455,10.83186"
@@ -728,43 +796,71 @@
        id="path56062-5-7-3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,254.00013 h 219.60397 -4.88008"
+       d="M 179.91753,185.20852 H 399.5215 394.64142"
+       id="path56062-5-7-3-3" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,193.36846,236.73989)"
+       id="text2695-6-0-6-5-6-6-2-7-3"
+       style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5);fill:#000000;fill-opacity:1;stroke:none"><tspan
+         x="-55.119141"
+         y="-135.52347"
+         id="tspan20056">priority - high</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 179.91753,211.66685 H 399.5215 394.64142"
+       id="path56062-5-7-3-3-5" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,193.36846,265.84406)"
+       id="text2695-6-0-6-5-6-6-2-7-3-2"
+       style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
+         x="-55.119141"
+         y="-135.52347"
+         id="tspan20058">priority - urgent</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 179.91753,240.77102 H 399.5215 394.64142"
+       id="path56062-5-7-3-3-5-9" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 187.47359,403.91449 h 219.60397 -4.88008"
        id="path56062-5-6" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,280.45846 h 219.60397 -4.88008"
+       d="m 187.47359,430.37282 h 219.60397 -4.88008"
        id="path56062-5-6-2" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 190.50054,312.20846 h 219.60397 -4.88008"
+       d="m 192.76525,462.12282 h 219.60397 -4.88008"
        id="path56062-5-6-2-9" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 190.50054,333.37513 h 219.60397 -4.88008"
+       d="m 192.76525,483.28949 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,354.54179 h 219.60397 -4.88008"
+       d="m 187.47359,504.45615 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,381.00013 h 219.60397 -4.88008"
+       d="m 187.47359,530.91449 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2-7" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,407.45846 h 219.60397 -4.88008"
+       d="m 187.47359,557.37282 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2-7-0" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 190.50054,444.50013 h 219.60397 -4.88008"
+       d="m 192.76525,594.41449 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2-7-0-9" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 179.91721,481.54179 H 399.52118 394.6411"
+       d="m 182.18192,631.45615 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2-7-0-9-3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 185.20888,513.29179 h 219.60397 -4.88008"
+       d="m 187.47359,663.20615 h 219.60397 -4.88008"
        id="path56062-5-6-2-9-1-2-7-0-9-3-6" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -775,11 +871,11 @@
        id="rect1012"
        width="1.0583439"
        height="1.3229282"
-       x="387.65311"
-       y="447.76056" />
+       x="389.91782"
+       y="597.67493" />
     <g
        id="g3178"
-       transform="matrix(1.0769229,0,0,1,-23.957441,152.75012)"
+       transform="matrix(1.0769229,0,0,1,-21.692729,302.66448)"
        style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1">
       <path
          style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -795,15 +891,15 @@
        id="rect4388"
        width="8.598958"
        height="8.598958"
-       x="384.87497"
-       y="491.41681" />
+       x="387.13968"
+       y="641.33118" />
     <rect
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:1.90937;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect1012-7-59"
        width="0.79372573"
        height="1.3229288"
-       x="-553.13654"
-       y="46.85651"
+       x="-669.43335"
+       y="141.48474"
        transform="matrix(-0.64278762,-0.76604443,-0.76604443,0.64278762,0,0)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png"
        inkscape:export-xdpi="96"
@@ -813,8 +909,8 @@
        id="rect1012-7-5-2"
        width="0.79372573"
        height="1.3229288"
-       x="-61.855026"
-       y="-541.87427"
+       x="-156.48325"
+       y="-658.17108"
        transform="matrix(0.76604443,-0.64278762,-0.64278762,-0.76604443,0,0)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png"
        inkscape:export-xdpi="96"
@@ -822,8 +918,8 @@
     <circle
        style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#fdfbf4;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path31-9-6-2-6-28"
-       cx="310.0159"
-       cy="460.77524"
+       cx="312.28061"
+       cy="610.68958"
        r="10"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png"
        inkscape:export-xdpi="96"
@@ -833,14 +929,14 @@
        id="rect1012-9"
        width="1.0583439"
        height="1.3229282"
-       x="309.60101"
-       y="447.76056"
+       x="311.86572"
+       y="597.67493"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
     <g
        id="g3178-7"
-       transform="matrix(1.0769229,0,0,1,-102.00952,152.75012)"
+       transform="matrix(1.0769229,0,0,1,-99.744808,302.66448)"
        style="fill:#fdfbf4;fill-opacity:1;stroke:#fdfbf4;stroke-opacity:1"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png"
        inkscape:export-xdpi="96"
@@ -859,29 +955,29 @@
        id="rect1012-7-1"
        width="0.79372573"
        height="1.3229288"
-       x="-631.01324"
-       y="8.5861378"
+       x="-747.31006"
+       y="103.21436"
        transform="matrix(-0.64278762,-0.76604443,-0.76604443,0.64278762,0,0)" />
     <rect
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:1.90937;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect1012-7-5-29"
        width="0.79372573"
        height="1.3229288"
-       x="-23.58465"
-       y="-619.75104"
+       x="-118.21288"
+       y="-736.04785"
        transform="matrix(0.76604443,-0.64278762,-0.64278762,-0.76604443,0,0)" />
     <rect
        style="fill:none;fill-opacity:0.980392;stroke:#fdfbf4;stroke-width:2.20479;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect1012-1"
        width="1.0583439"
        height="1.3229282"
-       x="388.97601"
-       y="482.81787" />
+       x="391.24072"
+       y="632.73224" />
     <circle
        style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#fdfbf4;stroke-width:2.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path31-9-6-2-6-3-8"
-       cx="312.66174"
-       cy="495.83255"
+       cx="314.92645"
+       cy="645.74689"
        r="10"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png"
        inkscape:export-xdpi="96"
@@ -891,8 +987,8 @@
        id="rect4388-4"
        width="8.598958"
        height="8.598958"
-       x="308.14581"
-       y="491.41684"
+       x="310.41052"
+       y="641.33118"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
@@ -901,8 +997,8 @@
        id="rect1012-7-1-5"
        width="0.79372573"
        height="1.3229288"
-       x="-581.69269"
-       y="67.364098"
+       x="-697.9895"
+       y="161.99232"
        transform="matrix(-0.64278762,-0.76604443,-0.76604443,0.64278762,0,0)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png"
        inkscape:export-xdpi="96"
@@ -912,8 +1008,8 @@
        id="rect1012-7-5-29-0"
        width="0.79372573"
        height="1.3229288"
-       x="-82.36261"
-       y="-570.43048"
+       x="-176.99083"
+       y="-686.72729"
        transform="matrix(0.76604443,-0.64278762,-0.64278762,-0.76604443,0,0)"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png"
        inkscape:export-xdpi="96"
@@ -923,8 +1019,8 @@
        id="rect1012-9-3"
        width="1.0583439"
        height="1.3229282"
-       x="312.24686"
-       y="483.47931"
+       x="314.51157"
+       y="633.39368"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
@@ -990,15 +1086,37 @@
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/progress_not-started.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" />
-    <circle
-       style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
-       id="path71165-4-5"
-       cx="307.81152"
-       cy="42.364372"
-       r="10"
+    <g
+       id="g1354"
        inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
        inkscape:export-xdpi="96"
-       inkscape:export-ydpi="96" />
+       inkscape:export-ydpi="96">
+      <path
+         style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 307.76903,38.24126 v 8.46667"
+         id="path4120-1"
+         sodipodi:nodetypes="cc"
+         inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96" />
+      <path
+         style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 312.26694,42.210017 h -8.99582"
+         id="path4120-3-2"
+         sodipodi:nodetypes="cc"
+         inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96" />
+      <circle
+         style="fill:none;fill-opacity:0.980392;stroke:#ededec;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         id="path71165-4-5"
+         cx="307.81152"
+         cy="42.364372"
+         r="10"
+         inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/add.png"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96" />
+    </g>
     <circle
        style="fill:#ededec;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke markers fill"
        id="circle163346"
