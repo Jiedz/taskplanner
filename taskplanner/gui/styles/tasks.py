@@ -9,9 +9,9 @@ from PyQt5.Qt import QSize
 COLOR_PALETTES = {
     'dark material':
         {
-            'main background': '#232426',#'#1e1f22',
-            'secondary background': '#3a3c3f', #'#2b2d30',
-            'text': 'white',#'#bcbec4',
+            'main background': '#232426',
+            'secondary background': '#3a3c3f',
+            'text': '#ededecff',
             'text - light': '#bcbec4',
             'text - highlight': '#4273bc',
             'border': '#3a3c3f',
@@ -29,7 +29,7 @@ FONTS = {'light':
 }
 
 ICON_SIZES = {'regular': QSize(40, 40),
-              'small': QSize(25, 25)}
+              'small': QSize(30, 30)}
 
 
 class TaskWidgetStyle:
@@ -190,31 +190,86 @@ class TaskWidgetStyle:
                                     color:%s;
                                     font-size:%s;
                                 }
+                                QComboBox:item:selected
+                                {
+                                    background-color:%s;
+                                }
                                 ''' % (self.color_palette['border'],
                                        self.color_palette['text'],
-                                       self.font['size - text - small']),
+                                       self.font['size - text - small'],
+                                       self.color_palette['secondary background']),
                         },
                     'category_widget':
                         {
-                            'icon_pushbutton':
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'combobox':
+                                '''
+                                QComboBox
+                                {
+                                    border:2px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                QComboBox:item:selected
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text'],
+                                       self.font['size - text - small'],
+                                       self.color_palette['secondary background']),
+                            'add_pushbutton':
                                 '''
                                                 QPushButton
                                                 {
-                                                    border: 0px;
-                                                    /* border-radius:%s; */
+                                                    border-radius:%spx;
+                                                    border:2px solid %s;
                                                 }
-                                                ''' % (int(screen_size.width / 220)),
+                                                QPushButton:hover
+                                                {
+                                                    background-color:%s;
+                                                }
+                                                ''' % (int(screen_size.width / 220),
+                                                       self.color_palette['border'],
+                                                       self.color_palette['border']),
+                        },
+                    'assignee_widget':
+                        {
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
                             'combobox':
                                 '''
-                                                QComboBox
-                                                {
-                                                    font-size:%s;
-                                                    border:2px solid %s;
-                                                    border-radius:%spx;
-                                                }
-                                                ''' % (self.font['size - text'],
-                                                       self.color_palette['border'],
-                                                       int(screen_size.width / 220)),
+                                QComboBox
+                                {
+                                    border:2px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                QComboBox:item:selected
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text'],
+                                       self.font['size - text - small'],
+                                       self.color_palette['secondary background']),
                             'add_pushbutton':
                                 '''
                                                 QPushButton
@@ -232,36 +287,33 @@ class TaskWidgetStyle:
                         },
                     'priority_widget':
                         {
-                            'icon_pushbutton':
+                            'label':
                                 '''
-                                                QPushButton
-                                                {
-                                                    border: 0px;
-                                                    /* border-radius:%s; */
-                                                }
-                                                ''' % (int(screen_size.width / 220)),
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
                             'combobox':
                                 '''
-                                                QComboBox
-                                                {
-                                                    font-size:%s;
-                                                    border-radius:%s;
-                                                }
-                                                ''' % (self.font['size - text'],
-                                                       int(screen_size.width / 220))
+                                QComboBox
+                                {
+                                    border:2px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                QComboBox:item:selected
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text'],
+                                       self.font['size - text - small'],
+                                       self.color_palette['secondary background']),
                         },
-                    'assignee_widget':
-                        {
-                            'icon_pushbutton':
-                                '''
-                                            QPushButton
-                                            {
-                                                border: 0px;
-                                                /* border-radius:%s; */
-                                            }
-                                            ''' % (int(screen_size.width / 220)),
-                        },
-
                     'description_textedit':
                         '''
                                         QTextEdit
