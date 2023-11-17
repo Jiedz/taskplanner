@@ -22,9 +22,9 @@ from PyQt5.QtWidgets import \
     QCalendarWidget,
 )
 
-from taskplanner.gui.stylesheets.tasks import TaskWidgetStyle
+from taskplanner.gui.styles.tasks import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_screen_size
-from taskplanner.tasks import Task
+from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
 
 
 class TaskWidget(QWidget):
@@ -71,38 +71,46 @@ class TaskWidget(QWidget):
         # Path widget
         if not self.task.is_top_level:
             self.make_path_widget()
+        # Horizontal layout for (title, task progress)
+        self.title_progress_layout = QHBoxLayout()
+        self.layout.addLayout(self.title_progress_layout)
         # Title widget
         self.make_title_widget()
-        self.title_widget.setMinimumHeight(int(self.height()*0.08))
+        self.title_widget.setFixedHeight(int(self.height()*0.08))
         ## Textedit
-        self.title_widget.textedit.setFixedHeight(int(self.height()*0.1))
-        self.title_widget.textedit.setMinimumWidth(int(self.width()*0.6))
-        # Horizontal layout that contains the (category, priority, assignee) layout and the (start date, end date) widgets
-        self.middle_layout_horizontal = QHBoxLayout()
-        self.layout.addLayout(self.middle_layout_horizontal)
-        # Vertical layout for category, priority, assignee
-        self.middle_layout_vertical = QVBoxLayout()
-        self.middle_layout_horizontal.addLayout(self.middle_layout_vertical)
+        self.title_widget.textedit.setFixedHeight(int(self.title_widget.height()))
+        self.title_widget.textedit.setMinimumWidth(int(self.width() * 0.5))
+        # Progress widget
+        self.make_progress_widget()
+        self.title_progress_layout.addStretch()
+        ## Combobox
+        self.progress_widget.combobox.setMinimumWidth(int(self.width()*0.15))
+        # Horizontal layout for (category, assignee)
+        self.category_assignee_layout = QHBoxLayout()
+        self.layout.addLayout(self.category_assignee_layout)
         # Category
         self.make_category_widget()
         ## Combobox
         self.category_widget.combobox.setMinimumWidth(int(self.width()*0.2))
         ## New textedit
         self.category_widget.new_textedit.setMaximumHeight(int(self.category_widget.combobox.height() * 1))
-        # Priority
-        self.make_priority_widget()
-        ## Combobox
-        self.priority_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         # Assignee
         self.make_assignee_widget()
+        self.category_assignee_layout.addStretch()
         ## Combobox
         self.assignee_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         ## New textedit
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
-        self.middle_layout_horizontal.addStretch()
+        # Horizontal layout for (priority, start date, end date)
+        self.priority_dates_layout = QHBoxLayout()
+        self.layout.addLayout(self.priority_dates_layout)
+        # Priority
+        self.make_priority_widget()
+        ## Combobox
+        self.priority_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         # Start and end date widgets
         self.make_date_widgets()
-        ## Start date
+        self.priority_dates_layout.addStretch()
         # Task Description
         self.make_description_textedit()
         self.description_textedit.setMaximumWidth(int(self.width()*1))
@@ -148,7 +156,7 @@ class TaskWidget(QWidget):
                 self.setLayout(self.layout)
                 # Geometry
                 # Icon pushbutton
-                self.make_icon_pushbutton()
+                self.make_icon_label()
                 # Push buttons and Labels
                 self.separator_label = QLabel()
                 self.separator_label.setText('|')
@@ -161,13 +169,14 @@ class TaskWidget(QWidget):
                     self.task.parent_changed.disconnect(slot)
                 self.task.parent_changed.connect(lambda **kwargs: self.make_path())
 
-            def make_icon_pushbutton(self):
-                self.icon_pushbutton = QPushButton()
-                self.layout.addWidget(self.icon_pushbutton)
+            def make_icon_label(self):
+                from PyQt5.Qt import QSize
+                self.icon_label = QLabel()
+                self.layout.addWidget(self.icon_label)
                 # Icon
                 icon_path = self.parent()._style.icon_path
-                icon_filename = os.path.join(icon_path, 'task.png')
-                self.icon_pushbutton.setIcon(QIcon(icon_filename))
+                icon_filename = os.path.join(icon_path, 'supertask.png')
+                self.icon_label.setPixmap(QIcon(icon_filename).pixmap(ICON_SIZES['regular']))
 
             def make_path(self):
                 for supertask in self.task.ancestors:
@@ -242,6 +251,7 @@ class TaskWidget(QWidget):
                 self.textedit = QTextEdit()
                 # Layout
                 self.layout.addWidget(self.textedit)
+                self.textedit.setAlignment(Qt.AlignCenter)
 
                 def callback():
                     # Update task
@@ -284,7 +294,64 @@ class TaskWidget(QWidget):
 
         self.title_widget = TitleWidget(task=self.task,
                                         parent=self)
-        self.layout.addWidget(self.title_widget)
+        self.title_progress_layout.addWidget(self.title_widget)
+
+    def make_progress_widget(self):
+        class ProgressWidget(QWidget):
+            """
+            This widget contains:
+            - A label, indicating progress
+            - A combobox containing icons that indicate progress levels
+            """
+            def __init__(self,
+                         task: Task,
+                         parent: QWidget = None):
+                """
+
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                """
+                super().__init__(parent=parent)
+                self.task = task
+                # Layout
+                self.layout = QVBoxLayout()
+                self.setLayout(self.layout)
+                # Label
+                self.make_label()
+                # Combobox
+                self.make_combobox()
+
+            def make_label(self):
+                self.label = QLabel('Progress')
+                self.layout.addWidget(self.label)
+                self.label.setAlignment(Qt.AlignCenter)
+
+            def make_combobox(self):
+                self.combobox = QComboBox()
+                # Layout
+                self.layout.addWidget(self.combobox)
+                # Add items
+                for i in range(len(PROGRESS_LEVELS)):
+                    level = PROGRESS_LEVELS[i]
+                    icon_path = self.parent()._style.icon_path
+                    icon_filename = os.path.join(icon_path, f'progress_{level.replace(" ", "-")}.png')
+                    self.combobox.addItem(level)
+                    self.combobox.setItemIcon(i,
+                                              QIcon(icon_filename))
+                    self.combobox.setIconSize(ICON_SIZES['small'])
+                # User interactions
+                def clicked():
+                    self.task.progress = self.combobox.currentText()
+                # Connect task and widget
+                self.combobox.currentIndexChanged.connect(clicked)
+                self.task.progress_changed.connect(lambda **kwargs: self.combobox.setCurrentText(self.task.progress))
+
+        self.progress_widget = ProgressWidget(task=self.task,
+                                        parent=self)
+        self.title_progress_layout.addWidget(self.progress_widget)
+
 
     def make_category_widget(self):
         class CategoryWidget(QWidget):
@@ -328,6 +395,7 @@ class TaskWidget(QWidget):
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'categories.png')
                 self.icon_pushbutton.setIcon(QIcon(icon_filename))
+                self.icon_pushbutton.setIconSize(ICON_SIZES['regular'])
 
             def make_combobox(self):
                 self.combobox = QComboBox(parent=self)
@@ -382,7 +450,7 @@ class TaskWidget(QWidget):
 
         self.category_widget = CategoryWidget(task=self.task,
                                               parent=self)
-        self.middle_layout_vertical.addWidget(self.category_widget)
+        self.category_assignee_layout.addWidget(self.category_widget)
 
     def make_priority_widget(self):
         class PriorityWidget(QWidget):
@@ -447,7 +515,7 @@ class TaskWidget(QWidget):
 
         self.priority_widget = PriorityWidget(task=self.task,
                                               parent=self)
-        self.middle_layout_vertical.addWidget(self.priority_widget)
+        self.priority_dates_layout.addWidget(self.priority_widget)
 
     def make_assignee_widget(self):
         class AssigneeWidget(QWidget):
@@ -552,7 +620,7 @@ class TaskWidget(QWidget):
 
         self.assignee_widget = AssigneeWidget(task=self.task,
                                               parent=self)
-        self.middle_layout_vertical.addWidget(self.assignee_widget)
+        self.category_assignee_layout.addWidget(self.assignee_widget)
 
     def make_date_widgets(self):
         class DateWidget(QWidget):
@@ -658,11 +726,11 @@ class TaskWidget(QWidget):
         self.start_date_widget = DateWidget(task=self.task,
                                             parent=self,
                                             time_mode='start')
-        self.middle_layout_horizontal.addWidget(self.start_date_widget)
+        self.priority_dates_layout.addWidget(self.start_date_widget)
         self.end_date_widget = DateWidget(task=self.task,
                                           parent=self,
                                           time_mode='end')
-        self.middle_layout_horizontal.addWidget(self.end_date_widget)
+        self.priority_dates_layout.addWidget(self.end_date_widget)
 
     def make_description_textedit(self):
         self.description_textedit = QTextEdit()
@@ -903,8 +971,6 @@ class TaskLineWidget(QWidget):
         self.layout = QHBoxLayout()
         self.layout.setAlignment(Qt.AlignLeft)
         self.setLayout(self.layout)
-        # Completed pushbutton
-        self.make_completed_pushbutton()
         # Name
         self.make_name_pushbutton()
         # Priority
@@ -918,39 +984,6 @@ class TaskLineWidget(QWidget):
         self.make_expand_pushbutton()
         self.layout.addStretch()
 
-    def make_completed_pushbutton(self):
-        # Pushbutton to mark the task as completed
-        self.completed_pushbutton = QPushButton()
-        self.layout.addWidget(self.completed_pushbutton)
-        # Icon
-        icon_path = self.parent()._style.icon_path
-        icon_filename = os.path.join(icon_path,
-                                     'ok.png')
-        self.completed_pushbutton.setIcon(QIcon(icon_filename))
-
-        def switch_background(completed: bool):
-            stylesheet = self.parent()._style.stylesheets['standard view']['toolbar'][
-                'completed_pushbutton']
-            if completed:
-                stylesheet = stylesheet.replace('/* background-color */', 'background-color:%s;/* main */' % (
-                    self.parent()._style.color_palette["completed"]))
-            else:
-                stylesheet = stylesheet.replace(
-                    'background-color:%s;/* main */' % (self.parent()._style.color_palette["completed"]),
-                    '/* background-color */')
-            self.parent()._style.stylesheets['standard view']['toolbar'][
-                'completed_pushbutton'] = stylesheet
-            self.completed_pushbutton.setStyleSheet(stylesheet)
-
-        def callback():
-            self.task.completed = not self.task.completed
-            switch_background(self.task.completed)
-
-        # Set Current Value
-        switch_background(self.task.completed)
-        self.completed_pushbutton.clicked.connect(lambda: callback())
-        self.task.completed_changed.connect(
-            lambda **kwargs: switch_background(self.task.completed))
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()
         self.layout.addWidget(self.name_pushbutton)

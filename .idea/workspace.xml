@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f674270-a58a-40c1-8377-19a523b9d94e" name="Changes" comment="" />
+    <list default="true" id="8f674270-a58a-40c1-8377-19a523b9d94e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/assignee.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/assignee.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/categories.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/categories.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/minus.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/minus.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/ok.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/progress_completed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/plus.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/plus.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/ring-bell.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/ring-bell.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/start-time.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/start-time.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/stop-time.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/stop-time.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/subtask-widget_expanded.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/subtask-widget_expanded.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/subtask-widget_not-expanded.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/subtask-widget_not-expanded.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/subtask.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/subtask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/deep-purple/task.png" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/dark-material/supertask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/icons.svg" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/icons/icons.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/Icons/light-earth/plus.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/stylesheets/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/test/TaskWidget_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/test/TaskWidget_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/tasks.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,15 +48,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/jiedz/Jiedz/Software/Python/nktpy",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/jiedz/Jiedz/Software/Python/nktpy&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

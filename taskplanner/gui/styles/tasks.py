@@ -1,40 +1,21 @@
 """
-This module define the stylesheets to be used by the task-related widgets.
+This module define the styles to be used by the task-related widgets.
 """
 import os
 
 from taskplanner.gui.utilities import get_screen_size
+from PyQt5.Qt import QSize
 
-COLOR_PALETTES = {'light earth':
-    {
-        'main background': 'white',
-        'secondary background': '#FCF5ED',
-        'urgent': '#CE5A67',
-        'text': '#45474B',
-        'text - light': 'gray',
-        'highlight': '#F4BF96',
-        'completed': '#A7D397'
-    },
-    'light blue':
+COLOR_PALETTES = {
+    'dark material':
         {
-            'main background': '#F6F1F1',
-            'secondary background': '#AFD3E2',
-            'urgent': '#CE5A67',
-            'text': '#476072',
-            'text - light': '#AAAAAA',
-            'highlight': '#0077b6',
-            'completed': '#38b000'
+            'main background': '#232426',#'#1e1f22',
+            'secondary background': '#3a3c3f', #'#2b2d30',
+            'text': 'white',#'#bcbec4',
+            'text - light': '#bcbec4',
+            'text - highlight': '#4273bc',
+            'border': '#3a3c3f',
         },
-    'deep purple':
-        {
-            'main background': '#35155D',
-            'secondary background': '#512B81',
-            'urgent': '#9D44C0',
-            'text': '#F0F0F0',
-            'text - light': '#F0F0F0',
-            'highlight': '#4477CE',
-            'completed': '#8CABFF'
-        }
 }
 
 FONTS = {'light':
@@ -42,21 +23,18 @@ FONTS = {'light':
         'family': 'Sans Serif',
         'size - title 1': '22pt',
         'size - title 2': '18pt',
-        'size - text': '12pt'
+        'size - text': '12pt',
+        'size - text - small': '10pt'
     },
-    'elegant light':
-        {
-            'family': 'Liberation Serif',  # 'Oregano',
-            'size - title 1': '22pt',
-            'size - title 2': '18pt',
-            'size - text': '12pt'
-        }
 }
+
+ICON_SIZES = {'regular': QSize(40, 40),
+              'small': QSize(25, 25)}
 
 
 class TaskWidgetStyle:
     def __init__(self,
-                 color_palette: str = 'light earth',
+                 color_palette: str = 'dark material',
                  font='light'):
         if font not in list(FONTS.keys()):
             raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
@@ -70,7 +48,7 @@ class TaskWidgetStyle:
         # Locate icon path
         self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
         self.icon_path = os.path.join(self.icon_path,
-                                      'Icons',
+                                      'icons',
                                       self.color_palette_name.replace(" ", "-"))
         # Get screen size
         screen_size = get_screen_size()
@@ -89,7 +67,7 @@ class TaskWidgetStyle:
                                             color:%s
                                         }
                                         ''' % (self.color_palette['main background'],
-                                               self.color_palette['highlight'],
+                                               self.color_palette['border'],
                                                self.font['family'],
                                                self.color_palette['text']),
                     'scrollarea':
@@ -137,72 +115,84 @@ class TaskWidgetStyle:
                             border-radius:10px;
                         }
                     ''' % (self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            self.color_palette['main background'],
-                           self.color_palette['highlight'],
+                           self.color_palette['border'],
                            ),
-                    'toolbar':
+                    'path_widget':
                         {
                             'main':
+                            '''
+                            QPushButton
+                            {
+                                color:%s;
+                                font-size:%s;
+                                border:2px solid %s;
+                            }
+                            QPushButton:hover
+                            {
+                                text-decoration:underline;
+                            }
+                            ''' % (self.color_palette['text - highlight'],
+                                   self.font['size - text'],
+                                   self.color_palette['border']),
+                            'icon_label':
                                 '''
-                                                QWidget
-                                                {
-                                                    background-color:%s;
-                                                    border:None;
-                                                    border-radius:10px;
-                                                    font-size:%s;
-                                                }
-                                                ''' % (
-                                    self.color_palette['secondary background'],
-                                    self.font['size - title 1'])
-                                +
+                                QLabel
+                                {
+                                    
+                                }
                                 '''
-                                                QPushButton
-                                                {
-                                                    border:2px solid %s;
-                                                    border-radius:10px;
-                                                    font-size:%s;
-                                                    background-color:%s
-                                                }   
-                                                ''' % (self.color_palette['highlight'],
-                                                       self.font['size - text'],
-                                                       self.color_palette['secondary background']),
-                            'path_label':
-                                '''
-                                                QLabel
-                                                {
-                                                    font-size:%s;
-                                                    color:%s;
-                                                    border:None;
-                                                }
-                                                ''' % (self.font['size - text'],
-                                                       self.color_palette['text - light']),
-                            'completed_pushbutton':
-                                '''
-                                                QPushButton
-                                                {
-                                                    /* background-color */
-                                                    border-radius:%spx;
-                                                }
-                                                QPushButton:hover
-                                                {
-                                                    background-color:%s;
-                                                    color:white;
-                                                    
-                                                }
-                                                ''' % (int(screen_size.width / 120),
-                                                       self.color_palette['completed']),
 
+                        },
+                    'title_widget':
+                        {
+                            'textedit':
+                            '''
+                            QTextEdit
+                            {
+                                background-color:%s;
+                                border:None;
+                                color:%s;
+                                font-size:%s
+                            }
+                            ''' % (self.color_palette['secondary background'],
+                                   self.color_palette['text'],
+                                   self.font['size - title 1'])
+                        },
+                    'progress_widget':
+                        {
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'combobox':
+                                '''
+                                QComboBox
+                                {
+                                    border:2px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text'],
+                                       self.font['size - text - small']),
                         },
                     'category_widget':
                         {
@@ -223,7 +213,7 @@ class TaskWidgetStyle:
                                                     border-radius:%spx;
                                                 }
                                                 ''' % (self.font['size - text'],
-                                                       self.color_palette['highlight'],
+                                                       self.color_palette['border'],
                                                        int(screen_size.width / 220)),
                             'add_pushbutton':
                                 '''
@@ -237,8 +227,8 @@ class TaskWidgetStyle:
                                                     background-color:%s;
                                                 }
                                                 ''' % (int(screen_size.width / 220),
-                                                       self.color_palette['highlight'],
-                                                       self.color_palette['highlight']),
+                                                       self.color_palette['border'],
+                                                       self.color_palette['border']),
                         },
                     'priority_widget':
                         {
@@ -259,29 +249,6 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (self.font['size - text'],
                                                        int(screen_size.width / 220))
-                        },
-                    'name_widget':
-                        {
-                            'icon_pushbutton':
-                                '''
-                                            QPushButton
-                                                {
-                                                    border: 0px;
-                                                    /* border-radius:%s; */
-                                                }
-                                            ''' % (int(screen_size.width / 220)),
-                            'textedit':
-                                '''
-                                                QTextEdit
-                                                {
-                                                    font-size:%s;
-                                                    border:2px solid %s;
-                                                    border-radius:%s;
-                                                }
-                                                ''' % (
-                                    self.font['size - title 2'],
-                                    self.color_palette['highlight'],
-                                    int(screen_size.width / 220)),
                         },
                     'assignee_widget':
                         {
@@ -304,7 +271,7 @@ class TaskWidgetStyle:
                                             border-radius:%s;
                                         }
                                         ''' % (self.font['size - text'],
-                                               self.color_palette['highlight'],
+                                               self.color_palette['border'],
                                                int(screen_size.width / 220))
                 },
             'simple view':

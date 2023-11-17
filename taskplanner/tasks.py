@@ -12,6 +12,7 @@ from signalslot import Signal
 
 # %% Task
 PRIORITY_LEVELS = ["low", "medium", "high", "urgent"]
+PROGRESS_LEVELS = ['not started', 'in progress', 'completed']
 
 
 class Task(Node):
@@ -67,14 +68,14 @@ class Task(Node):
             # Initialize the internal attributes to 'None'
             setattr(self, f"_{a}", None)
         # Set up signals for change of attribute value
-        for a in attribute_names + ['completed',
+        for a in attribute_names + ['progress',
                                     'children',
                                     'parent']:
             setattr(self, f'{a}_changed', Signal())
         for a in attribute_names:
             # Set the corresponding properties to the passed argument values
             setattr(self, a, argvalues.locals[a])
-        self._completed = False
+        self._progress = 'not started'
 
     @property
     def name(self):
@@ -159,15 +160,15 @@ class Task(Node):
         self.priority_changed.emit()
 
     @property
-    def completed(self):
-        return self._completed
+    def progress(self):
+        return self._progress
 
-    @completed.setter
-    def completed(self, value):
-        if type(value) is not bool:
-            raise TypeError('Attribute "completed" must be a boolean')
-        self._completed = value
-        self.completed_changed.emit()
+    @progress.setter
+    def progress(self, value):
+        if value not in PROGRESS_LEVELS:
+            raise ValueError(f"Invalid progress level '{value}'. Accepted values are {PROGRESS_LEVELS}")
+        self._progress = value
+        self.progress_changed.emit()
 
     @property
     def is_top_level(self):
