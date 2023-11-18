@@ -14,7 +14,6 @@ from signalslot import Signal
 PRIORITY_LEVELS = ["low", "high", "urgent"]
 PROGRESS_LEVELS = ['not started', 'in progress', 'completed']
 
-
 class Task(Node):
     '''
     This class defines a task.
@@ -376,3 +375,16 @@ class Task(Node):
             filename += ".txt"
         self.file.write(self.__str__())
         self.file.close()
+
+def _signal_changed_property(task: Task,
+                             signal: Signal,
+                             property_name: str):
+    valid_properties = [attr.replace('_changed', '') for attr in vars(Task()) if '_changed' in attr]
+    if property_name not in valid_properties:
+        raise ValueError(f'Invalid property "{property_name}". Valid properties are {tuple(valid_properties)}')
+    if not task.is_bottom_level:
+        getattr(task, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
+        for subtask in task.children:
+            _signal_changed_property(task=subtask,
+                                     signal=signal,
+                                     property_name=property_name)

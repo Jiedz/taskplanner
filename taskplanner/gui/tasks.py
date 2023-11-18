@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import \
 from taskplanner.gui.styles.tasks import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
+from taskplanner.planner import Planner
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -38,12 +39,15 @@ class TaskWidget(QWidget):
 
     def __init__(self,
                  task: Task,
+                 planner: Planner = None,
                  main_color: str = None,
                  parent: QWidget = None,
                  style: TaskWidgetStyle = None):
         """
         :param task: :py:class:'taskplanner.tasks.Task'
             The task associated to this widget
+        :param planner: :py:class:'taskplanner.planner.Planner'
+            The planner associated to this task.
         :param main_color: str, optional
             The main color of this task and all sub-tasks
         :param parent: :py:class:'QWidget', optional
@@ -51,7 +55,7 @@ class TaskWidget(QWidget):
         :param style: :py:class:'TaskWidgetStyle', optional
             The widget's style
         """
-        self.task, self.main_color = task, main_color
+        self.task, self.planner, self.main_color = task, planner, main_color
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
@@ -208,6 +212,7 @@ class TaskWidget(QWidget):
                 # Callback
                 def callback():
                     task_widget = TaskWidget(task=supertask,
+                                             planner=self.parent().planner,
                                              style=self.parent()._style)
                     task_widget.show()
 
@@ -376,6 +381,7 @@ class TaskWidget(QWidget):
 
             def __init__(self,
                          task: Task,
+                         planner: Planner = None,
                          parent: QWidget = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
@@ -384,7 +390,7 @@ class TaskWidget(QWidget):
                     The parent widget
                 """
                 super().__init__(parent=parent)
-                self.task = task
+                self.task, self.planner = task, planner
                 # Layout
                 self.layout = QVBoxLayout()
                 self.setLayout(self.layout)
@@ -455,6 +461,9 @@ class TaskWidget(QWidget):
                         if text not in all_items:
                             self.combobox.addItem(text)
                             self.task.category = text
+                            if self.planner is not None:
+                                self.planner.add_categories(self.task.category)
+                                print(self.planner.categories)
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
@@ -462,6 +471,7 @@ class TaskWidget(QWidget):
                 self.new_textedit.hide()
 
         self.category_widget = CategoryWidget(task=self.task,
+                                              planner=self.planner,
                                               parent=self)
         self.category_assignee_layout.addWidget(self.category_widget)
 
