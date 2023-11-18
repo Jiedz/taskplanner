@@ -350,7 +350,6 @@ class TaskWidget(QWidget):
                     self.combobox.addItem(level)
                     self.combobox.setItemIcon(i,
                                               QIcon(icon_filename))
-                    self.combobox.setIconSize(ICON_SIZES['small'])
                 # User interactions
                 def clicked():
                     self.task.progress = self.combobox.currentText()
@@ -434,7 +433,6 @@ class TaskWidget(QWidget):
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'add.png')
                 self.add_pushbutton.setIcon(QIcon(icon_filename))
-                self.add_pushbutton.setIconSize(ICON_SIZES['small'])
                 # User interactions
                 def callback():
                     # Show the new assignee linedit
@@ -535,7 +533,6 @@ class TaskWidget(QWidget):
                 icon_path = self.parent()._style.icon_path
                 icon_filename = os.path.join(icon_path, 'add.png')
                 self.add_pushbutton.setIcon(QIcon(icon_filename))
-                self.add_pushbutton.setIconSize(ICON_SIZES['small'])
 
                 def callback():
                     # Show the new assignee linedit
@@ -613,7 +610,6 @@ class TaskWidget(QWidget):
                     self.combobox.addItem(level)
                     self.combobox.setItemIcon(i,
                                               QIcon(icon_filename))
-                    self.combobox.setIconSize(ICON_SIZES['small'])
                 # User interactions
                 def clicked():
                     self.task.priority = self.combobox.currentText()
@@ -973,7 +969,6 @@ class TaskLineWidget(QWidget):
         # Layout
         self.layout = QHBoxLayout(self)
         self.layout.setAlignment(Qt.AlignLeft)
-        self.setAutoFillBackground(True)
         # Priority
         self.make_priority_label()
         # Progress
@@ -1089,7 +1084,6 @@ class TaskLineWidget(QWidget):
             icon_filename = os.path.join(icon_path,
                                          f'subtask-widget_{name}.png')
             self.expand_pushbutton.setIcon(QIcon(icon_filename))
-            self.expand_pushbutton.setIconSize(ICON_SIZES['small'])
 
         self.expand_pushbutton.clicked.connect(callback)
         if self.task.is_bottom_level:
@@ -1104,7 +1098,6 @@ class TaskLineWidget(QWidget):
         icon_filename = os.path.join(icon_path,
                                      'remove.png')
         self.remove_pushbutton.setIcon(QIcon(icon_filename))
-        self.remove_pushbutton.setIconSize(ICON_SIZES['small'])
 
         # Callback
         def callback():

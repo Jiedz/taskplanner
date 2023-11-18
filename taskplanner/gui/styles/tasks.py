@@ -33,9 +33,8 @@ SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
 SCREEN_HEIGHT = SCREEN.height
 
-ICON_SIZES = {'regular': QSize(int(SCREEN_WIDTH/75), int(SCREEN_WIDTH/75)),
+ICON_SIZES = {'regular': QSize(int(SCREEN_WIDTH/70), int(SCREEN_WIDTH/70)),
               'small': QSize(int(SCREEN_WIDTH/100), int(SCREEN_WIDTH/100))}
-
 
 class TaskWidgetStyle:
     def __init__(self,
@@ -155,7 +154,7 @@ class TaskWidgetStyle:
                                 '''
                                 QLabel
                                 {
-                                    
+                                    border:None;   
                                 }
                                 '''
 
@@ -194,6 +193,7 @@ class TaskWidgetStyle:
                                     border:2px solid %s;
                                     color:%s;
                                     font-size:%s;
+                                    icon-size:%spx;
                                 }
                                 QComboBox:item:selected
                                 {
@@ -202,6 +202,7 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['border'],
                                        self.color_palette['text'],
                                        self.font['size - text - small'],
+                                       ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
                         },
                     'category_widget':
@@ -223,6 +224,7 @@ class TaskWidgetStyle:
                                     border:2px solid %s;
                                     color:%s;
                                     font-size:%s;
+                                    icon-size:%spx;
                                 }
                                 QComboBox:item:selected
                                 {
@@ -231,6 +233,7 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['border'],
                                        self.color_palette['text'],
                                        self.font['size - text - small'],
+                                       ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
                             'add_pushbutton':
                                 '''
@@ -238,6 +241,7 @@ class TaskWidgetStyle:
                                                 {
                                                     border-radius:%spx;
                                                     border:2px solid %s;
+                                                    icon-size:%spx;
                                                 }
                                                 QPushButton:hover
                                                 {
@@ -245,6 +249,7 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (int(screen_size.width / 220),
                                                        self.color_palette['border'],
+                                                       ICON_SIZES['small'].width(),
                                                        self.color_palette['border']),
                         },
                     'assignee_widget':
@@ -266,6 +271,7 @@ class TaskWidgetStyle:
                                     border:2px solid %s;
                                     color:%s;
                                     font-size:%s;
+                                    icon-size:%spx;
                                 }
                                 QComboBox:item:selected
                                 {
@@ -274,6 +280,7 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['border'],
                                        self.color_palette['text'],
                                        self.font['size - text - small'],
+                                       ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
                             'add_pushbutton':
                                 '''
@@ -281,6 +288,7 @@ class TaskWidgetStyle:
                                                 {
                                                     border-radius:%spx;
                                                     border:2px solid %s;
+                                                    icon-size:%spx;
                                                 }
                                                 QPushButton:hover
                                                 {
@@ -288,6 +296,7 @@ class TaskWidgetStyle:
                                                 }
                                                 ''' % (int(screen_size.width / 220),
                                                        self.color_palette['border'],
+                                                       ICON_SIZES['small'].width(),
                                                        self.color_palette['border']),
                         },
                     'priority_widget':
@@ -309,6 +318,7 @@ class TaskWidgetStyle:
                                     border:2px solid %s;
                                     color:%s;
                                     font-size:%s;
+                                    icon-size:%spx;
                                 }
                                 QComboBox:item:selected
                                 {
@@ -317,6 +327,7 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['border'],
                                        self.color_palette['text'],
                                        self.font['size - text - small'],
+                                       ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
                         },
                     'start_date_widget':
@@ -346,6 +357,13 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['text - highlight'],
                                    self.font['size - text'],
                                    self.color_palette['border']),
+                            'calendar_widget':
+                                '''
+                                QCalendarWidget QWidget
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['background 2']),
                         },
                     'end_date_widget':
                         {
@@ -374,6 +392,13 @@ class TaskWidgetStyle:
                                 ''' % (self.color_palette['text - highlight'],
                                        self.font['size - text'],
                                        self.color_palette['border']),
+                            'calendar_widget':
+                                '''
+                                QCalendarWidget QWidget
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['background 2']),
                         },
                     'description_textedit':
                         '''
@@ -387,7 +412,17 @@ class TaskWidgetStyle:
                                         ''' % (self.color_palette['background 2'],
                                                self.font['size - text'],
                                                self.color_palette['border'],
-                                               int(screen_size.width / 220))
+                                               int(screen_size.width / 220)),
+                    'subtask_list_widget':
+                        {
+                            'icon_label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;   
+                                }
+                                '''
+                        }
                 },
             'simple view':
                 {
@@ -441,24 +476,26 @@ class TaskWidgetStyle:
                                 '''
                                 QPushButton
                                 {
-
+                                    icon-size:%spx;
                                 }
                                 QPushButton:hover
                                 {
                                     background-color:%s;
                                 }
-                                ''' % (self.color_palette['background 2']),
+                                ''' % (ICON_SIZES['small'].width(),
+                                       self.color_palette['background 2']),
                             'expand_pushbutton':
                                 '''
                                 QPushButton
                                 {
-
+                                    icon-size:%spx;
                                 }
                                 QPushButton:hover
                                 {
                                     background-color:%s;
                                 }
-                                ''' % (self.color_palette['background 2'])
+                                ''' % (ICON_SIZES['small'].width(),
+                                       self.color_palette['background 2'])
                         }
                 }
         }
