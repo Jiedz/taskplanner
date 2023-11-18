@@ -391,122 +391,77 @@ class TaskWidgetStyle:
                 },
             'simple view':
                 {
+                    'task_line_widget':
+                        {
+                            'main':
+                                '''
+                                QWidget
+                                {
+                                    /* background-color:%s; */
+                                    border:2px solid %s;
+                                }
+                                ''' % (self.color_palette['background 2'],
+                                       self.color_palette['border']),
+                            'name_pushbutton':
+                                '''
+                                QPushButton
+                                {
+                                    color:%s;
+                                    font-size:%s;
+                                    border:0px solid %s;
+                                }
+                                QPushButton:hover
+                                {
+                                    text-decoration:underline;
+                                }
+                                ''' % (self.color_palette['text - highlight'],
+                                       self.font['size - text'],
+                                       self.color_palette['border']),
+                            'priority_label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'progress_label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'remove_pushbutton':
+                                '''
+                                QPushButton
+                                {
 
+                                }
+                                QPushButton:hover
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['background 2']),
+                            'expand_pushbutton':
+                                '''
+                                QPushButton
+                                {
+
+                                }
+                                QPushButton:hover
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['background 2'])
+                        }
                 }
         }
-
-    @property
-    def font(self):
-        return self._font
-
-    @font.setter
-    def font(self, name):
-        if name not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {name}. Accepted fonts are {FONTS}')
-        self.__init__(color_palette=self.color_palette,
-                      font=FONTS[name])
-
-    @property
-    def color_palette(self):
-        return self._color_palette
-
-    @color_palette.setter
-    def color_palette(self, name):
-        if name not in list(COLOR_PALETTES.keys()):
-            raise ValueError(f'Invalid color_palette name. Accepted color_palettes are {COLOR_PALETTES}')
-        self.__init__(font=self.font,
-                      color_palette=COLOR_PALETTES[name])
-
-class TaskLineWidgetStyle:
-    def __init__(self,
-                 color_palette: str = 'dark material',
-                 font='light'):
-        if font not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
-        self._font = FONTS[font]
-        self.font_name = font
-        if color_palette not in list(COLOR_PALETTES.keys()):
-            raise ValueError(
-                f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
-        self._color_palette = COLOR_PALETTES[color_palette]
-        self.color_palette_name = color_palette
-        # Locate icon path
-        self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
-        self.icon_path = os.path.join(self.icon_path,
-                                      'icons',
-                                      self.color_palette_name.replace(" ", "-"))
-        # Get screen size
-        screen_size = get_primary_screen()
-        # Define style sheets
-        self.stylesheets = {
-                                'main':
-                                    '''
-                                    QWidget
-                                    {
-                                        /* background-color:%s;*/
-                                        border:2px solid %s;
-                                    }
-                                    ''' % (self.color_palette['background 2'],
-                                           self.color_palette['border']),
-                                'name_pushbutton':
-                                    '''
-                                    QPushButton
-                                    {
-                                        color:%s;
-                                        font-size:%s;
-                                        border:0px solid %s;
-                                    }
-                                    QPushButton:hover
-                                    {
-                                        text-decoration:underline;
-                                    }
-                                    ''' % (self.color_palette['text - highlight'],
-                                           self.font['size - text'],
-                                           self.color_palette['border']),
-                                'priority_label':
-                                    '''
-                                    QLabel
-                                    {
-                                        border:None;
-                                        color:%s;
-                                        font-size:%s;
-                                    }
-                                    ''' % (self.color_palette['text - light'],
-                                           self.font['size - text']),
-                                'progress_label':
-                                    '''
-                                    QLabel
-                                    {
-                                        border:None;
-                                        color:%s;
-                                        font-size:%s;
-                                    }
-                                    ''' % (self.color_palette['text - light'],
-                                           self.font['size - text']),
-                                'remove_pushbutton':
-                                    '''
-                                    QPushButton
-                                    {
-                                        
-                                    }
-                                    QPushButton:hover
-                                    {
-                                        background-color:%s;
-                                    }
-                                    ''' % (self.color_palette['background 2']),
-                                'expand_pushbutton':
-                                    '''
-                                    QPushButton
-                                    {
-                    
-                                    }
-                                    QPushButton:hover
-                                    {
-                                        background-color:%s;
-                                    }
-                                    ''' % (self.color_palette['background 2'])
-                            }
-
 
     @property
     def font(self):

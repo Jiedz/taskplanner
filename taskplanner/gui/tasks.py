@@ -7,6 +7,7 @@ from datetime import date as dt
 
 # %% Imports
 from PyQt5.QtCore import Qt, QDate
+from PyQt5.Qt import QSize
 from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtWidgets import \
     (
@@ -22,7 +23,7 @@ from PyQt5.QtWidgets import \
     QCalendarWidget,
 )
 
-from taskplanner.gui.styles.tasks import TaskWidgetStyle, TaskLineWidgetStyle, ICON_SIZES
+from taskplanner.gui.styles.tasks import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
 
@@ -39,7 +40,7 @@ class TaskWidget(QWidget):
                  task: Task,
                  main_color: str = None,
                  parent: QWidget = None,
-                 style: TaskWidgetStyle = TaskWidgetStyle()):
+                 style: TaskWidgetStyle = None):
         """
         :param task: :py:class:'taskplanner.tasks.Task'
             The task associated to this widget
@@ -74,7 +75,7 @@ class TaskWidget(QWidget):
         self.make_path_widget()
         if self.task.is_top_level:
             self.path_widget.hide()
-        # Horizontal layout for (title, tdates)
+        # Horizontal layout for (title, dates)
         self.title_dates_layout = QHBoxLayout()
         self.layout.addLayout(self.title_dates_layout)
         # Title widget
@@ -133,8 +134,9 @@ class TaskWidget(QWidget):
         self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()))
         self.layout.addStretch()
         # Set style
-        set_style(widget=self,
-                  stylesheets=self._style.stylesheets['standard view'])
+        if self._style is not None:
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets['standard view'])
 
     def show(self):
         super().show()
@@ -178,7 +180,6 @@ class TaskWidget(QWidget):
                 self.task.parent_changed.connect(lambda **kwargs: self.make_path())
 
             def make_icon_label(self):
-                from PyQt5.Qt import QSize
                 self.icon_label = QLabel()
                 self.layout.addWidget(self.icon_label)
                 # Icon
@@ -809,7 +810,7 @@ class TaskWidget(QWidget):
                 self.task.children_changed.connect(lambda **kwargs: self.update_subtasks())
 
             def make_icon_label(self):
-                from PyQt5.Qt import QSize
+                
                 self.icon_label = QLabel()
                 self.layout.addWidget(self.icon_label)
                 # Icon
@@ -855,8 +856,7 @@ class TaskWidget(QWidget):
                     if subtask not in [widget.task for widget in self.subtask_widgets]:
                         widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
-                                                  style=TaskWidgetStyle(color_palette=self.parent()._style.color_palette_name,
-                                                                        font=self.parent()._style.font_name)
+                                                  style=self.parent()._style
                                                   )
                         self.layout.addWidget(widget)
                         self.subtask_widgets += [widget]
@@ -904,17 +904,17 @@ class TaskWidgetSimple(QWidget):
         # This task
         self.task_line_widget = TaskLineWidget(parent=self,
                                                task=self.task,
-                                               style=TaskLineWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                         font=self._style.font_name)
-                                               )
+                                               style=self._style)
+
         self.layout.addWidget(self.task_line_widget)
         # Subtasks
         self.subtask_widgets = []
         self.make_subtasks()
 
         # Set style
-        set_style(widget=self,
-                  stylesheets=self._style.stylesheets['simple view'])
+        if self._style is not None:
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets['simple view'])
         if hide:
             self.hide()
 
@@ -936,8 +936,7 @@ class TaskWidgetSimple(QWidget):
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
                                                   hide=not self.task_line_widget.expanded,
-                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                        font=self._style.font_name)
+                                                  style=self._style
                                                   )
                 self.layout.addWidget(subtask_widget)
                 self.subtask_widgets += [subtask_widget]
@@ -959,7 +958,7 @@ class TaskLineWidget(QWidget):
     def __init__(self,
                  parent: QWidget,
                  task: Task,
-                 style: TaskLineWidgetStyle = TaskLineWidgetStyle()):
+                 style: TaskWidgetStyle = TaskWidgetStyle()):
         """
         :param task:
             the task associated to this widget
@@ -972,9 +971,9 @@ class TaskLineWidget(QWidget):
         self._style = style
         super().__init__(parent=parent)
         # Layout
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.layout.setAlignment(Qt.AlignLeft)
-        self.setLayout(self.layout)
+        self.setAutoFillBackground(True)
         # Priority
         self.make_priority_label()
         # Progress
@@ -990,8 +989,9 @@ class TaskLineWidget(QWidget):
         self.make_expand_pushbutton()
         self.layout.addStretch()
         # Set style
-        set_style(widget=self,
-                  stylesheets=self._style.stylesheets)
+        if self._style is not None:
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets['simple view']['task_line_widget'])
 
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()
@@ -1001,8 +1001,7 @@ class TaskLineWidget(QWidget):
         # Callback
         def clicked():
             task_widget = TaskWidget(task=self.task,
-                                     style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                           font=self._style.font_name))
+                                     style=self._style)
             task_widget.show()
 
         def update_widget():
