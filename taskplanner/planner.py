@@ -45,8 +45,8 @@ class Planner:
             if task not in self.tasks:
                 self._tasks += [task]
                 _signal_changed_property(task=task,
-                                                     signal=self.tasks_changed,
-                                                     property_name='children')
+                                         signal=self.tasks_changed,
+                                         property_name='children')
                 self._add_new_values(task=task,
                                        signal=self.categories_changed,
                                        property_name='category')
@@ -66,9 +66,9 @@ class Planner:
                 self.tasks_changed.emit()
 
     def add_categories(self,
-                      categories: str):
+                       *categories: str):
         for category in categories:
-            if category not in self.categories:
+            if category not in self.categories and category not in ['No Category', '']:
                 self._categories += [category]
                 self.categories_changed.emit()
 
@@ -82,16 +82,16 @@ class Planner:
     def add_assignees(self,
                       *assignees: str):
         for assignee in assignees:
-            if assignee not in self.assignee:
-                self._assignee += [assignee]
-                self.assignee_changed.emit()
+            if assignee not in self.assignees:
+                self._assignees += [assignee]
+                self.assignees_changed.emit()
 
     def remove_assignees(self,
                          *assignees: str):
         for assignee in assignees:
-            if assignee in self.assignee:
-                self._assignee.remove(assignee)
-                self.assignee_changed.emit()
+            if assignee in self.assignees:
+                self._assignees.remove(assignee)
+                self.assignees_changed.emit()
 
     def _add_new_values(self,
                         task: Task,

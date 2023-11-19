@@ -382,8 +382,9 @@ def _signal_changed_property(task: Task,
     valid_properties = [attr.replace('_changed', '') for attr in vars(Task()) if '_changed' in attr]
     if property_name not in valid_properties:
         raise ValueError(f'Invalid property "{property_name}". Valid properties are {tuple(valid_properties)}')
-    if not task.is_bottom_level:
+    if task.is_bottom_level:
         getattr(task, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
+    else:
         for subtask in task.children:
             _signal_changed_property(task=subtask,
                                      signal=signal,

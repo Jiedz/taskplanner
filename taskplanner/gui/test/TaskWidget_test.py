@@ -16,7 +16,7 @@ task1.add_children_tasks(task2)
 task2.add_children_tasks(task3)
 task4.set_parent_task(task3)
 
-
+# Make a task planner
 planner = Planner()
 planner.add_tasks(task1, task1b)
 

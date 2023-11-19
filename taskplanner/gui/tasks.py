@@ -156,6 +156,7 @@ class TaskWidget(QWidget):
 
             def __init__(self,
                          task: Task,
+                         planner: Planner = None,
                          parent: QWidget = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
@@ -164,7 +165,7 @@ class TaskWidget(QWidget):
                     The parent widget
                 """
                 super().__init__(parent=parent)
-                self.task = task
+                self.task, self.planner = task, planner
                 # Layout
                 self.layout = QHBoxLayout()
                 self.setLayout(self.layout)
@@ -212,7 +213,7 @@ class TaskWidget(QWidget):
                 # Callback
                 def callback():
                     task_widget = TaskWidget(task=supertask,
-                                             planner=self.parent().planner,
+                                             planner=self.planner,
                                              style=self.parent()._style)
                     task_widget.show()
 
@@ -231,6 +232,7 @@ class TaskWidget(QWidget):
                 return pushbutton
 
         self.path_widget = PathWidget(task=self.task,
+                                      planner=self.planner,
                                       parent=self)
         self.layout.addWidget(self.path_widget)
 
@@ -386,6 +388,8 @@ class TaskWidget(QWidget):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this task.
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
@@ -419,7 +423,9 @@ class TaskWidget(QWidget):
                 # Layout
                 self.combobox_add_layout.addWidget(self.combobox)
                 # Add categories
-                if self.task.category not in ['No Category']:
+                if self.planner is not None:
+                    self.combobox.addItems(self.planner.categories)
+                elif self.task.category not in ['No Category']:
                     self.combobox.addItems([self.task.category])
                 # User interactions
                 def clicked():
@@ -428,6 +434,16 @@ class TaskWidget(QWidget):
                 self.combobox.currentIndexChanged.connect(clicked)
                 self.task.category_changed.connect(
                     lambda **kwargs: self.combobox.setCurrentText(self.task.category))
+                # Connect planner and widget
+                if self.planner is not None:
+                    def update_categories():
+                        self.combobox.blockSignals(True)
+                        for i in range(self.combobox.count()):
+                            self.combobox.removeItem(0)
+                        self.combobox.addItems(self.planner.categories)
+                        self.combobox.setCurrentText(self.task.category)
+                        self.combobox.blockSignals(False)
+                    self.planner.categories_changed.connect(lambda **kwargs: update_categories())
                 # Set initial value
                 self.combobox.setCurrentText(self.task.category)
 
@@ -463,7 +479,6 @@ class TaskWidget(QWidget):
                             self.task.category = text
                             if self.planner is not None:
                                 self.planner.add_categories(self.task.category)
-                                print(self.planner.categories)
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
@@ -487,15 +502,18 @@ class TaskWidget(QWidget):
 
             def __init__(self,
                          task: Task,
+                         planner: Planner = None,
                          parent: QWidget = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this task.
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
                 super().__init__(parent=parent)
-                self.task = task
+                self.task, self.planner = task, planner
                 # Layout
                 self.layout = QVBoxLayout()
                 self.setLayout(self.layout)
@@ -524,7 +542,10 @@ class TaskWidget(QWidget):
                 # Layout
                 self.combobox_add_layout.addWidget(self.combobox)
                 # Add items
-                self.combobox.addItems([self.task.assignee])
+                if self.planner is not None:
+                    self.combobox.addItems(self.planner.assignees)
+                elif self.task.assignee not in [None]:
+                    self.combobox.addItems([self.task.assignee])
                 # User interactions
                 def clicked():
                     self.task.assignee = self.combobox.currentText()
@@ -532,6 +553,16 @@ class TaskWidget(QWidget):
                 self.combobox.currentIndexChanged.connect(clicked)
                 self.task.assignee_changed.connect(
                     lambda **kwargs: self.combobox.setCurrentText(self.task.assignee))
+                # Connect planner and widget
+                if self.planner is not None:
+                    def update_assignees():
+                        self.combobox.blockSignals(True)
+                        for i in range(self.combobox.count()):
+                            self.combobox.removeItem(0)
+                        self.combobox.addItems(self.planner.assignees)
+                        self.combobox.setCurrentText(self.task.assignee)
+                        self.combobox.blockSignals(False)
+                    self.planner.assignees_changed.connect(lambda **kwargs: update_assignees())
                 # Set initial value
                 self.combobox.setCurrentText(self.task.assignee)
 
@@ -565,6 +596,9 @@ class TaskWidget(QWidget):
                         if text not in all_items:
                             self.combobox.addItem(text)
                             self.task.assignee = text
+                            if self.planner is not None:
+                                self.planner.add_assignees(self.task.assignee)
+                                self.planner.add_assignees('Random')
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
@@ -572,7 +606,8 @@ class TaskWidget(QWidget):
                 self.new_textedit.hide()
 
         self.assignee_widget = AssigneeWidget(task=self.task,
-                                              parent=self)
+                                              parent=self,
+                                              planner=self.planner)
         self.category_assignee_layout.addWidget(self.assignee_widget)
 
     def make_priority_widget(self):
@@ -790,15 +825,18 @@ class TaskWidget(QWidget):
 
             def __init__(self,
                          task: Task,
+                         planner: Planner = None,
                          parent: QWidget = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this task.
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
                 super().__init__(parent=parent)
-                self.task = task
+                self.task, self.planner = task, planner
                 # Layout
                 self.layout = QVBoxLayout()
                 self.setLayout(self.layout)
@@ -862,6 +900,7 @@ class TaskWidget(QWidget):
                     if subtask not in [widget.task for widget in self.subtask_widgets]:
                         widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
+                                                  planner=self.planner,
                                                   style=self.parent()._style
                                                   )
                         self.layout.addWidget(widget)
@@ -876,6 +915,7 @@ class TaskWidget(QWidget):
                 self.make_subtask_widgets()
 
         self.subtask_list_widget = SubtaskListWidget(task=self.task,
+                                                     planner=self.planner,
                                                      parent=self)
         self.layout.addWidget(self.subtask_list_widget)
 
@@ -888,6 +928,7 @@ class TaskWidgetSimple(QWidget):
 
     def __init__(self,
                  task: Task,
+                 planner: Planner = None,
                  parent: QWidget = None,
                  hide: bool = False,
                  style: TaskWidgetStyle = TaskWidgetStyle()):
@@ -899,7 +940,7 @@ class TaskWidgetSimple(QWidget):
         :param hide:
             If 'True', the widget is hidden
         """
-        self.task = task
+        self.task, self.planner = task, planner
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
@@ -910,6 +951,7 @@ class TaskWidgetSimple(QWidget):
         # This task
         self.task_line_widget = TaskLineWidget(parent=self,
                                                task=self.task,
+                                               planner=self.planner,
                                                style=self._style)
 
         self.layout.addWidget(self.task_line_widget)
@@ -941,6 +983,7 @@ class TaskWidgetSimple(QWidget):
             if subtask not in [widget.task for widget in self.subtask_widgets]:
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
+                                                  planner=self.planner,
                                                   hide=not self.task_line_widget.expanded,
                                                   style=self._style
                                                   )
@@ -962,18 +1005,19 @@ class TaskLineWidget(QWidget):
     """
 
     def __init__(self,
-                 parent: QWidget,
                  task: Task,
+                 planner: Planner = None,
+                 parent: QWidget = None,
                  style: TaskWidgetStyle = TaskWidgetStyle()):
         """
         :param task:
             the task associated to this widget
-        :param parent:
+        :param parent:, optional
             the parent widget
         :param style: :py:class:'TaskWidgetStyle', optional
             The widget's style
         """
-        self.task = task
+        self.task, self.planner = task, planner
         self._style = style
         super().__init__(parent=parent)
         # Layout
@@ -1006,6 +1050,7 @@ class TaskLineWidget(QWidget):
         # Callback
         def clicked():
             task_widget = TaskWidget(task=self.task,
+                                     planner=self.planner,
                                      style=self._style)
             task_widget.show()
 
