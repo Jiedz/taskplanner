@@ -3,7 +3,7 @@ from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
 from taskplanner.gui.styles.tasks import TaskWidgetStyle
 
-from PyQt5.QtWidgets import QApplication, QFontComboBox
+from PyQt5.QtWidgets import QApplication, QFontComboBox, QColorDialog
 import sys
 
 task1 = Task(name='Task - Level 1')
@@ -37,4 +37,7 @@ task1.priority = 'high'
 font_combobox = QFontComboBox()
 font_combobox.show()
 '''
+color_dialog = QColorDialog()
+color_dialog.show()
+
 sys.exit(app.exec_())

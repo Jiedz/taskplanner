@@ -79,12 +79,14 @@ class TaskWidget(QWidget):
         self.make_path_widget()
         if self.task.is_top_level:
             self.path_widget.hide()
-        # Horizontal layout for (title, dates)
+        # Horizontal layout for (title, color, dates)
         self.title_dates_layout = QHBoxLayout()
         self.layout.addLayout(self.title_dates_layout)
         # Title widget
         self.make_title_widget()
         self.title_widget.setFixedHeight(int(self.height()*0.08))
+        # Color widget
+        self.make_color_widget()
         # Start and end date widgets
         self.make_date_widgets()
         self.title_dates_layout.addStretch()
@@ -161,6 +163,8 @@ class TaskWidget(QWidget):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this task.
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
@@ -312,6 +316,29 @@ class TaskWidget(QWidget):
         self.title_widget = TitleWidget(task=self.task,
                                         parent=self)
         self.title_dates_layout.addWidget(self.title_widget)
+
+    def make_color_widget(self):
+        class ColorWidget(QWidget):
+            """
+            This task containt:
+            - A label that indicates the task's color
+            - A push button containing the color of the widget
+            - A color picker widget, popping up at the click of the color push button,
+             that allows the user to select a new color.
+            """
+            def __init__(self,
+                         task: Task,
+                         planner: Planner = None,
+                         parent: QWidget = None):
+                """
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this task.
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                """
+                raise NotImplementedError
 
     def make_progress_widget(self):
         class ProgressWidget(QWidget):
@@ -598,7 +625,6 @@ class TaskWidget(QWidget):
                             self.task.assignee = text
                             if self.planner is not None:
                                 self.planner.add_assignees(self.task.assignee)
-                                self.planner.add_assignees('Random')
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
@@ -953,7 +979,20 @@ class TaskWidgetSimple(QWidget):
                                                task=self.task,
                                                planner=self.planner,
                                                style=self._style)
+        ## Offset the task line widget to the right, by an amount proportional to its depth in the task tree
+        ## up to the main task. The latter may not necessarily be a top-level task.
+        def find_spacing(task_widget_simple: TaskWidgetSimple,
+                         spacing: int):
+            if 'TaskWidgetSimple' not in str(type(task_widget_simple.parent())):
+                return spacing
+            else:
+                return find_spacing(task_widget_simple = task_widget_simple.parent(),
+                                    spacing=spacing + 20)
 
+
+        self.task_line_widget.layout.insertSpacing(0,
+                                                   find_spacing(self,
+                                                                0))
         self.layout.addWidget(self.task_line_widget)
         # Subtasks
         self.subtask_widgets = []
