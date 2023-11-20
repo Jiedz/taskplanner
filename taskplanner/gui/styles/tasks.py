@@ -174,6 +174,33 @@ class TaskWidgetStyle:
                                    self.color_palette['text'],
                                    self.font['size - title 1'])
                         },
+                    'color_widget':
+                        {
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'color_pushbutton':
+                                '''
+                                QPushButton
+                                {
+                                }
+                                ''',
+                            'color_dialog':
+                                '''
+                                QColorDialog
+                                {
+                                    
+                                }
+                                '''
+                        }
+                    ,
                     'progress_widget':
                         {
                             'label':

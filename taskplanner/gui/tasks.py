@@ -21,7 +21,8 @@ from PyQt5.QtWidgets import \
     QScrollArea,
     QMainWindow,
     QCalendarWidget,
-)
+    QColorDialog
+    )
 
 from taskplanner.gui.styles.tasks import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
@@ -40,7 +41,6 @@ class TaskWidget(QWidget):
     def __init__(self,
                  task: Task,
                  planner: Planner = None,
-                 main_color: str = None,
                  parent: QWidget = None,
                  style: TaskWidgetStyle = None):
         """
@@ -48,22 +48,21 @@ class TaskWidget(QWidget):
             The task associated to this widget
         :param planner: :py:class:'taskplanner.planner.Planner'
             The planner associated to this task.
-        :param main_color: str, optional
-            The main color of this task and all sub-tasks
         :param parent: :py:class:'QWidget', optional
             The parent widget
         :param style: :py:class:'TaskWidgetStyle', optional
             The widget's style
         """
-        self.task, self.planner, self.main_color = task, planner, main_color
+        self.task, self.planner = task, planner
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
+        self.layout.setAlignment(Qt.AlignHCenter)
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
         # Geometry
         # Get screen size
-        width, height = int(SCREEN_WIDTH * 0.35), int(SCREEN_HEIGHT * 0.6)
+        width, height = int(SCREEN_WIDTH * 0.37), int(SCREEN_HEIGHT * 0.65)
         self.setGeometry(int(SCREEN_WIDTH / 2) - int(width / 2),
                          int(SCREEN_HEIGHT / 2) - int(height / 2),
                          width,  # width
@@ -80,16 +79,18 @@ class TaskWidget(QWidget):
         if self.task.is_top_level:
             self.path_widget.hide()
         # Horizontal layout for (title, color, dates)
-        self.title_dates_layout = QHBoxLayout()
-        self.layout.addLayout(self.title_dates_layout)
+        self.title_color_dates_layout = QHBoxLayout()
+        self.layout.addLayout(self.title_color_dates_layout)
         # Title widget
         self.make_title_widget()
         self.title_widget.setFixedHeight(int(self.height()*0.08))
         # Color widget
         self.make_color_widget()
+        ## Color pushbutton
+        #self.color_widget.color_pushbutton.setFixedSize(ICON_SIZES['small'])
         # Start and end date widgets
         self.make_date_widgets()
-        self.title_dates_layout.addStretch()
+        self.title_color_dates_layout.addStretch()
         ## Textedit
         self.title_widget.textedit.setFixedHeight(int(self.title_widget.height()))
         self.title_widget.textedit.setMinimumWidth(int(self.width() * 0.5))
@@ -134,7 +135,7 @@ class TaskWidget(QWidget):
         self.subtask_list_widget.setMaximumWidth(int(self.width()*2))
         ## Icon pushbutton
         self.subtask_list_widget.icon_label.setFixedSize(int(self.height()*0.05),
-                                                              int(self.height()*0.05))
+                                                         int(self.height()*0.05))
         ## New textedit
         self.subtask_list_widget.new_textedit.setFixedWidth(int(self.width()*0.5))
         self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()))
@@ -315,7 +316,7 @@ class TaskWidget(QWidget):
 
         self.title_widget = TitleWidget(task=self.task,
                                         parent=self)
-        self.title_dates_layout.addWidget(self.title_widget)
+        self.title_color_dates_layout.addWidget(self.title_widget)
 
     def make_color_widget(self):
         class ColorWidget(QWidget):
@@ -338,7 +339,183 @@ class TaskWidget(QWidget):
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
-                raise NotImplementedError
+                self.task, self.planner = task, planner
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout(self)
+                # Label
+                self.make_label()
+                # Color button
+                self.make_color_button()
+                # Color picking dialog
+                self.make_color_dialog()
+
+            def make_label(self):
+                self.label = QLabel('Color')
+                self.layout.addWidget(self.label)
+                self.label.setAlignment(Qt.AlignLeft)
+
+            def make_color_button(self):
+                self.color_pushbutton = QPushButton()
+                # Layout
+                self.layout.addWidget(self.color_pushbutton)
+                # User interactions
+                def clicked():
+                    if not self.color_dialog.isVisible():
+                        self.color_dialog.show()
+
+                def update_color():
+                    if self.task.color is None:
+                        self.task.color = self.parent()._style.color_palette['background 2']
+                    stylesheet = '''
+                                QPushButton
+                                {
+                                    background-color:%s;
+                                    border-color:%s;
+                                }
+                                QPushButton:hover
+                                {
+                                    border:2px solid %s;
+                                }
+                                ''' % (self.task.color,
+                                       self.parent()._style.color_palette['background 1'],
+                                       self.parent()._style.color_palette['text - highlight'])
+                    self.parent()._style.stylesheets['standard view']['color_widget']['color_pushbutton'] = stylesheet
+                    self.color_pushbutton.setStyleSheet(stylesheet)
+                # Connect task and widget
+                self.color_pushbutton.clicked.connect(clicked)
+                # Keep connecting
+                self.task.color_changed.connect(lambda **kwargs: update_color())
+                # Set initial value
+                update_color()
+
+
+
+            def make_color_dialog(self):
+                self.color_dialog = QColorDialog()
+                # Geometry
+                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                                    'y',
+                                                                                    'width',
+                                                                                    'height']]
+                self.color_dialog.setWindowTitle(f'Widget Color')
+                self.color_dialog.setGeometry(int(x + 1.5 * w),
+                                                 int(y + h / 2),
+                                                 self.color_dialog.width(),
+                                                 self.color_dialog.height())
+                # User interactions
+                def accepted():
+                    self.task.color = self.color_dialog.selectedColor().name()
+
+                self.color_dialog.accepted.connect(accepted)
+
+        self.color_widget = ColorWidget(task=self.task,
+                                        planner=self.planner,
+                                        parent=self)
+        self.title_color_dates_layout.addWidget(self.color_widget)
+
+    def make_date_widgets(self):
+        class DateWidget(QWidget):
+            """
+            This widget contains:
+                - An icon symbolizing the type of time mode (start, end, ...)
+                - A label indicating the selected date
+                - A calendar widget that allows the user to select a day
+            """
+            def __init__(self,
+                         task: Task,
+                         parent: QWidget = None,
+                         time_mode: str = 'start'):
+                """
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                :param time_mode: str, optional
+                    The time mode, e.g., 'start', 'end'.
+                """
+                TIME_MODES = ['start', 'end']
+                if time_mode not in TIME_MODES:
+                    raise ValueError(f'Unrecognized time more {time_mode}. Possible time modes are {tuple(TIME_MODES)}')
+                self.task = task
+                self.time_mode = time_mode
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout()
+                self.setLayout(self.layout)
+                # Label
+                self.make_label()
+                # Label
+                self.make_pushbutton()
+                # Calendar widget
+                self.make_calendar_widget()
+
+            def make_label(self):
+                self.label = QLabel(f'{self.time_mode.title()} Date')
+                self.layout.addWidget(self.label)
+                self.label.setAlignment(Qt.AlignLeft)
+
+            def make_pushbutton(self):
+                self.pushbutton = QPushButton()
+                # Layout
+                self.layout.addWidget(self.pushbutton)
+                # User interactions
+                def update_label():
+                    date = getattr(self.task, f'{self.time_mode}_date')
+                    self.pushbutton.setText(f'{date.day}/{date.month}/{date.year}')
+
+                getattr(self.task, f'{self.time_mode}_date_changed').connect(lambda **kwargs: update_label())
+                update_label()
+
+                def clicked():
+                    self.calendar_widget.show()
+
+                self.pushbutton.clicked.connect(clicked)
+
+
+
+            def make_calendar_widget(self):
+                self.calendar_widget = QCalendarWidget()
+                self.calendar_widget.setGridVisible(True)
+                # Geometry
+                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                           'y',
+                                                                           'width',
+                                                                           'height']]
+                self.calendar_widget.setWindowTitle(f'{self.time_mode.title()} Date')
+                self.calendar_widget.setGeometry(int(x+1.5*w),
+                                                 int(y+h/2),
+                                                 self.calendar_widget.width(),
+                                                 self.calendar_widget.height())
+
+                def callback():
+                    # Get date from calendar
+                    date = self.calendar_widget.selectedDate()
+                    # Set date to task
+                    old_date = getattr(self.task, f'{self.time_mode}_date')
+                    task_date = dt(date.year(),
+                                   date.month(),
+                                   date.day())
+                    try:
+                        setattr(self.task, f'{self.time_mode}_date', task_date)
+                    except ValueError:
+                        self.calendar_widget.setSelectedDate(QDate(old_date.year,
+                                                                   old_date.month,
+                                                                   old_date.day))
+                        callback()
+                    # Hide calendar
+                    self.calendar_widget.hide()
+
+                self.calendar_widget.clicked.connect(callback)
+
+        self.start_date_widget = DateWidget(task=self.task,
+                                            parent=self,
+                                            time_mode='start')
+        self.title_color_dates_layout.addWidget(self.start_date_widget)
+        self.end_date_widget = DateWidget(task=self.task,
+                                          parent=self,
+                                          time_mode='end')
+        self.title_color_dates_layout.addWidget(self.end_date_widget)
 
     def make_progress_widget(self):
         class ProgressWidget(QWidget):
@@ -452,8 +629,8 @@ class TaskWidget(QWidget):
                 # Add categories
                 if self.planner is not None:
                     self.combobox.addItems(self.planner.categories)
-                elif self.task.category not in ['No Category']:
-                    self.combobox.addItems([self.task.category])
+                elif self.task.category is not None:
+                    self.combobox.addItems(self.task.category)
                 # User interactions
                 def clicked():
                     self.task.category = self.combobox.currentText()
@@ -484,7 +661,7 @@ class TaskWidget(QWidget):
                 self.add_pushbutton.setIcon(QIcon(icon_filename))
                 # User interactions
                 def callback():
-                    # Show the new assignee linedit
+                    # Show the new textedit
                     self.new_textedit.setText('')
                     self.new_textedit.show()
 
@@ -503,7 +680,7 @@ class TaskWidget(QWidget):
                         all_items = [self.combobox.itemText(i) for i in range(self.combobox.count())]
                         if text not in all_items:
                             self.combobox.addItem(text)
-                            self.task.category = text
+                            self.task.category = text if text != '' else None
                             if self.planner is not None:
                                 self.planner.add_categories(self.task.category)
                         self.new_textedit.hide()
@@ -571,8 +748,8 @@ class TaskWidget(QWidget):
                 # Add items
                 if self.planner is not None:
                     self.combobox.addItems(self.planner.assignees)
-                elif self.task.assignee not in [None]:
-                    self.combobox.addItems([self.task.assignee])
+                elif self.task.assignee is not None:
+                    self.combobox.addItems(self.task.assignee)
                 # User interactions
                 def clicked():
                     self.task.assignee = self.combobox.currentText()
@@ -622,7 +799,7 @@ class TaskWidget(QWidget):
                         all_items = [self.combobox.itemText(i) for i in range(self.combobox.count())]
                         if text not in all_items:
                             self.combobox.addItem(text)
-                            self.task.assignee = text
+                            self.task.assignee = text if text != '' else None
                             if self.planner is not None:
                                 self.planner.add_assignees(self.task.assignee)
                         self.new_textedit.hide()
@@ -693,109 +870,6 @@ class TaskWidget(QWidget):
         self.priority_widget = PriorityWidget(task=self.task,
                                               parent=self)
         self.priority_progress_layout.addWidget(self.priority_widget)
-
-    def make_date_widgets(self):
-        class DateWidget(QWidget):
-            """
-            This widget contains:
-                - An icon symbolizing the type of time mode (start, end, ...)
-                - A label indicating the selected date
-                - A calendar widget that allows the user to select a day
-            """
-            def __init__(self,
-                         task: Task,
-                         parent: QWidget = None,
-                         time_mode: str = 'start'):
-                """
-                :param task: :py:class:'taskplanner.tasks.Task'
-                    The task associated to this widget
-                :param parent: :py:class:'QWidget', optional
-                    The parent widget
-                :param time_mode: str, optional
-                    The time mode, e.g., 'start', 'end'.
-                """
-                TIME_MODES = ['start', 'end']
-                if time_mode not in TIME_MODES:
-                    raise ValueError(f'Unrecognized time more {time_mode}. Possible time modes are {tuple(TIME_MODES)}')
-                self.task = task
-                self.time_mode = time_mode
-                super().__init__(parent=parent)
-                # Layout
-                self.layout = QVBoxLayout()
-                self.setLayout(self.layout)
-                # Label
-                self.make_label()
-                # Label
-                self.make_pushbutton()
-                # Calendar widget
-                self.make_calendar_widget()
-
-            def make_label(self):
-                self.label = QLabel(f'{self.time_mode.title()} Date')
-                self.layout.addWidget(self.label)
-                self.label.setAlignment(Qt.AlignLeft)
-
-            def make_pushbutton(self):
-                self.pushbutton = QPushButton()
-                # Layout
-                self.layout.addWidget(self.pushbutton)
-                # User interactions
-                def update_label():
-                    date = getattr(self.task, f'{self.time_mode}_date')
-                    self.pushbutton.setText(f'{date.day}/{date.month}/{date.year}')
-
-                getattr(self.task, f'{self.time_mode}_date_changed').connect(lambda **kwargs: update_label())
-                update_label()
-
-                def clicked():
-                    self.calendar_widget.show()
-
-                self.pushbutton.clicked.connect(clicked)
-
-
-
-            def make_calendar_widget(self):
-                self.calendar_widget = QCalendarWidget()
-                self.calendar_widget.setGridVisible(True)
-                # Geometry
-                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
-                                                                           'y',
-                                                                           'width',
-                                                                           'height']]
-                self.calendar_widget.setWindowTitle(f'{self.time_mode.title()} Date')
-                self.calendar_widget.setGeometry(int(x+1.5*w),
-                                                 int(y+h/2),
-                                                 self.calendar_widget.width(),
-                                                 self.calendar_widget.height())
-
-                def callback():
-                    # Get date from calendar
-                    date = self.calendar_widget.selectedDate()
-                    # Set date to task
-                    old_date = getattr(self.task, f'{self.time_mode}_date')
-                    task_date = dt(date.year(),
-                                   date.month(),
-                                   date.day())
-                    try:
-                        setattr(self.task, f'{self.time_mode}_date', task_date)
-                    except ValueError:
-                        self.calendar_widget.setSelectedDate(QDate(old_date.year,
-                                                                   old_date.month,
-                                                                   old_date.day))
-                        callback()
-                    # Hide calendar
-                    self.calendar_widget.hide()
-
-                self.calendar_widget.clicked.connect(callback)
-
-        self.start_date_widget = DateWidget(task=self.task,
-                                            parent=self,
-                                            time_mode='start')
-        self.title_dates_layout.addWidget(self.start_date_widget)
-        self.end_date_widget = DateWidget(task=self.task,
-                                          parent=self,
-                                          time_mode='end')
-        self.title_dates_layout.addWidget(self.end_date_widget)
 
     def make_description_textedit(self):
         self.description_textedit = QTextEdit()

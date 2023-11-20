@@ -68,7 +68,8 @@ class Planner:
     def add_categories(self,
                        *categories: str):
         for category in categories:
-            if category not in self.categories and category not in ['No Category', '']:
+            if (category not in self.categories) and (category is not None):
+                print(category)
                 self._categories += [category]
                 self.categories_changed.emit()
 
@@ -82,7 +83,7 @@ class Planner:
     def add_assignees(self,
                       *assignees: str):
         for assignee in assignees:
-            if assignee not in self.assignees:
+            if (assignee not in self.assignees) and (assignee is not None):
                 self._assignees += [assignee]
                 self.assignees_changed.emit()
 
@@ -101,6 +102,14 @@ class Planner:
                                  'assignee']:
             raise ValueError(f'Invalid property "{property_name}". Valid properties are (category, assignee)')
         plural_form = f'{property_name[:-1]}ies' if property_name[-1]=='y' else f'{property_name}s'
+        getattr(self, f'add_{plural_form}')(getattr(task, property_name))
+        getattr(task, f'{property_name}_changed').connect(
+            lambda **kwargs: signal.emit())
+        for subtask in task.descendants:
+            getattr(self, f'add_{plural_form}')(getattr(subtask, property_name))
+            getattr(subtask, f'{property_name}_changed').connect(
+                lambda **kwargs: signal.emit())
+        '''
         if task.is_bottom_level and getattr(task, property_name) not in getattr(self, plural_form):
             getattr(self, plural_form).append(getattr(task, property_name))
             getattr(task, f'{property_name}_changed').connect(
@@ -110,4 +119,5 @@ class Planner:
                 self._add_new_values(task=subtask,
                                      signal=signal,
                                      property_name=property_name)
+        '''
 

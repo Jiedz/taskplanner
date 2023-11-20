@@ -9,6 +9,7 @@ from logging import warning
 # %% Imports
 from anytree import Node, RenderTree
 from signalslot import Signal
+from PyQt5.Qt import QColor
 
 # %% Task
 PRIORITY_LEVELS = ["low", "high", "urgent"]
@@ -33,12 +34,13 @@ class Task(Node):
     def __init__(self,
                  parent: object = None,
                  name: str = "A Task",
-                 category: object = "No Category",
+                 category: object = None,
                  description: object = "",
                  priority: object = "low",
                  start_date: date = date.today(),
                  end_date: date = None,
-                 assignee: object = None) -> object:
+                 assignee: object = None,
+                 color: str = None) -> object:
         '''
         :param parent: py:class:'anytree.Node', optional
             The parent of the current task. If 'None', the task is considered as a top-level task.
@@ -55,6 +57,8 @@ class Task(Node):
             The task's end date. If not specified, the current date is used.
         :param assignee: str, optional
             The name of the person who is assigned the task.
+        :param color: str, optional
+            The color associated with the task.
         '''
         super().__init__(name=name,
                          parent=parent)  # A task is a node of a tree
@@ -170,6 +174,18 @@ class Task(Node):
         self.progress_changed.emit()
 
     @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        if value is not None:
+            if not QColor.isValidColor(value):
+                raise ValueError(f'Invalid color {value}.')
+        self._color = value
+        self.color_changed.emit()
+
+    @property
     def is_top_level(self):
         """
         It returns 'True' if and only if this task has no parent tasks.
@@ -246,6 +262,10 @@ class Task(Node):
         # Propagate the signal to all ancestors
         for a in self.ancestors:
             a.children_changed.emit()
+        # Set the color of all color-less descendants to the parent's color
+        for subtask in self.descendants:
+            if subtask.color is None:
+                subtask.color = self.color
 
     def remove_children_tasks(self, *children):
         '''
@@ -382,6 +402,7 @@ def _signal_changed_property(task: Task,
     valid_properties = [attr.replace('_changed', '') for attr in vars(Task()) if '_changed' in attr]
     if property_name not in valid_properties:
         raise ValueError(f'Invalid property "{property_name}". Valid properties are {tuple(valid_properties)}')
+    '''
     if task.is_bottom_level:
         getattr(task, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
     else:
@@ -389,3 +410,7 @@ def _signal_changed_property(task: Task,
             _signal_changed_property(task=subtask,
                                      signal=signal,
                                      property_name=property_name)
+    '''
+    getattr(task, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
+    for subtask in task.descendants:
+        getattr(subtask, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())

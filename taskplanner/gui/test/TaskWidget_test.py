@@ -18,7 +18,9 @@ task4.set_parent_task(task3)
 
 # Make a task planner
 planner = Planner()
+print(planner.categories)
 planner.add_tasks(task1, task1b)
+print(planner.categories)
 
 for task in planner.tasks:
     task._print()
@@ -37,7 +39,9 @@ task1.priority = 'high'
 font_combobox = QFontComboBox()
 font_combobox.show()
 '''
+'''
 color_dialog = QColorDialog()
 color_dialog.show()
+'''
 
 sys.exit(app.exec_())
