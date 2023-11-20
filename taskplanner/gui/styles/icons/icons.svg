@@ -301,7 +301,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-35);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan28241">Dark Material</tspan></text>
+         id="tspan28520">Dark Material</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,303.49947,54.952067)"
@@ -309,7 +309,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan28243">Normal</tspan></text>
+         id="tspan28522">Normal</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,197.89613,55.068191)"
@@ -317,7 +317,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan28245">Description</tspan></text>
+         id="tspan28524">Description</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.19698,79.141419)"
@@ -325,7 +325,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28247">add</tspan></text>
+         id="tspan28526">add</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.44235,118.53791)"
@@ -333,7 +333,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28249">progress - completed</tspan></text>
+         id="tspan28528">progress - completed</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,380.66643,53.671827)"
@@ -341,7 +341,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-7-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan28251">Hover</tspan></text>
+         id="tspan28530">Hover</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.932262;stroke:#b52c00;stroke-width:1.82273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="rect11925-3"
@@ -664,7 +664,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28253">progress - in progress</tspan></text>
+         id="tspan28532">progress - in progress</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,107.56306 -5.31455,10.83186"
@@ -692,7 +692,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28255">progress - not started</tspan></text>
+         id="tspan28534">progress - not started</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,193.36846,210.28156)"
@@ -700,7 +700,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28257">priority - low</tspan></text>
+         id="tspan28536">priority - low</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,139.31306 -5.31455,10.83186"
@@ -732,7 +732,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28259">priority - high</tspan></text>
+         id="tspan28538">priority - high</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 179.91753,211.66685 H 399.5215 394.64142"
@@ -744,7 +744,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28261">priority - urgent</tspan></text>
+         id="tspan28540">priority - urgent</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 179.91753,240.77102 H 399.5215 394.64142"
@@ -893,7 +893,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28263">supertask</tspan></text>
+         id="tspan28542">supertask</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.36695,397.78756)"
@@ -901,15 +901,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-0);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28265">remove</tspan></text>
-    <text
-       xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,199.65862,426.37744)"
-       id="text2695-6-0-6-5-6-6-2-7-3-2-1-9-6"
-       style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-0-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
-         x="-55.119141"
-         y="-135.52347"
-         id="tspan28267">color picker</tspan></text>
+         id="tspan28544">remove</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.23785,315.53156)"
@@ -917,7 +909,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28269">subtask</tspan></text>
+         id="tspan28546">subtask</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.41593,339.70228)"
@@ -925,7 +917,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28271">subtask not expanded</tspan></text>
+         id="tspan28548">subtask not expanded</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.76867,368.55065)"
@@ -933,6 +925,6 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan28273">subtask expanded</tspan></text>
+         id="tspan28550">subtask expanded</tspan></text>
   </g>
 </svg>
