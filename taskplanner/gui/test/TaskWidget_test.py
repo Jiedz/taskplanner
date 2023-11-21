@@ -1,9 +1,9 @@
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
-from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
-from taskplanner.gui.styles.tasks import TaskWidgetStyle
+from taskplanner.gui.tasks import TaskWidget
+from taskplanner.gui.styles import TaskWidgetStyle
 
-from PyQt5.QtWidgets import QApplication, QFontComboBox, QColorDialog
+from PyQt5.QtWidgets import QApplication
 import sys
 
 task1 = Task(name='Task - Level 1')

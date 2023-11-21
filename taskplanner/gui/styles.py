@@ -52,7 +52,7 @@ class TaskWidgetStyle:
         # Locate icon path
         self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
         self.icon_path = os.path.join(self.icon_path,
-                                      'icons',
+                                      'styles/icons',
                                       self.color_palette_name.replace(" ", "-"))
         # Get screen size
         screen_size = get_primary_screen()
@@ -548,3 +548,27 @@ class TaskWidgetStyle:
             raise ValueError(f'Invalid color_palette name. Accepted color_palettes are {COLOR_PALETTES}')
         self.__init__(font=self.font,
                       color_palette=COLOR_PALETTES[name])
+
+
+class PlannerWidgetStyle:
+    def __init__(self,
+                 color_palette: str = 'dark material',
+                 font='light'):
+        if font not in list(FONTS.keys()):
+            raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
+        self._font = FONTS[font]
+        self.font_name = font
+        if color_palette not in list(COLOR_PALETTES.keys()):
+            raise ValueError(
+                f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
+        self._color_palette = COLOR_PALETTES[color_palette]
+        self.color_palette_name = color_palette
+        # Locate icon path
+        self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
+        self.icon_path = os.path.join(self.icon_path,
+                                      'styles/icons',
+                                      self.color_palette_name.replace(" ", "-"))
+        # Get screen size
+        screen_size = get_primary_screen()
+        # Define style sheets
+        self.stylesheets = {}

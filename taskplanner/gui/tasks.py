@@ -7,8 +7,7 @@ from datetime import date as dt
 
 # %% Imports
 from PyQt5.QtCore import Qt, QDate
-from PyQt5.Qt import QSize
-from PyQt5.QtGui import QIcon, QTextCursor
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -19,12 +18,11 @@ from PyQt5.QtWidgets import \
     QTextEdit,
     QComboBox,
     QScrollArea,
-    QMainWindow,
     QCalendarWidget,
     QColorDialog
     )
 
-from taskplanner.gui.styles.tasks import TaskWidgetStyle, ICON_SIZES
+from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
 from taskplanner.planner import Planner
