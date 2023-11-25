@@ -128,11 +128,12 @@ class PlannerWidget(QTabWidget):
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout(self)
-                        self.layout.setAlignment(Qt.AlignTop)
+                        #self.layout.setAlignment(Qt.AlignTop)
                         # New task textedit
                         self.make_new_task_textedit()
                         # Subtask widgets
                         self.task_widgets = []
+                        self.layout.addStretch()
                         self.make_task_widgets()
 
                         slots = [slot for slot in self.planner.tasks_changed._slots if
@@ -174,6 +175,7 @@ class PlannerWidget(QTabWidget):
                         self.new_task_textedit.setPlaceholderText("+ New Task")
 
                     def make_task_widgets(self):
+                        self.layout.removeItem(self.layout.itemAt(self.layout.count()-1))
                         for task in self.planner.tasks:
                             if task not in [widget.task for widget in self.task_widgets]:
                                 widget = TaskWidgetSimple(parent=self,
@@ -187,8 +189,9 @@ class PlannerWidget(QTabWidget):
                         # Remove non-existent tasks
                         for widget in self.task_widgets:
                             if widget.task not in self.planner.tasks:
-                                #widget.hide()
+                                widget.hide()
                                 self.task_widgets.remove(widget)
+                        self.layout.addStretch()
 
                 self.task_list_widget = TaskListWidget(planner=self.planner,
                                                        parent=self)

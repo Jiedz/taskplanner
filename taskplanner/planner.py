@@ -3,6 +3,7 @@ This module defines a task planner.
 """
 from taskplanner.tasks import Task, _signal_changed_property
 from signalslot import Signal
+from PyQt5.Qt import QCalendar
 
 class Planner:
     """
@@ -26,6 +27,8 @@ class Planner:
                      'categories',
                      'assignees']:
             setattr(self, f'{attr}_changed', Signal())
+
+        self.calendar = QCalendar()
 
     @property
     def tasks(self):
