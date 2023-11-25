@@ -19,13 +19,16 @@ from PyQt5.QtWidgets import \
 
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
-from taskplanner.gui.tasks import TaskWidget
+from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
 from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
 SCREEN_HEIGHT = SCREEN.height
+
+DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette='dark material',
+                                           font='light')
 
 class PlannerWidget(QTabWidget):
     """
@@ -36,8 +39,7 @@ class PlannerWidget(QTabWidget):
     def __init__(self,
                  planner: Planner,
                  parent: QWidget = None,
-                 style: PlannerWidgetStyle = PlannerWidgetStyle(color_palette='dark material',
-                                                                font='light')
+                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
                  ):
         """
 
@@ -78,7 +80,9 @@ class PlannerWidget(QTabWidget):
             """
             def __init__(self,
                          planner: Planner,
-                         parent: QWidget = None):
+                         parent: QWidget = None,
+                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
+                         ):
                 """
 
                 :param planner: :py:class:'taskplanner.planner.Planner'
@@ -86,7 +90,7 @@ class PlannerWidget(QTabWidget):
                 :param parent: :py:class:'QWidget', optional
                     The parent widget
                 """
-                self.planner = planner
+                self.planner, self._style = planner, style
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QHBoxLayout(self)
@@ -111,20 +115,31 @@ class PlannerWidget(QTabWidget):
                     """
                     def __init__(self,
                                  planner: Planner,
-                                 parent: QWidget = None):
+                                 parent: QWidget = None,
+                                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
+                                 ):
                         """
                         :param planner: :py:class:'taskplanner.planner.Planner'
                             The planner associated to this widget
                         :param parent: :py:class:'QWidget', optional
                             The parent widget
                         """
-                        self.planner = planner
+                        self.planner, self._style = planner, style
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout(self)
+                        self.layout.setAlignment(Qt.AlignTop)
                         # New task textedit
                         self.make_new_task_textedit()
-                        self.layout.addStretch()
+                        # Subtask widgets
+                        self.task_widgets = []
+                        self.make_task_widgets()
+
+                        slots = [slot for slot in self.planner.tasks_changed._slots if
+                                 'TaskListWidget.' in str(slot)]
+                        for slot in slots:
+                            self.planner.tasks_changed.disconnect(slot)
+                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_task_widgets())
 
                     def make_new_task_textedit(self):
                         # textedit to define a new assignee when the 'plus' button is clicked
@@ -133,21 +148,55 @@ class PlannerWidget(QTabWidget):
                         self.layout.addWidget(self.new_task_textedit)
 
                         def callback():
-                            text = self.new_task_textedit.toPlainText()
-                            if '\n' in text:
-                                text = text.replace('\n', '')
-                                task = Task(name=text)
-                                self.planner.add_tasks(task)
+                            if '\n' in self.new_task_textedit.toPlainText():
+                                new_task = Task(name=self.new_task_textedit.toPlainText()[:-1])
+                                self.new_task_textedit.blockSignals(True)
+                                self.new_task_textedit.setText('')
+                                self.new_task_textedit.blockSignals(False)
+                                """
+                                For some reason, the cursor is normally reset to the start of the 
+                                widget. One then needs to move the cursor to the end and then reset the cursor
+                                """
+                                # Move cursor to the end
+                                cursor = self.new_task_textedit.textCursor()
+                                cursor.movePosition(cursor.Left,
+                                                    cursor.MoveAnchor,
+                                                    0)
+                                """
+                                For some other reason, all text is also automatically selected, so one needs to
+                                clear the selection.
+                                """
+                                cursor.clearSelection()
+                                # Add new subtask
+                                self.planner.add_tasks(new_task)
 
                         self.new_task_textedit.textChanged.connect(lambda: callback())
                         self.new_task_textedit.setPlaceholderText("+ New Task")
+
+                    def make_task_widgets(self):
+                        for task in self.planner.tasks:
+                            if task not in [widget.task for widget in self.task_widgets]:
+                                widget = TaskWidgetSimple(parent=self,
+                                                          task=task,
+                                                          planner=self.planner,
+                                                          style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
+                                                                                font=self._style.font_name)
+                                                          )
+                                self.layout.addWidget(widget)
+                                self.task_widgets += [widget]
+                        # Remove non-existent tasks
+                        for widget in self.task_widgets:
+                            if widget.task not in self.planner.tasks:
+                                #widget.hide()
+                                self.task_widgets.remove(widget)
 
                 self.task_list_widget = TaskListWidget(planner=self.planner,
                                                        parent=self)
                 self.layout.addWidget(self.task_list_widget)
 
         self.planner_tab = PlannerTab(planner=self.planner,
-                                      parent=self)
+                                      parent=self,
+                                      style=self._style)
         self.addTab(self.planner_tab, 'Planner')
 
 

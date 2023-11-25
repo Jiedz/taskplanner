@@ -48,28 +48,29 @@ class Planner:
                                          signal=self.tasks_changed,
                                          property_name='children')
                 self._add_new_values(task=task,
-                                       signal=self.categories_changed,
-                                       property_name='category')
+                                     signal=self.categories_changed,
+                                     property_name='category')
                 self._add_new_values(task=task,
-                                       signal=self.categories_changed,
-                                       property_name='assignee')
+                                     signal=self.categories_changed,
+                                     property_name='assignee')
                 self.tasks_changed.emit()
 
-    def remove_task(self,
-                    *tasks: Task):
+    def remove_tasks(self,
+                     *tasks: Task):
         for task in tasks:
             if task in self.tasks:
-                self._tasks = self._tasks.remove(task)
+                self._tasks.remove(task)
+                '''
                 _signal_changed_property(task=task,
                                          signal=self.tasks_changed,
                                          property_name='children')
+                '''
                 self.tasks_changed.emit()
 
     def add_categories(self,
                        *categories: str):
         for category in categories:
             if (category not in self.categories) and (category is not None):
-                print(category)
                 self._categories += [category]
                 self.categories_changed.emit()
 

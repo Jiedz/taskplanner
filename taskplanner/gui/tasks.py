@@ -684,7 +684,7 @@ class TaskWidget(QWidget):
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
-                self.new_textedit.setPlaceholderText("New Category")
+                self.new_textedit.setPlaceholderText("+ New Category")
                 self.new_textedit.hide()
 
         self.category_widget = CategoryWidget(task=self.task,
@@ -803,7 +803,7 @@ class TaskWidget(QWidget):
                         self.new_textedit.hide()
 
                 self.new_textedit.textChanged.connect(lambda: callback())
-                self.new_textedit.setPlaceholderText("New Assignee")
+                self.new_textedit.setPlaceholderText("+ New Assignee")
                 self.new_textedit.hide()
 
         self.assignee_widget = AssigneeWidget(task=self.task,
@@ -949,7 +949,7 @@ class TaskWidget(QWidget):
                 slots = [slot for slot in self.task.children_changed._slots if 'SubtaskListWidget.' in str(slot)]
                 for slot in slots:
                     self.task.children_changed.disconnect(slot)
-                self.task.children_changed.connect(lambda **kwargs: self.update_subtasks())
+                self.task.children_changed.connect(lambda **kwargs: self.make_subtask_widgets())
 
             def make_icon_label(self):
                 
@@ -991,7 +991,7 @@ class TaskWidget(QWidget):
                         self.task.add_children_tasks(new_task)
 
                 self.new_textedit.textChanged.connect(lambda: callback())
-                self.new_textedit.setPlaceholderText("New Subtask")
+                self.new_textedit.setPlaceholderText("+ New Subtask")
 
             def make_subtask_widgets(self):
                 for subtask in self.task.children:
@@ -1008,9 +1008,6 @@ class TaskWidget(QWidget):
                     if widget.task not in self.task.children:
                         widget.hide()
                         self.subtask_widgets.remove(widget)
-
-            def update_subtasks(self):
-                self.make_subtask_widgets()
 
         self.subtask_list_widget = SubtaskListWidget(task=self.task,
                                                      planner=self.planner,
@@ -1267,8 +1264,11 @@ class TaskLineWidget(QWidget):
 
         # Callback
         def callback():
-            if self.task.parent is not None:
+            if not self.task.is_top_level:
                 self.task.parent.remove_children_tasks(self.task)
+            elif self.planner is not None:
+                self.planner.remove_tasks(self.task)
+                self.hide()
 
         self.remove_pushbutton.clicked.connect(callback)
 
