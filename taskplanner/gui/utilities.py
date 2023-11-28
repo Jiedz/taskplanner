@@ -22,5 +22,18 @@ def set_style(widget, stylesheets):
                 print(e)
 
 from screeninfo import get_monitors
-def get_screen_size():
-    return get_monitors()[0]
+
+def get_primary_screen():
+    monitors = get_monitors()
+    return [m for m in monitors if m.is_primary][0]
+
+
+from PyQt5.Qt import QCursor, QApplication
+
+def get_pixel_ratio():
+    # Source: https://stackoverflow.com/a/40053864/3388962
+    pos = QCursor.pos()
+    for screen in QApplication().screens():
+        rect = screen.geometry()
+        if rect.contains(pos):
+            return screen.devicePixelRatio()
