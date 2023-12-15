@@ -17,6 +17,8 @@ from PyQt5.QtWidgets import \
     QTabWidget
     )
 
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
@@ -55,14 +57,9 @@ class PlannerWidget(QTabWidget):
         # Layout
         self.layout = QHBoxLayout(self)
         # Geometry
-        width, height = int(SCREEN_WIDTH), int(SCREEN_HEIGHT)
+        width, height = int(SCREEN_WIDTH*0.9), int(SCREEN_HEIGHT*0.9)
         self.setFixedSize(width,
                           height)
-        # Scroll area
-        self.scrollarea = QScrollArea()
-        self.scrollarea.setWidgetResizable(True)
-        self.scrollarea.setGeometry(self.geometry())
-        self.scrollarea.setWidget(self)
         # Planner tab
         self.make_planner_tab()
         # Sorted tasks
@@ -99,17 +96,23 @@ class PlannerWidget(QTabWidget):
                 self.setGeometry(self.parent().geometry())
                 # Task list widget
                 self.make_task_list_widget()
-                self.task_list_widget.setFixedSize(int(self.width()*0.5),
-                                                   self.height())
+                # Scroll area
+                self.task_list_scrollarea = QScrollArea()
+                self.task_list_scrollarea.setWidgetResizable(True)
+                self.task_list_scrollarea.setFixedSize(int(self.width()*0.3),
+                                                       int(self.height()*0.95))
+                self.task_list_scrollarea.setWidget(self.task_list_widget)
+                self.layout.addWidget(self.task_list_scrollarea)
                 ## New task textedit
                 self.task_list_widget.new_task_textedit.setFixedSize(int(self.width()*0.15),
                                                                      int(self.height() * 0.035))
                 # Timelines widget
 
+
             def make_task_list_widget(self):
                 self.task_list_widget = TaskListWidget(planner=self.planner,
                                                        parent=self)
-                self.layout.addWidget(self.task_list_widget)
+                #self.layout.addWidget(self.task_list_widget)
 
             def make_timelines_widget(self):
                 class TimelinesWidget(QWidget):
@@ -125,11 +128,50 @@ class PlannerWidget(QTabWidget):
                                  task_list_widget: TaskListWidget,
                                  parent: QWidget = None):
                         """
-
                         :param planner:
                         :param task_list_widget:
                         :param parent:
                         """
+                        self.planner = planner
+                        self.task_list_widget = task_list_widget
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QVBoxLayout(self)
+                        # Months Panel
+                        self.make_months_panel()
+
+                    def make_months_panel(self):
+                        class MonthsPanel(QWidget):
+                            """
+                            This widget contains a fixed number of month widgets.
+                            """
+                            def __init__(self,
+                                         planner: Planner,
+                                         parent: QWidget=None,
+                                         start_date: date=date.today(),
+                                         n_months: int=3):
+                                self.planner = planner
+                                self.start_date = start_date
+                                N_MAX = 5
+                                self.n_months = n_months
+                                if n_months > N_MAX:
+                                    raise ValueError(f'Visualizing too many months ({n_months}). Maximum number of months is {N_max}')
+                                super().__init__(parent)
+                                # Layout
+                                self.layout = QHBoxLayout(self)
+
+                            def make_month_widgets(self):
+                                self.months = []
+                                for month in range(self.start_date.month,
+                                                   self.start_date.month + self.n_months + 1):
+                                    self.months += [month % 12]
+                                # Make month widget
+
+
+                        self.months_panel = MonthsPanel(planner=self.planner,
+                                                        parent=self)
+                        self.layout.addWidget(self.months_panel)
+
 
         self.planner_tab = PlannerTab(planner=self.planner,
                                       parent=self,
@@ -140,7 +182,6 @@ class PlannerWidget(QTabWidget):
 
     def show(self):
         super().show()
-        self.scrollarea.show()
 
 
 class TaskListWidget(QWidget):

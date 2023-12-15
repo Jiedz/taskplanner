@@ -587,51 +587,54 @@ class PlannerWidgetStyle:
                            self.color_palette['border'],
                            self.font['family'],
                            self.color_palette['text']),
-                'scrollarea':
-                    '''
-                        QScrollArea
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar:vertical
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar:horizontal
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar:handle:vertical
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar:handle:horizontal
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar:handle
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                        QScrollBar::groove 
-                        {
-                            background-color:%s;
-                            border:2px solid %s;
-                            border-radius:10px;
-                        }
-                    ''' % (self.color_palette['background 1'],
+                'planner_tab':
+                    {
+                        'task_list_scrollarea':
+                            '''
+                            QScrollArea
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar:vertical
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar:horizontal
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar:handle:vertical
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar:handle:horizontal
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar:handle
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            QScrollBar::groove 
+                            {
+                                background-color:%s;
+                                border:2px solid %s;
+                                border-radius:10px;
+                            }
+                            '''
+                            % (self.color_palette['background 1'],
                            self.color_palette['border'],
                            self.color_palette['background 1'],
                            self.color_palette['border'],
@@ -646,6 +649,11 @@ class PlannerWidgetStyle:
                            self.color_palette['background 1'],
                            self.color_palette['border'],
                            ),
+                        'timelines_widget':
+                            {
+
+                            }
+                    }
             }
 
     @property

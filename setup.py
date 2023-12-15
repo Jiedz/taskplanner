@@ -11,7 +11,8 @@ requirements = ['numpy',
                 'anytree',
                 'pyqt5',
                 'screeninfo',
-                'signalslot']
+                'signalslot',
+                'python-dateutil']
 
 setup(name='taskplanner',
       version='1',
