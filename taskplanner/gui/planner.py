@@ -155,17 +155,23 @@ class PlannerWidget(QTabWidget):
                                 N_MAX = 5
                                 self.n_months = n_months
                                 if n_months > N_MAX:
-                                    raise ValueError(f'Visualizing too many months ({n_months}). Maximum number of months is {N_max}')
+                                    raise ValueError(f'Visualizing too many months ({n_months}). Maximum number of months is {N_MAX}')
                                 super().__init__(parent)
                                 # Layout
                                 self.layout = QHBoxLayout(self)
 
                             def make_month_widgets(self):
+                                # Make month widget
+                                class MonthWidget(QWidget):
+                                    """
+                                    This widget contains:
+                                        - 
+                                    """
                                 self.months = []
                                 for month in range(self.start_date.month,
                                                    self.start_date.month + self.n_months + 1):
                                     self.months += [month % 12]
-                                # Make month widget
+
 
 
                         self.months_panel = MonthsPanel(planner=self.planner,
