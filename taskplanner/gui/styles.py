@@ -652,6 +652,14 @@ class PlannerWidgetStyle:
                         'timelines_widget':
                             {
 
+                            },
+                        'month_widget':
+                            {
+
+                            },
+                        'week_widget':
+                            {
+
                             }
                     }
             }

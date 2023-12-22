@@ -107,6 +107,7 @@ class PlannerWidget(QTabWidget):
                 self.task_list_widget.new_task_textedit.setFixedSize(int(self.width()*0.15),
                                                                      int(self.height() * 0.035))
                 # Timelines widget
+                self.make_timelines_widget()
 
 
             def make_task_list_widget(self):
@@ -126,7 +127,10 @@ class PlannerWidget(QTabWidget):
                     def __init__(self,
                                  planner: Planner,
                                  task_list_widget: TaskListWidget,
-                                 parent: QWidget = None):
+                                 parent: QWidget = None,
+                                 start_date: date=date.today(),
+                                 n_months: int=3,
+                                 style: PlannerWidgetStyle = None):
                         """
                         :param planner:
                         :param task_list_widget:
@@ -134,49 +138,144 @@ class PlannerWidget(QTabWidget):
                         """
                         self.planner = planner
                         self.task_list_widget = task_list_widget
+                        self.start_date = start_date
+                        self._style = style
+                        N_MAX = 5
+                        self.n_months = n_months
+                        if n_months > N_MAX:
+                            raise ValueError(
+                                f'Visualizing too many months ({n_months}). Maximum number of months is {N_MAX}')
                         super().__init__(parent=parent)
                         # Layout
-                        self.layout = QVBoxLayout(self)
+                        self.layout = QHBoxLayout(self)
                         # Months Panel
-                        self.make_months_panel()
+                        self.make_month_widgets()
 
-                    def make_months_panel(self):
-                        class MonthsPanel(QWidget):
+                    def make_month_widgets(self):
+                        # Make month widget
+                        class MonthWidget(QWidget):
                             """
-                            This widget contains a fixed number of month widgets.
+                            This widget contains:
+                                - A label containing the month
+                                - A set of labels containing the weeks of the month
                             """
                             def __init__(self,
                                          planner: Planner,
+                                         task_list_widget: TaskListWidget,
+                                         date: date,
                                          parent: QWidget=None,
-                                         start_date: date=date.today(),
-                                         n_months: int=3):
-                                self.planner = planner
-                                self.start_date = start_date
-                                N_MAX = 5
-                                self.n_months = n_months
-                                if n_months > N_MAX:
-                                    raise ValueError(f'Visualizing too many months ({n_months}). Maximum number of months is {N_MAX}')
-                                super().__init__(parent)
+                                         style: PlannerWidgetStyle=None):
+                                self.planner = Planner
+                                self.task_list_widget = task_list_widget
+                                self._style = style
+                                self.date = date
+                                super().__init__(parent=parent)
                                 # Layout
-                                self.layout = QHBoxLayout(self)
+                                self.layout = QVBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignTop)
+                                # Month label
+                                self.make_label()
+                                # Horizontal layout for week widgets
+                                self.week_widgets_layout = QHBoxLayout()
+                                self.layout.addLayout(self.week_widgets_layout)
+                                # Week widgets
+                                self.make_week_widgets()
+                                # Set style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['planner_tab']
+                                              ['timelines_widget']
+                                              ['month_widget'])
 
-                            def make_month_widgets(self):
-                                # Make month widget
-                                class MonthWidget(QWidget):
+                            def make_label(self):
+                                self.label = QLabel()
+                                # Layout
+                                self.layout.addWidget(self.label)
+                                self.label.setAlignment(Qt.AlignCenter)
+                                # Set text
+                                self.label.setText(self.date.strftime('%B %Y'))
+
+                            def make_week_widgets(self):
+                                class WeekWidget(QWidget):
                                     """
                                     This widget contains:
-                                        - 
+                                        - A label containing the week
+                                        - A set of labels containing the days of the week
                                     """
-                                self.months = []
-                                for month in range(self.start_date.month,
-                                                   self.start_date.month + self.n_months + 1):
-                                    self.months += [month % 12]
+
+                                    def __init__(self,
+                                                 planner: Planner,
+                                                 task_list_widget: TaskListWidget,
+                                                 date: date,
+                                                 parent: QWidget = None,
+                                                 style: PlannerWidgetStyle = None):
+                                        self.planner = Planner
+                                        self.task_list_widget = task_list_widget
+                                        self._style = style
+                                        self.date = date
+                                        super().__init__(parent=parent)
+                                        # Layout
+                                        self.layout = QVBoxLayout(self)
+                                        self.layout.setAlignment(Qt.AlignTop)
+                                        # Week label
+                                        self.make_label()
+                                        # Day widgets
+                                        # Set style
+                                        if self._style is not None:
+                                            set_style(widget=self,
+                                                      stylesheets=self._style.stylesheets
+                                                      ['planner_tab']
+                                                      ['timelines_widget']
+                                                      ['week_widget'])
+
+                                    def make_label(self):
+                                        self.label = QLabel()
+                                        # Layout
+                                        self.layout.addWidget(self.label)
+                                        self.label.setAlignment(Qt.AlignCenter)
+                                        # Set text
+                                        self.label.setText(self.date.strftime('%W'))
+
+                                self.dates = []
+                                self.week_widgets = []
+                                import calendar
+                                self.n_weeks = len(calendar.monthcalendar(self.date.year,
+                                                                     self.date.month)
+                                                   )
+                                reference_date = date(self.date.year,
+                                                      self.date.month,
+                                                      1)
+                                for count in range(self.n_weeks):
+                                    self.dates += [reference_date + relativedelta(weeks=count)]
+                                    self.week_widgets += [WeekWidget(planner=self.planner,
+                                                                       task_list_widget=self.task_list_widget,
+                                                                       date=self.dates[-1],
+                                                                       parent=self,
+                                                                       style=self._style)]
+                                    self.week_widgets_layout.addWidget(self.week_widgets[-1])
 
 
+                        self.dates = []
+                        self.month_widgets = []
+                        reference_date = date(self.start_date.year,
+                                              self.start_date.month,
+                                              1)
+                        for count in range(self.n_months):
+                            self.dates += [reference_date + relativedelta(months=count)]
+                            self.month_widgets += [MonthWidget(planner=self.planner,
+                                                               task_list_widget=self.task_list_widget,
+                                                               date=self.dates[-1],
+                                                               parent=self,
+                                                               style=self._style)]
+                            self.layout.addWidget(self.month_widgets[-1])
 
-                        self.months_panel = MonthsPanel(planner=self.planner,
-                                                        parent=self)
-                        self.layout.addWidget(self.months_panel)
+                self.timelines_widget = TimelinesWidget(planner=self.planner,
+                                                        task_list_widget=self.task_list_widget,
+                                                        parent=self,
+                                                        start_date=date.today(),
+                                                        n_months=3)
+                self.layout.addWidget(self.timelines_widget)
 
 
         self.planner_tab = PlannerTab(planner=self.planner,
