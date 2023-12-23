@@ -220,7 +220,11 @@ class PlannerWidget(QTabWidget):
                                         self.layout.setAlignment(Qt.AlignTop)
                                         # Week label
                                         self.make_label()
+                                        # Horizontal layout for week widgets
+                                        self.day_widgets_layout = QHBoxLayout()
+                                        self.layout.addLayout(self.day_widgets_layout)
                                         # Day widgets
+                                        self.make_day_widgets()
                                         # Set style
                                         if self._style is not None:
                                             set_style(widget=self,
@@ -236,6 +240,66 @@ class PlannerWidget(QTabWidget):
                                         self.label.setAlignment(Qt.AlignCenter)
                                         # Set text
                                         self.label.setText(self.date.strftime('%W'))
+
+                                    def make_day_widgets(self):
+                                        class DayWidget(QWidget):
+                                            """
+                                            This widget contains:
+                                                - A label containing the day
+                                            """
+
+                                            def __init__(self,
+                                                         planner: Planner,
+                                                         task_list_widget: TaskListWidget,
+                                                         date: date,
+                                                         parent: QWidget = None,
+                                                         style: PlannerWidgetStyle = None):
+                                                self.planner = Planner
+                                                self.task_list_widget = task_list_widget
+                                                self._style = style
+                                                self.date = date
+                                                super().__init__(parent=parent)
+                                                # Layout
+                                                self.layout = QVBoxLayout(self)
+                                                self.layout.setAlignment(Qt.AlignTop)
+                                                # Day label
+                                                self.make_label()
+                                                # Set style
+                                                if self._style is not None:
+                                                    set_style(widget=self,
+                                                              stylesheets=self._style.stylesheets
+                                                              ['planner_tab']
+                                                              ['timelines_widget']
+                                                              ['day_widget'])
+
+                                            def make_label(self):
+                                                self.label = QLabel()
+                                                # Layout
+                                                self.layout.addWidget(self.label)
+                                                self.label.setAlignment(Qt.AlignCenter)
+                                                # Set text
+                                                self.label.setText(self.date.strftime('%A')[:3])
+
+                                        self.dates = []
+                                        self.day_widgets = []
+                                        import calendar
+                                        is_day_of_week = True
+                                        self.n_days = 0
+                                        while is_day_of_week:
+                                            d = self.date + relativedelta(days=self.n_days)
+                                            d_previous = self.date + relativedelta(days=self.n_days-1)
+                                            if d.day % 7 < d_previous.day % 7:
+                                                is_day_of_week = False
+                                            else:
+                                                #print(d)
+                                                self.dates += [d]
+                                                self.n_days += 1
+                                                self.day_widgets += [DayWidget(planner=self.planner,
+                                                                               task_list_widget=self.task_list_widget,
+                                                                               date=self.dates[-1],
+                                                                               parent=self,
+                                                                               style=self._style)]
+                                                self.day_widgets_layout.addWidget(self.day_widgets[-1])
 
                                 self.dates = []
                                 self.week_widgets = []

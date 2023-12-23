@@ -660,6 +660,10 @@ class PlannerWidgetStyle:
                         'week_widget':
                             {
 
+                            },
+                        'day_widget':
+                            {
+
                             }
                     }
             }
