@@ -663,7 +663,16 @@ class PlannerWidgetStyle:
                             },
                         'day_widget':
                             {
-
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text - small']),
                             }
                     }
             }

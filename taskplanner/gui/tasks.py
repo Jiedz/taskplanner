@@ -1055,7 +1055,7 @@ class TaskWidgetSimple(QWidget):
             if 'TaskWidgetSimple' not in str(type(task_widget_simple.parent())):
                 return spacing
             else:
-                return find_spacing(task_widget_simple = task_widget_simple.parent(),
+                return find_spacing(task_widget_simple=task_widget_simple.parent(),
                                     spacing=spacing + 20)
 
 
