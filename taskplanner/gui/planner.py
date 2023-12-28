@@ -14,7 +14,8 @@ from PyQt5.QtWidgets import \
     QScrollArea,
     QCalendarWidget,
     QColorDialog,
-    QTabWidget
+    QTabWidget,
+    QFrame
     )
 
 from datetime import date
@@ -113,12 +114,24 @@ class PlannerWidget(QTabWidget):
                 self.timelines_scrollarea.setWidgetResizable(True)
                 self.timelines_scrollarea.setWidget(self.timelines_widget)
                 self.layout.addWidget(self.timelines_scrollarea)
+                ## Relative size of month, week and day widgets
+                for month_widget in self.timelines_widget.month_widgets:
+                    month_widget.setFixedWidth(int(self.timelines_widget.width()*0.2))
+                    month_widget.label.setFixedHeight(int(self.height()*0.05))
+                    for week_widget in month_widget.week_widgets:
+                        week_widget.setFixedWidth(int(month_widget.width() / 5))
+                        for day_widget in week_widget.day_widgets:
+                            day_widget.setFixedWidth(int(week_widget.width() / 7))
+                if self._style is not None:
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab'])
+
 
 
             def make_task_list_widget(self):
                 self.task_list_widget = TaskListWidget(planner=self.planner,
                                                        parent=self)
-                #self.layout.addWidget(self.task_list_widget)
 
             def make_timelines_widget(self):
                 class TimelinesWidget(QWidget):
@@ -145,6 +158,7 @@ class PlannerWidget(QTabWidget):
                         self.task_list_widget = task_list_widget
                         self.start_date = start_date
                         self._style = style
+                        self.month_widgets = []
                         N_MAX = 24
                         self.n_months = n_months
                         if n_months > N_MAX:
@@ -152,14 +166,18 @@ class PlannerWidget(QTabWidget):
                                 f'Visualizing too many months ({n_months}). Maximum number of months is {N_MAX}')
                         super().__init__(parent=parent)
                         # Layout
-                        self.layout = QHBoxLayout(self)
+                        self.layout = QVBoxLayout(self)
                         self.layout.setSpacing(0)
+                        # Horizontal layout for month widgets
+                        self.month_widgets_layout = QHBoxLayout()
+                        self.layout.addLayout(self.month_widgets_layout)
                         # Months Panel
                         self.make_month_widgets()
 
+
                     def make_month_widgets(self):
                         # Make month widget
-                        class MonthWidget(QWidget):
+                        class MonthWidget(QFrame):
                             """
                             This widget contains:
                                 - A label containing the month
@@ -175,6 +193,7 @@ class PlannerWidget(QTabWidget):
                                 self.task_list_widget = task_list_widget
                                 self._style = style
                                 self.date = date
+                                self.week_widgets = []
                                 super().__init__(parent=parent)
                                 # Layout
                                 self.layout = QVBoxLayout(self)
@@ -183,7 +202,7 @@ class PlannerWidget(QTabWidget):
                                 self.make_label()
                                 # Horizontal layout for week widgets
                                 self.week_widgets_layout = QHBoxLayout()
-                                self.week_widgets_layout.setSpacing(0)
+                                self.week_widgets_layout.setAlignment(Qt.AlignLeft)
                                 self.layout.addLayout(self.week_widgets_layout)
                                 # Week widgets
                                 self.make_week_widgets()
@@ -192,19 +211,19 @@ class PlannerWidget(QTabWidget):
                                     set_style(widget=self,
                                               stylesheets=self._style.stylesheets
                                               ['planner_tab']
-                                              ['timelines_widget']
                                               ['month_widget'])
 
                             def make_label(self):
                                 self.label = QLabel()
                                 # Layout
                                 self.layout.addWidget(self.label)
-                                self.label.setAlignment(Qt.AlignCenter)
+                                self.label.setAlignment(Qt.AlignLeft)
+                                self.label.setAlignment(Qt.AlignVCenter)
                                 # Set text
                                 self.label.setText(self.date.strftime('%B %Y'))
 
                             def make_week_widgets(self):
-                                class WeekWidget(QWidget):
+                                class WeekWidget(QFrame):
                                     """
                                     This widget contains:
                                         - A label containing the week
@@ -221,6 +240,7 @@ class PlannerWidget(QTabWidget):
                                         self.task_list_widget = task_list_widget
                                         self._style = style
                                         self.date = date
+                                        self.day_widgets = []
                                         super().__init__(parent=parent)
                                         # Layout
                                         self.layout = QVBoxLayout(self)
@@ -229,6 +249,7 @@ class PlannerWidget(QTabWidget):
                                         self.make_label()
                                         # Horizontal layout for week widgets
                                         self.day_widgets_layout = QHBoxLayout()
+                                        self.day_widgets_layout.setAlignment(Qt.AlignLeft)
                                         self.day_widgets_layout.setSpacing(0)
                                         self.layout.addLayout(self.day_widgets_layout)
                                         # Day widgets
@@ -238,19 +259,18 @@ class PlannerWidget(QTabWidget):
                                             set_style(widget=self,
                                                       stylesheets=self._style.stylesheets
                                                       ['planner_tab']
-                                                      ['timelines_widget']
                                                       ['week_widget'])
 
                                     def make_label(self):
                                         self.label = QLabel()
                                         # Layout
                                         self.layout.addWidget(self.label)
-                                        self.label.setAlignment(Qt.AlignCenter)
+                                        self.label.setAlignment(Qt.AlignVCenter)
                                         # Set text
-                                        self.label.setText(self.date.strftime('%W'))
+                                        self.label.setText(self.date.strftime('Week %W'))
 
                                     def make_day_widgets(self):
-                                        class DayWidget(QWidget):
+                                        class DayWidget(QFrame):
                                             """
                                             This widget contains:
                                                 - A label containing the day
@@ -277,7 +297,6 @@ class PlannerWidget(QTabWidget):
                                                     set_style(widget=self,
                                                               stylesheets=self._style.stylesheets
                                                               ['planner_tab']
-                                                              ['timelines_widget']
                                                               ['day_widget'])
 
                                             def make_label(self):
@@ -286,14 +305,13 @@ class PlannerWidget(QTabWidget):
                                                 self.layout.addWidget(self.label)
                                                 self.label.setAlignment(Qt.AlignCenter)
                                                 # Set text
-                                                self.label.setText(self.date.strftime('%A')[:3])
+                                                self.label.setText(self.date.strftime('%A')[:3]
+                                                                   + ' ' + str(self.date.day))
 
                                         self.dates = []
-                                        self.day_widgets = []
                                         import calendar
                                         is_day_of_week = True
                                         self.n_days = 0
-                                        print(f'Week widget starting on date {self.date} = {self.date.strftime("%Y %B %A")}')
 
                                         while is_day_of_week:
                                             d = self.date + relativedelta(days=self.n_days)
@@ -303,7 +321,6 @@ class PlannerWidget(QTabWidget):
                                                 d_previous = self.date + relativedelta(days=self.n_days-1)
                                             if d.weekday() % 7 < d_previous.weekday() % 7:
                                                 is_day_of_week = False
-                                                print(f'Day {d}={d.strftime("%Y %B %A")} is not considered day of the same week')
                                             else:
                                                 self.dates += [d]
                                                 self.n_days += 1
@@ -315,7 +332,6 @@ class PlannerWidget(QTabWidget):
                                                 self.day_widgets_layout.addWidget(self.day_widgets[-1])
 
                                 self.dates = []
-                                self.week_widgets = []
                                 import calendar
                                 self.n_weeks = len(calendar.monthcalendar(self.date.year,
                                                                           self.date.month)
@@ -330,13 +346,10 @@ class PlannerWidget(QTabWidget):
                                                                        date=self.dates[-1],
                                                                        parent=self,
                                                                        style=self._style)]
-                                    if len(self.week_widgets[-1].dates) > 0:
-                                        print(f'Week days: {self.week_widgets[-1].dates}')
-                                        self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
+                                    self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
                                     self.week_widgets_layout.addWidget(self.week_widgets[-1])
 
                         self.dates = []
-                        self.month_widgets = []
                         reference_date = date(self.start_date.year,
                                               self.start_date.month,
                                               1)
@@ -347,12 +360,13 @@ class PlannerWidget(QTabWidget):
                                                                date=self.dates[-1],
                                                                parent=self,
                                                                style=self._style)]
-                            self.layout.addWidget(self.month_widgets[-1])
+                            self.month_widgets_layout.addWidget(self.month_widgets[-1])
 
                 self.timelines_widget = TimelinesWidget(planner=self.planner,
                                                         task_list_widget=self.task_list_widget,
                                                         parent=self,
                                                         start_date=date.today(),
+                                                        style=self._style,
                                                         n_months=6)
                 self.layout.addWidget(self.timelines_widget)
 

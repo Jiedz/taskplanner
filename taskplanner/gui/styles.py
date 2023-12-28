@@ -460,7 +460,9 @@ class TaskWidgetStyle:
                                 QWidget
                                 {
                                     /* background-color:%s; */
-                                    border:2px solid %s;
+                                    border:1px solid %s;
+                                    margin:0px;
+                                    padding:0px;
                                 }
                                 ''' % (self.color_palette['background 2'],
                                        self.color_palette['border']),
@@ -649,20 +651,75 @@ class PlannerWidgetStyle:
                            self.color_palette['background 1'],
                            self.color_palette['border'],
                            ),
+                        'timelines_scrollarea':
+                            '''
+                                QWidget
+                                {
+                                    border:None;
+                                    margin-top:0px;
+                                }
+                            ''',
                         'timelines_widget':
                             {
-
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:None;
+                                    }
+                                    '''
                             },
                         'month_widget':
                             {
-
+                                'main':
+                                    '''
+                                    QFrame
+                                    {
+                                        border:3px solid %s;
+                                        padding:0px;
+                                    }
+                                    ''' % (self.color_palette['border']),
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - title 2']),
                             },
                         'week_widget':
                             {
-
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:2px solid %s;
+                                        padding:0px;
+                                    }
+                                    ''' % (self.color_palette['border']),
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text']),
                             },
                         'day_widget':
                             {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:1px solid %s;
+                                    }
+                                    ''' % (self.color_palette['border']),
                                 'label':
                                     '''
                                     QLabel

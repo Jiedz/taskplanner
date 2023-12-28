@@ -19,7 +19,8 @@ from PyQt5.QtWidgets import \
     QComboBox,
     QScrollArea,
     QCalendarWidget,
-    QColorDialog
+    QColorDialog,
+    QFrame
     )
 
 from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
@@ -1059,9 +1060,11 @@ class TaskWidgetSimple(QWidget):
                                     spacing=spacing + 20)
 
 
-        self.task_line_widget.layout.insertSpacing(0,
-                                                   find_spacing(self,
-                                                                0))
+        margins = self.task_line_widget.contentsMargins()
+        self.setContentsMargins(find_spacing(self, 0),
+                                margins.top(),
+                                margins.right(),
+                                margins.bottom())
         self.layout.addWidget(self.task_line_widget)
         # Subtasks
         self.subtask_widgets = []
@@ -1103,7 +1106,8 @@ class TaskWidgetSimple(QWidget):
                 widget.hide()
                 self.subtask_widgets.remove(widget)
 
-class TaskLineWidget(QWidget):
+
+class TaskLineWidget(QFrame):
     """
     This widget contains:
         - A pushbutton containing the name of the widget
