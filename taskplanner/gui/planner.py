@@ -208,7 +208,6 @@ class PlannerWidget(QTabWidget):
                         for slot in slots:
                             self.planner.tasks_changed.disconnect(slot)
                         self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
-                        #self.planner.tasks_changed.connect(lambda **kwargs: setattr(self, 'view_type', self.view_type))
                         if self._style is not None:
                             set_style(widget=self,
                                       stylesheets=self._style.stylesheets
