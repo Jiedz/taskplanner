@@ -1066,6 +1066,8 @@ class TaskWidgetSimple(QWidget):
                                 margins.right(),
                                 margins.bottom())
         self.layout.addWidget(self.task_line_widget)
+        from signalslot import Signal
+        self.visibility_changed = Signal()
         # Subtasks
         self.subtask_widgets = []
         self.make_subtasks()
@@ -1105,6 +1107,14 @@ class TaskWidgetSimple(QWidget):
             if widget.task not in self.task.children:
                 widget.hide()
                 self.subtask_widgets.remove(widget)
+
+    def show(self):
+        super().show()
+        self.visibility_changed.emit()
+
+    def hide(self):
+        super().hide()
+        self.visibility_changed.emit()
 
 
 class TaskLineWidget(QFrame):

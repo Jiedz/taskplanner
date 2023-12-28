@@ -730,6 +730,56 @@ class PlannerWidgetStyle:
                                     }
                                     ''' % (self.color_palette['text - light'],
                                            self.font['size - text - small']),
+                            },
+                        'view_selector':
+                            {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:None;
+                                    }
+                                    ''',
+                                'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                                'combobox':
+                                    '''
+                                    QComboBox
+                                    {
+                                        border:2px solid %s;
+                                        color:%s;
+                                        font-size:%s;
+                                        icon-size:%spx;
+                                    }
+                                    QComboBox:item:selected
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.color_palette['border'],
+                                           self.color_palette['text'],
+                                           self.font['size - text - small'],
+                                           ICON_SIZES['small'].width(),
+                                           self.color_palette['background 2']),
+                            },
+                        'timeline':
+                            {
+                                'main':
+                                    {
+                                        '''
+                                        QWidget
+                                        {
+                                            
+                                        }
+                                        '''
+                                    }
                             }
                     }
             }

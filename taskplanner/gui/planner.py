@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import \
     )
 
 from datetime import date
+import logging
 from dateutil.relativedelta import relativedelta
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
@@ -32,6 +33,10 @@ SCREEN_HEIGHT = SCREEN.height
 
 DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette='dark material',
                                            font='light')
+
+TIMELINE_VIEW_TYPES = ['daily',
+                       'weekly',
+                       'monthly']
 
 class PlannerWidget(QTabWidget):
     """
@@ -114,19 +119,10 @@ class PlannerWidget(QTabWidget):
                 self.timelines_scrollarea.setWidgetResizable(True)
                 self.timelines_scrollarea.setWidget(self.timelines_widget)
                 self.layout.addWidget(self.timelines_scrollarea)
-                ## Relative size of month, week and day widgets
-                for month_widget in self.timelines_widget.month_widgets:
-                    month_widget.setFixedWidth(int(self.timelines_widget.width()*0.2))
-                    month_widget.label.setFixedHeight(int(self.height()*0.05))
-                    for week_widget in month_widget.week_widgets:
-                        week_widget.setFixedWidth(int(month_widget.width() / 5))
-                        for day_widget in week_widget.day_widgets:
-                            day_widget.setFixedWidth(int(week_widget.width() / 7))
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab'])
-
 
 
             def make_task_list_widget(self):
@@ -146,34 +142,141 @@ class PlannerWidget(QTabWidget):
                                  planner: Planner,
                                  task_list_widget: TaskListWidget,
                                  parent: QWidget = None,
+                                 view_type: str='daily',
                                  start_date: date=date.today(),
                                  n_months: int=3,
                                  style: PlannerWidgetStyle = None):
                         """
-                        :param planner:
-                        :param task_list_widget:
-                        :param parent:
+
+                        :py:class:'taskplanner.planner.Planner'
+                            The planner associated to this widget
+                        :param task_list_widget: :py:class:'taskplanner.gui.planner.TaskListWidget'
+                            Widget containing the task list connected to this timelines widget
+                        :param parent: :py:class:'QWidget', optional
+                            The parent widget
+                        :param view_type: str, optional
+                            A string that defines the level of detail of the displayed timelines:
+                                - daily,
+                                - weekly,
+                                - monthly
+                        :param start_date: :py:class:'datetime.date', optional
+                            The displayed timelines begin at the start of the month of the inserted date.
+                        :param n_months: int, optional
+                            The number of months to be displayed in the timeline
+                        :param style: :py:class:'taskplanner.gui.styles.PlannerWidgetStyle', optional
+                            The style of this widget.
                         """
                         self.planner = planner
                         self.task_list_widget = task_list_widget
                         self.start_date = start_date
                         self._style = style
                         self.month_widgets = []
-                        N_MAX = 24
+                        self._view_type = view_type
                         self.n_months = n_months
-                        if n_months > N_MAX:
-                            raise ValueError(
-                                f'Visualizing too many months ({n_months}). Maximum number of months is {N_MAX}')
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout(self)
-                        self.layout.setSpacing(0)
+                        self.layout.setAlignment(Qt.AlignTop)
+                        # Horizontal layout for settings
+                        self.settings_layout = QHBoxLayout()
+                        self.layout.addLayout(self.settings_layout)
+                        # View selector
+                        self.make_view_selector()
+                        task_widget_example = TaskWidget(task=Task(),
+                                                         style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
+                                                                               font=self._style.font_name))
+                        self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
+                        self.view_selector.setFixedHeight(int(self.parent().height()*0.08))
+                        # Start date widget
+                        # End date widget
+                        self.settings_layout.addStretch()
                         # Horizontal layout for month widgets
                         self.month_widgets_layout = QHBoxLayout()
                         self.layout.addLayout(self.month_widgets_layout)
-                        # Months Panel
+                        # Month widgets
                         self.make_month_widgets()
+                        # Vertical layout for timelines
+                        self.timelines_layout = QVBoxLayout()
+                        self.layout.addLayout(self.timelines_layout)
+                        # Timelines
+                        self.timeline_widgets = []
+                        self.make_timelines()
+                        #self.timelines_layout.addStretch()
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['planner_tab']
+                                      ['timelines_widget'])
 
+                    @property
+                    def view_type(self):
+                        return self._view_type
+                    @view_type.setter
+                    def view_type(self, value):
+                        if value not in TIMELINE_VIEW_TYPES:
+                            raise ValueError(f'Invalid  timeline view type {value}.'
+                                             f' Valid view types are {TIMELINE_VIEW_TYPES}')
+                        self._view_type = value
+                        self.make_month_widgets()
+                        self.make_timelines()
+                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
+
+                    def make_view_selector(self):
+                        class ViewSelector(QFrame):
+                            """
+                            This widget contains:
+                                - A label indicating that this is a view selector
+                                - A combobox containing the view types
+                            """
+                            def __init__(self,
+                                         timelines_widget: TimelinesWidget,
+                                         parent: QWidget=None,
+                                         style: PlannerWidgetStyle=None):
+                                self._style = style
+                                self.timelines_widget = timelines_widget
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QVBoxLayout(self)
+                                # Label
+                                self.make_label()
+                                # Combobox
+                                self.make_combobox()
+                                # Style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['planner_tab']
+                                              ['view_selector'])
+                                self.layout.addStretch()
+
+                            def make_label(self):
+                                self.label = QLabel('Planner View')
+                                self.layout.addWidget(self.label)
+                                self.label.setAlignment(Qt.AlignLeft)
+
+                            def make_combobox(self):
+                                self.combobox = QComboBox()
+                                # Layout
+                                self.layout.addWidget(self.combobox)
+                                # Add items
+                                self.combobox.addItems(TIMELINE_VIEW_TYPES)
+                                # User interactions
+                                def clicked():
+                                    self.view_type = self.combobox.currentText().lower()
+                                    self.timelines_widget.view_type = self.view_type
+
+                                # Connect task and widget
+                                self.combobox.currentIndexChanged.connect(clicked)
+                                # Set initial value
+                                self.combobox.setCurrentText(self.timelines_widget.view_type)
+
+                        self.view_selector = ViewSelector(timelines_widget=self,
+                                                          parent=self,
+                                                          style=self._style)
+                        self.settings_layout.addWidget(self.view_selector)
+
+                    def make_start_end_date_widgets(self):
+                        logging.warning(f'Funtion "make_start_end_date_widgets" of widget {self} is not implemented yet.')
 
                     def make_month_widgets(self):
                         # Make month widget
@@ -186,11 +289,13 @@ class PlannerWidget(QTabWidget):
                             def __init__(self,
                                          planner: Planner,
                                          task_list_widget: TaskListWidget,
+                                         timelines_widget: TimelinesWidget,
                                          date: date,
                                          parent: QWidget=None,
                                          style: PlannerWidgetStyle=None):
                                 self.planner = Planner
                                 self.task_list_widget = task_list_widget
+                                self.timelines_widget = timelines_widget
                                 self._style = style
                                 self.date = date
                                 self.week_widgets = []
@@ -205,7 +310,9 @@ class PlannerWidget(QTabWidget):
                                 self.week_widgets_layout.setAlignment(Qt.AlignLeft)
                                 self.layout.addLayout(self.week_widgets_layout)
                                 # Week widgets
-                                self.make_week_widgets()
+                                if timelines_widget.view_type in ['weekly',
+                                                                  'daily']:
+                                    self.make_week_widgets()
                                 # Set style
                                 if self._style is not None:
                                     set_style(widget=self,
@@ -233,13 +340,16 @@ class PlannerWidget(QTabWidget):
                                     def __init__(self,
                                                  planner: Planner,
                                                  task_list_widget: TaskListWidget,
+                                                 timelines_widget: TimelinesWidget,
                                                  date: date,
                                                  parent: QWidget = None,
                                                  style: PlannerWidgetStyle = None):
                                         self.planner = Planner
                                         self.task_list_widget = task_list_widget
+                                        self.timelines_widget = TimelinesWidget
                                         self._style = style
                                         self.date = date
+                                        self.dates = []
                                         self.day_widgets = []
                                         super().__init__(parent=parent)
                                         # Layout
@@ -250,10 +360,11 @@ class PlannerWidget(QTabWidget):
                                         # Horizontal layout for week widgets
                                         self.day_widgets_layout = QHBoxLayout()
                                         self.day_widgets_layout.setAlignment(Qt.AlignLeft)
-                                        self.day_widgets_layout.setSpacing(0)
+                                        self.day_widgets_layout.setSpacing(5)
                                         self.layout.addLayout(self.day_widgets_layout)
                                         # Day widgets
-                                        self.make_day_widgets()
+                                        if timelines_widget.view_type == 'daily':
+                                            self.make_day_widgets()
                                         # Set style
                                         if self._style is not None:
                                             set_style(widget=self,
@@ -342,14 +453,22 @@ class PlannerWidget(QTabWidget):
                                 self.dates += [reference_date]
                                 for count in range(self.n_weeks):
                                     self.week_widgets += [WeekWidget(planner=self.planner,
-                                                                       task_list_widget=self.task_list_widget,
-                                                                       date=self.dates[-1],
-                                                                       parent=self,
-                                                                       style=self._style)]
-                                    self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
+                                                                     task_list_widget=self.task_list_widget,
+                                                                     timelines_widget=self.timelines_widget,
+                                                                     date=self.dates[-1],
+                                                                     parent=self,
+                                                                     style=self._style)]
+                                    if len(self.week_widgets[-1].dates) > 0:
+                                        self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
                                     self.week_widgets_layout.addWidget(self.week_widgets[-1])
 
+                        # Delete old month widgets
+                        for widget in self.month_widgets:
+                            widget.hide()
+                            self.layout.removeWidget(widget)
+                        # Make new month widgets
                         self.dates = []
+                        self.month_widgets = []
                         reference_date = date(self.start_date.year,
                                               self.start_date.month,
                                               1)
@@ -357,10 +476,97 @@ class PlannerWidget(QTabWidget):
                             self.dates += [reference_date + relativedelta(months=count)]
                             self.month_widgets += [MonthWidget(planner=self.planner,
                                                                task_list_widget=self.task_list_widget,
+                                                               timelines_widget=self,
                                                                date=self.dates[-1],
                                                                parent=self,
                                                                style=self._style)]
                             self.month_widgets_layout.addWidget(self.month_widgets[-1])
+
+                    def make_timelines(self):
+                        class Timeline(QLabel):
+                            """
+                            This widget contains a label which:
+                                - Has the same color as the associated task. Its color must follow the associated
+                                  task's color.
+                                - Has same vertical position as the associated task in the task list widget.
+                                  Its position must change whenever the vertical position of the associated
+                                  task changes. In particular, if the associated task is hidden or shown
+                                  in the task list widget of the planner, so must the timeline be hidden or shown.
+                                  Similarly, if the task is removed from the planner.
+                                - Has position and a horizontal extension such that it matches the start and end date
+                                  of the associated task, according to the TimelinesWidget that contains it.
+                                  Its geometry must change whenever the start or end date of the task change, and
+                                  whenever the planner view type is changed (e.g., from daily to weekly)
+                            """
+                            def __init__(self,
+                                         task_widget: TaskWidgetSimple,
+                                         timelines_widget: TimelinesWidget,
+                                         parent: QWidget=None,
+                                         style: PlannerWidgetStyle=None):
+                                self.task_widget = task_widget
+                                self.task = self.task_widget.task
+                                self.timelines_widget = timelines_widget
+                                self._style = style
+                                super().__init__(parent=parent)
+                                # Set text
+                                self.setText(self.task.name)
+                                self.task.name_changed.connect(lambda **kwargs: self.setText(self.task.name))
+                                # Set background color, border
+                                self.set_color()
+                                self.task.color_changed.connect(lambda **kwargs: self.set_color())
+                                # Set geometry
+                                self.set_geometry()
+                                # Set visibility
+                                self.set_visibility()
+                                self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
+
+
+                            def set_color(self):
+                                style_sheet = '''
+                                QLabel
+                                {
+                                    background-color:%s;
+                                    border:1px solid %s;
+                                }
+                                ''' % (self.task.color,
+                                       self.task.color)
+                                self.setStyleSheet(style_sheet)
+
+                            def set_geometry(self):
+                                # Set vertical position
+                                self.setGeometry(self.x(),
+                                                 self.task_widget.y(),
+                                                 self.width(),
+                                                 self.height())
+
+                            def set_visibility(self):
+                                if self.task_widget.isVisible():
+                                    self.show()
+                                else:
+                                    self.hide()
+
+                        # Delete all timelines
+                        for widget in self.timeline_widgets:
+                            widget.hide()
+                            self.timelines_layout.removeWidget(widget)
+
+                        self.timeline_widgets = []
+
+                        def make_timelines(task_widget):
+                            self.timeline_widgets += [Timeline(task_widget=task_widget,
+                                                          timelines_widget=self,
+                                                          parent=self,
+                                                          style=self._style)
+                                                 ]
+                            self.timelines_layout.addWidget(self.timeline_widgets[-1])
+                            for subtask_widget in task_widget.subtask_widgets:
+                                make_timelines(subtask_widget)
+
+                        for task_widget in self.task_list_widget.task_widgets:
+                            make_timelines(task_widget)
+                        self.layout.addStretch()
+
+
 
                 self.timelines_widget = TimelinesWidget(planner=self.planner,
                                                         task_list_widget=self.task_list_widget,
