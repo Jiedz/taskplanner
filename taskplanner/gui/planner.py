@@ -142,7 +142,7 @@ class PlannerWidget(QTabWidget):
                                  planner: Planner,
                                  task_list_widget: TaskListWidget,
                                  parent: QWidget = None,
-                                 view_type: str='daily',
+                                 view_type: str='weekly',
                                  start_date: date=date.today(),
                                  n_months: int=3,
                                  style: PlannerWidgetStyle = None):
@@ -171,8 +171,11 @@ class PlannerWidget(QTabWidget):
                         self.start_date = start_date
                         self._style = style
                         self.month_widgets = []
+                        self.timeline_widgets = []
                         self._view_type = view_type
                         self.n_months = n_months
+                        from signalslot import Signal
+                        self.view_type_changed = Signal()
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout(self)
@@ -199,9 +202,13 @@ class PlannerWidget(QTabWidget):
                         self.timelines_layout = QVBoxLayout()
                         self.layout.addLayout(self.timelines_layout)
                         # Timelines
-                        self.timeline_widgets = []
                         self.make_timelines()
-                        #self.timelines_layout.addStretch()
+                        slots = [slot for slot in self.planner.tasks_changed._slots if
+                                 'TimelinesWidget.' in str(slot)]
+                        for slot in slots:
+                            self.planner.tasks_changed.disconnect(slot)
+                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
+                        #self.planner.tasks_changed.connect(lambda **kwargs: setattr(self, 'view_type', self.view_type))
                         if self._style is not None:
                             set_style(widget=self,
                                       stylesheets=self._style.stylesheets
@@ -217,9 +224,12 @@ class PlannerWidget(QTabWidget):
                             raise ValueError(f'Invalid  timeline view type {value}.'
                                              f' Valid view types are {TIMELINE_VIEW_TYPES}')
                         self._view_type = value
+                        self.view_type_changed.emit()
+                        self.update_all()
+
+                    def update_all(self):
                         self.make_month_widgets()
                         self.make_timelines()
-                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
 
                     def make_view_selector(self):
                         class ViewSelector(QFrame):
@@ -259,16 +269,22 @@ class PlannerWidget(QTabWidget):
                                 # Layout
                                 self.layout.addWidget(self.combobox)
                                 # Add items
-                                self.combobox.addItems(TIMELINE_VIEW_TYPES)
+                                self.combobox.addItems([view.title() for view in TIMELINE_VIEW_TYPES])
                                 # User interactions
                                 def clicked():
-                                    self.view_type = self.combobox.currentText().lower()
-                                    self.timelines_widget.view_type = self.view_type
+                                    self.timelines_widget.view_type = self.combobox.currentText().lower()
+
+                                def update():
+                                    self.combobox.blockSignals(True)
+                                    self.combobox.setCurrentText(self.timelines_widget.view_type.title())
+                                    self.combobox.blockSignals(False)
+
 
                                 # Connect task and widget
                                 self.combobox.currentIndexChanged.connect(clicked)
+                                self.timelines_widget.view_type_changed.connect(lambda **kwargs: update())
                                 # Set initial value
-                                self.combobox.setCurrentText(self.timelines_widget.view_type)
+                                update()
 
                         self.view_selector = ViewSelector(timelines_widget=self,
                                                           parent=self,
@@ -535,9 +551,10 @@ class PlannerWidget(QTabWidget):
                             def set_geometry(self):
                                 # Set vertical position
                                 self.setGeometry(self.x(),
-                                                 self.task_widget.y(),
+                                                 self.timelines_widget.month_widgets[0].y()+self.timelines_widget.month_widgets[0].height()+self.task_widget.y(),
                                                  self.width(),
-                                                 self.height())
+                                                 self.task_widget.task_line_widget.height())
+                                self.setFixedHeight(self.task_widget.task_line_widget.height())
 
                             def set_visibility(self):
                                 if self.task_widget.isVisible():
@@ -552,18 +569,19 @@ class PlannerWidget(QTabWidget):
 
                         self.timeline_widgets = []
 
-                        def make_timelines(task_widget):
-                            self.timeline_widgets += [Timeline(task_widget=task_widget,
-                                                          timelines_widget=self,
-                                                          parent=self,
-                                                          style=self._style)
-                                                 ]
+                        def add_timelines(widget):
+                            self.timeline_widgets += [Timeline(task_widget=widget,
+                                                               timelines_widget=self,
+                                                               parent=self,
+                                                               style=self._style)
+                                                      ]
                             self.timelines_layout.addWidget(self.timeline_widgets[-1])
-                            for subtask_widget in task_widget.subtask_widgets:
-                                make_timelines(subtask_widget)
+                            for subtask_widget in widget.subtask_widgets:
+                                add_timelines(subtask_widget)
 
-                        for task_widget in self.task_list_widget.task_widgets:
-                            make_timelines(task_widget)
+                        for widget in self.task_list_widget.task_widgets:
+                            add_timelines(widget)
+
                         self.layout.addStretch()
 
 
@@ -658,6 +676,7 @@ class TaskListWidget(QWidget):
 
     def make_task_widgets(self):
         self.layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
+
         for task in self.planner.tasks:
             if task not in [widget.task for widget in self.task_widgets]:
                 widget = TaskWidgetSimple(parent=self,
@@ -673,4 +692,5 @@ class TaskListWidget(QWidget):
             if widget.task not in self.planner.tasks:
                 widget.hide()
                 self.task_widgets.remove(widget)
+                self.layout.removeWidget(widget)
         self.layout.addStretch()

@@ -1160,9 +1160,23 @@ class TaskLineWidget(QFrame):
         self.make_expand_pushbutton()
         self.layout.addStretch()
         # Set style
+        self.set_style()
+        self.task.color_changed.connect(lambda **kwargs: self.set_style())
+
+    def set_style(self):
         if self._style is not None:
+            self._style.stylesheets['simple view']['task_line_widget']['main'] \
+                = '''
+                  QWidget
+                  {
+                    border:2px solid %s;
+                  }
+                  ''' % self.task.color
             set_style(widget=self,
-                      stylesheets=self._style.stylesheets['simple view']['task_line_widget'])
+                      stylesheets=self._style.stylesheets
+                      ['simple view']
+                      ['task_line_widget'])
+
 
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()

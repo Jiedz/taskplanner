@@ -506,6 +506,7 @@ class TaskWidgetStyle:
                                 QPushButton
                                 {
                                     icon-size:%spx;
+                                    border:None;
                                 }
                                 QPushButton:hover
                                 {
@@ -518,13 +519,25 @@ class TaskWidgetStyle:
                                 QPushButton
                                 {
                                     icon-size:%spx;
+                                    border:None
                                 }
                                 QPushButton:hover
                                 {
                                     background-color:%s;
                                 }
                                 ''' % (ICON_SIZES['small'].width(),
-                                       self.color_palette['background 2'])
+                                       self.color_palette['background 2']),
+                            'end_date_label':
+                                '''
+                                QLabel
+                                {
+                                    border:1px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text - light'],
+                                       self.font['size - text']),
                         }
                 }
         }
