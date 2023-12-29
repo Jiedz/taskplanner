@@ -599,9 +599,22 @@ class PlannerWidget(QTabWidget):
                                 # Remove non-existent sub-timelines
                                 for widget in self.sub_timelines:
                                     if widget.task not in self.task.children:
-                                        widget.hide()
-                                        self.sub_timelines.remove(widget)
-                                        l.removeWidget(widget)
+                                        index = l.indexOf(widget)
+                                        w = widget
+                                        while w == widget or (w is not None and widget.task in w.task.ancestors):
+                                            w.hide()
+                                            try:  # It may be that the widget had been removed from the list, but not hidden
+                                                self.timelines_widget.timeline_widgets.remove(w)
+                                            except:
+                                                pass
+                                            l.removeWidget(w)
+                                            if l.count() > 0:
+                                                try:
+                                                    w = l.itemAt(index).widget()
+                                                except:
+                                                    break
+                                            else:
+                                                break
 
                         # Remove stretch
                         self.timelines_layout.removeItem(self.timelines_layout.itemAt(self.timelines_layout.count() - 1))
@@ -637,7 +650,10 @@ class PlannerWidget(QTabWidget):
                                         pass
                                     self.timelines_layout.removeWidget(w)
                                     if self.timelines_layout.count() > 0:
-                                        w = self.timelines_layout.itemAt(index).widget()
+                                        try:
+                                            w = self.timelines_layout.itemAt(index).widget()
+                                        except:
+                                            break
                                     else:
                                         break
 
