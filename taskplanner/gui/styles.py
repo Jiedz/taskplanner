@@ -785,14 +785,20 @@ class PlannerWidgetStyle:
                         'timeline':
                             {
                                 'main':
+                                    '''
+                                    QWidget
                                     {
-                                        '''
-                                        QWidget
-                                        {
-                                            
-                                        }
-                                        '''
+                                        margin-left:0px;
+                                        padding:0px;
                                     }
+                                    ''',
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.font['size - text'])
                             }
                     }
             }

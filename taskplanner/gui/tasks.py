@@ -1108,6 +1108,7 @@ class TaskWidgetSimple(QWidget):
             if widget.task not in self.task.children:
                 widget.hide()
                 self.subtask_widgets.remove(widget)
+                self.layout.removeWidget(widget)
 
 
     def show(self):

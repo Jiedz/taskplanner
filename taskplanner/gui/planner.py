@@ -204,6 +204,7 @@ class PlannerWidget(QTabWidget):
                         # Timelines
                         self.timelines_layout.addStretch()
                         self.make_timelines()
+
                         slots = [slot for slot in self.planner.tasks_changed._slots if
                                  'TimelinesWidget.' in str(slot)]
                         for slot in slots:
@@ -526,10 +527,17 @@ class PlannerWidget(QTabWidget):
                                 self._style = style
                                 super().__init__(parent=parent)
                                 # Layout
-                                self.layout = QVBoxLayout()
-                                self.setLayout(self.layout)
+                                self.layout = QVBoxLayout(self)
                                 # Label
                                 self.make_label()
+                                # Sub-timelines
+                                self.sub_timelines = []
+                                self.make_sub_timelines()
+                                slots = [slot for slot in self.task.children_changed._slots if
+                                         'Timeline.' in str(slot)]
+                                for slot in slots:
+                                    self.task.children_changed.disconnect(slot)
+                                self.task.children_changed.connect(lambda **kwargs: self.make_sub_timelines())
 
                             def make_label(self):
                                 self.label = QLabel()
@@ -560,21 +568,46 @@ class PlannerWidget(QTabWidget):
                                 self.setStyleSheet(style_sheet)
 
                             def set_geometry(self):
-                                # Set vertical position
-                                self.label.setFixedHeight(self.task_widget.task_line_widget.height())
+                                # Set height
+                                self.label.setFixedHeight(int(self.task_widget.height()*2.5))
+
 
                             def set_visibility(self):
-                                if self.task_widget.is_visible:
-                                    self.show()
-                                else:
-                                    self.hide()
+                                self.setVisible(self.task_widget.isVisible())
+
+                            def make_sub_timelines(self):
+                                l = self.timelines_widget.timelines_layout
+                                # Add new sub-timelines
+                                for subtask in self.task.children:
+                                    if subtask not in [widget.task for widget in self.sub_timelines]:
+                                        subtask_widget = [w for w in self.task_widget.subtask_widgets
+                                                       if w.task == subtask][0]
+                                        sub_timeline = Timeline(task_widget=subtask_widget,
+                                                                timelines_widget=self.timelines_widget,
+                                                                parent=self,
+                                                                style=self._style)
+                                        # Add the sub-timeline to the main timelines layout
+                                        l.removeItem(l.itemAt(l.count() - 1))
+                                        # Find the correct position in the layout
+                                        # where the sub-timeline is inserted
+                                        index = self.task.children.index(subtask)
+                                        index += l.indexOf(self) + 1
+                                        l.insertWidget(index, sub_timeline)
+                                        sub_timeline.setFixedHeight(self.height())
+                                        l.addStretch()
+                                        self.sub_timelines += [sub_timeline]
+                                # Remove non-existent sub-timelines
+                                for widget in self.sub_timelines:
+                                    if widget.task not in self.task.children:
+                                        widget.hide()
+                                        self.sub_timelines.remove(widget)
+                                        l.removeWidget(widget)
 
                         # Remove stretch
-                        self.timelines_layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
-                        '''
-                        for task in self.planner.tasks:
+                        self.timelines_layout.removeItem(self.timelines_layout.itemAt(self.timelines_layout.count() - 1))
+
+                        def add_timeline(task_w):
                             if task not in [widget.task_widget.task for widget in self.timeline_widgets]:
-                                print(f'Adding new timeline for task {task.name}')
                                 task_widget = [w for w in self.task_list_widget.task_widgets
                                                if w.task == task][0]
                                 widget = Timeline(task_widget=task_widget,
@@ -583,19 +616,37 @@ class PlannerWidget(QTabWidget):
                                                   style=self._style)
                                 self.timelines_layout.addWidget(widget)
                                 self.timeline_widgets += [widget]
-                        '''
-                        if self.task_list_widget.task_widgets:
-                            widget = Timeline(task_widget=self.task_list_widget.task_widgets[-1],
-                                              timelines_widget=self,
-                                              parent=self,
-                                              style=self._style)
-                        # Remove non-existent tasks
+
+                        for task in self.planner.tasks:
+                            add_timeline(task)
+
+                        # Remove non-existent timelines and all of those related to descendant tasks
+                        # This cannot be handled easily from within the nested structure of a Timeline object
+                        # and removing its sub-timelines, because the information about "ancestor" timelines
+                        # is absent in the current implementation. Only descendant timelines are available, hence,
+                        # a top-down deletion.
                         for widget in self.timeline_widgets:
-                            if widget.task_widget.task not in self.planner.tasks:
-                                widget.hide()
-                                self.timeline_widgets.remove(widget)
-                                self.timelines_layout.removeWidget(widget)
-                        self.layout.addStretch()
+                            if widget.task not in self.planner.tasks:
+                                index = self.timelines_layout.indexOf(widget)
+                                w = widget
+                                while w == widget or widget.task in w.task.ancestors:
+                                    w.hide()
+                                    try: # It may be that the widget had been removed from the list, but not hidden
+                                        self.timeline_widgets.remove(w)
+                                    except:
+                                        pass
+                                    self.timelines_layout.removeWidget(w)
+                                    if self.timelines_layout.count() > 0:
+                                        w = self.timelines_layout.itemAt(index).widget()
+                                    else:
+                                        break
+
+
+
+
+                        # Add stretch back
+                        self.timelines_layout.addStretch()
+
 
                 self.timelines_widget = TimelinesWidget(planner=self.planner,
                                                         task_list_widget=self.task_list_widget,

@@ -7,6 +7,7 @@ import sys
 # Make a task planner
 planner = Planner()
 # Build application
+
 app = QApplication(sys.argv)
 # Task widget - standard view
 style = PlannerWidgetStyle(color_palette='dark material')
