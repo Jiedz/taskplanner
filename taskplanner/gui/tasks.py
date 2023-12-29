@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import \
     QColorDialog,
     QFrame
     )
-
+from signalslot import Signal
 from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
@@ -1016,7 +1016,6 @@ class TaskWidget(QWidget):
         self.layout.addWidget(self.subtask_list_widget)
 
 
-
 class TaskWidgetSimple(QWidget):
     """
     This widget contains a tree of widgets representing all the subtasks contained in the input task.
@@ -1037,6 +1036,7 @@ class TaskWidgetSimple(QWidget):
             If 'True', the widget is hidden
         """
         self.task, self.planner = task, planner
+        self.is_visible = True
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
@@ -1066,7 +1066,6 @@ class TaskWidgetSimple(QWidget):
                                 margins.right(),
                                 margins.bottom())
         self.layout.addWidget(self.task_line_widget)
-        from signalslot import Signal
         self.visibility_changed = Signal()
         # Subtasks
         self.subtask_widgets = []
@@ -1078,6 +1077,8 @@ class TaskWidgetSimple(QWidget):
                       stylesheets=self._style.stylesheets['simple view'])
         if hide:
             self.hide()
+        else:
+            self.show()
 
         slots = [slot for slot in self.task.children_changed._slots if 'TaskWidget.' in str(slot)]
         for slot in slots:
@@ -1108,12 +1109,15 @@ class TaskWidgetSimple(QWidget):
                 widget.hide()
                 self.subtask_widgets.remove(widget)
 
+
     def show(self):
         super().show()
+        self.is_visible = True
         self.visibility_changed.emit()
 
     def hide(self):
         super().hide()
+        self.is_visible = False
         self.visibility_changed.emit()
 
 
