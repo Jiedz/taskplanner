@@ -103,6 +103,8 @@ class PlannerWidget(QTabWidget):
                 self.setGeometry(self.parent().geometry())
                 # Task list widget
                 self.make_task_list_widget()
+                # To be reviewed
+                self.task_list_widget.layout.insertSpacing(1, 0)
                 ## Scroll area
                 self.task_list_scrollarea = QScrollArea()
                 self.task_list_scrollarea.setWidgetResizable(True)
@@ -120,6 +122,20 @@ class PlannerWidget(QTabWidget):
                 self.timelines_scrollarea.setWidgetResizable(True)
                 self.timelines_scrollarea.setWidget(self.timelines_widget)
                 self.layout.addWidget(self.timelines_scrollarea)
+
+                # To be reviewed
+                def adjust_spacing():
+                    # Remove previous spacing
+                    self.task_list_widget.layout.removeItem(
+                        self.task_list_widget.layout.itemAt(1)
+                    )
+                    self.task_list_widget.layout.insertSpacing(1,
+                                                               int(self.timelines_widget.month_widgets[0].height()
+                                                                   + self.timelines_widget.view_selector.height()
+                                                                   + self.timelines_widget.view_selector.y()
+                                                                   - self.task_list_widget.new_task_textedit.height()))
+                self.timelines_widget.view_type_changed.connect(lambda **kwargs: adjust_spacing())
+
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
@@ -143,7 +159,7 @@ class PlannerWidget(QTabWidget):
                                  planner: Planner,
                                  task_list_widget: TaskListWidget,
                                  parent: QWidget = None,
-                                 view_type: str='weekly',
+                                 view_type: str='daily',
                                  start_date: date=date.today(),
                                  n_months: int=3,
                                  style: PlannerWidgetStyle = None):
@@ -433,16 +449,17 @@ class PlannerWidget(QTabWidget):
                                                 # Layout
                                                 self.layout.addWidget(self.label)
                                                 self.label.setAlignment(Qt.AlignCenter)
+                                                self.setFixedWidth(int(self.task_list_widget.new_task_textedit.width()*0.3))
                                                 # Set text
                                                 self.label.setText(self.date.strftime('%A')[:3]
                                                                    + ' ' + str(self.date.day))
 
                                         self.dates = []
                                         import calendar
-                                        is_day_of_week = True
+                                        is_day_of_week, is_day_of_month = True, True
                                         self.n_days = 0
 
-                                        while is_day_of_week:
+                                        while is_day_of_week and is_day_of_month:
                                             d = self.date + relativedelta(days=self.n_days)
                                             if d == self.date:
                                                 d_previous = self.date
@@ -450,6 +467,8 @@ class PlannerWidget(QTabWidget):
                                                 d_previous = self.date + relativedelta(days=self.n_days-1)
                                             if d.weekday() % 7 < d_previous.weekday() % 7:
                                                 is_day_of_week = False
+                                            elif d.month != d_previous.month:
+                                                is_day_of_month = False
                                             else:
                                                 self.dates += [d]
                                                 self.n_days += 1
@@ -478,6 +497,8 @@ class PlannerWidget(QTabWidget):
                                                                      style=self._style)]
                                     if len(self.week_widgets[-1].dates) > 0:
                                         self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
+                                    else:
+                                        self.dates += [self.week_widgets[-1].date + relativedelta(weeks=1)]
                                     self.week_widgets_layout.addWidget(self.week_widgets[-1])
 
                         # Delete old month widgets
@@ -528,6 +549,11 @@ class PlannerWidget(QTabWidget):
                                 super().__init__(parent=parent)
                                 # Layout
                                 self.layout = QVBoxLayout(self)
+                                # Horizontal layout for label
+                                self.label_layout = QHBoxLayout()
+                                self.layout.addLayout(self.label_layout)
+                                # Insert first spacing
+                                self.label_layout.insertSpacing(0, 0)
                                 # Label
                                 self.make_label()
                                 # Sub-timelines
@@ -542,7 +568,8 @@ class PlannerWidget(QTabWidget):
                             def make_label(self):
                                 self.label = QLabel()
                                 # Layout
-                                self.layout.addWidget(self.label)
+                                self.label_layout.addWidget(self.label)
+                                self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.035))
                                 # Set text
                                 self.label.setText(self.task.name)
                                 self.task.name_changed.connect(lambda **kwargs: self.label.setText(self.task.name))
@@ -551,6 +578,9 @@ class PlannerWidget(QTabWidget):
                                 self.task.color_changed.connect(lambda **kwargs: self.set_color())
                                 # Set geometry
                                 self.set_geometry()
+                                self.task.start_date_changed.connect(lambda **kwargs: self.set_geometry())
+                                self.task.end_date_changed.connect(lambda **kwargs: self.set_geometry())
+                                self.timelines_widget.view_type_changed.connect(lambda **kwargs: self.set_geometry())
                                 # Set visibility
                                 self.set_visibility()
                                 self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
@@ -567,10 +597,68 @@ class PlannerWidget(QTabWidget):
                                        self.task.color)
                                 self.setStyleSheet(style_sheet)
 
-                            def set_geometry(self):
-                                # Set height
-                                self.label.setFixedHeight(int(self.task_widget.height()*2.5))
+                            def set_height(self):
+                                pass
 
+                            def set_start_position(self):
+                                delta_date = self.task.start_date - self.timelines_widget.start_date
+                                spacing = 0
+                                # Remove spacing
+                                self.label_layout.removeItem(self.label_layout.itemAt(0))
+                                if self.timelines_widget.view_type == 'daily':
+                                    month_widgets = [w for w in self.timelines_widget.month_widgets
+                                                     if w.date <= self.task.start_date]
+                                    for month_widget in month_widgets:
+                                        spacing += month_widget.layout.contentsMargins().left()
+                                        print(f'MONTH DATE: {month_widget.date}')
+                                        week_widgets = month_widget.week_widgets
+                                        for week_widget in week_widgets:
+                                            spacing += week_widget.layout.contentsMargins().left()
+                                            print(f'\tWEEK DATE: {week_widget.date}')
+                                            day_widgets = week_widget.day_widgets
+                                            for day_widget in day_widgets:
+                                                print(f'\t\tDAY DATE: {day_widget.date}')
+                                                if day_widget.date < self.task.start_date:
+                                                    spacing += day_widget.width()
+                                                    spacing += day_widget.layout.contentsMargins().right()
+                                                else:
+                                                    # Insert spacing
+                                                    self.label_layout.insertSpacing(0, spacing)
+                                                    return
+                                            spacing += week_widget.layout.contentsMargins().right()
+                                        spacing += month_widget.layout.contentsMargins().right()
+                                elif self.timelines_widget.view_type == 'weekly':
+                                    month_widgets = [w for w in self.timelines_widget.month_widgets
+                                                     if w.date <= self.task.start_date]
+                                    for month_widget in month_widgets:
+                                        print(f'MONTH DATE: {month_widget.date}')
+                                        week_widgets = month_widget.week_widgets
+                                        for week_widget in week_widgets:
+                                            print(f'\tWEEK DATE: {week_widget.date}')
+                                            if week_widget.date < self.task.start_date:
+                                                spacing += week_widget.width()
+                                            else:
+                                                # Insert spacing
+                                                #self.label_layout.insertSpacing(0, spacing)
+                                                return
+                                elif self.timelines_widget.view_type == 'monthly':
+                                    month_widgets = [w for w in self.timelines_widget.month_widgets
+                                                     if w.date <= self.task.start_date]
+                                    for month_widget in month_widgets:
+                                        print(f'MONTH DATE: {month_widget.date}')
+                                        if month_widget.date < self.task.start_date:
+                                            spacing += month_widget.width()
+                                        else:
+                                            # Insert spacing
+                                            self.label_layout.insertSpacing(0, spacing)
+                                            return
+
+                            def set_length(self):
+                                pass#self.setFixedWidth(100)
+
+                            def set_geometry(self):
+                                #self.set_start_position()
+                                self.set_length()
 
                             def set_visibility(self):
                                 self.setVisible(self.task_widget.isVisible())
@@ -590,10 +678,10 @@ class PlannerWidget(QTabWidget):
                                         l.removeItem(l.itemAt(l.count() - 1))
                                         # Find the correct position in the layout
                                         # where the sub-timeline is inserted
-                                        index = self.task.children.index(subtask)
+                                        index = self.task.descendants.index(subtask)
                                         index += l.indexOf(self) + 1
                                         l.insertWidget(index, sub_timeline)
-                                        sub_timeline.setFixedHeight(self.height())
+                                        #sub_timeline.setFixedHeight(self.height())
                                         l.addStretch()
                                         self.sub_timelines += [sub_timeline]
                                 # Remove non-existent sub-timelines
@@ -701,6 +789,7 @@ class TaskListWidget(QWidget):
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout(self)
+        self.layout.setAlignment(Qt.AlignTop)
         # New task textedit
         self.make_new_task_textedit()
         # Subtask widgets
@@ -748,7 +837,6 @@ class TaskListWidget(QWidget):
 
     def make_task_widgets(self):
         self.layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
-
         for task in self.planner.tasks:
             if task not in [widget.task for widget in self.task_widgets]:
                 widget = TaskWidgetSimple(parent=self,

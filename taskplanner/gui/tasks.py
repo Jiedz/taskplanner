@@ -1051,17 +1051,8 @@ class TaskWidgetSimple(QWidget):
                                                style=self._style)
         ## Offset the task line widget to the right, by an amount proportional to its depth in the task tree
         ## up to the main task. The latter may not necessarily be a top-level task.
-        def find_spacing(task_widget_simple: TaskWidgetSimple,
-                         spacing: int):
-            if 'TaskWidgetSimple' not in str(type(task_widget_simple.parent())):
-                return spacing
-            else:
-                return find_spacing(task_widget_simple=task_widget_simple.parent(),
-                                    spacing=spacing + 20)
-
-
         margins = self.task_line_widget.contentsMargins()
-        self.setContentsMargins(find_spacing(self, 0),
+        self.setContentsMargins(int(SCREEN_WIDTH*0.005)*len(self.task.ancestors),
                                 margins.top(),
                                 margins.right(),
                                 margins.bottom())
@@ -1098,7 +1089,7 @@ class TaskWidgetSimple(QWidget):
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
                                                   planner=self.planner,
-                                                  hide=not self.task_line_widget.expanded,
+                                                  hide=True,#not self.task_line_widget.expanded,
                                                   style=self._style
                                                   )
                 self.layout.addWidget(subtask_widget)
@@ -1120,6 +1111,7 @@ class TaskWidgetSimple(QWidget):
         super().hide()
         self.is_visible = False
         self.visibility_changed.emit()
+        print(f'TaskWidgetSimple hidden: {self.task.name}')
 
 
 class TaskLineWidget(QFrame):
@@ -1128,7 +1120,7 @@ class TaskLineWidget(QFrame):
         - A pushbutton containing the name of the widget
         - The priority level
         - The end date
-        - A pushbutton that enables to view the subtasks
+        - A pushbutton that allows to view the subtasks
     """
 
     def __init__(self,
@@ -1269,11 +1261,17 @@ class TaskLineWidget(QFrame):
         # Callback
         def callback():
             self.expanded = not self.expanded
-            for subtask_widget in self.parent().subtask_widgets:
-                if subtask_widget.isVisible():
-                    subtask_widget.hide()
+            # Hide or show all descendant TaskWidgetSimple according to the expanded state of this TaskLineWidget
+            def set_visibilities(task_widget: TaskWidgetSimple):
+                if task_widget.parent().task_line_widget.expanded:
+                    task_widget.show()
                 else:
-                    subtask_widget.show()
+                    task_widget.hide()
+                for subtask_widget in task_widget.subtask_widgets:
+                    set_visibilities(subtask_widget)
+
+            for subtask_widget in self.parent().subtask_widgets:
+                set_visibilities(subtask_widget)
             # Set icon
             icon_path = self.parent()._style.icon_path
             name = 'expanded' if self.expanded else 'not-expanded'
