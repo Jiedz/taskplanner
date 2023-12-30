@@ -129,11 +129,16 @@ class PlannerWidget(QTabWidget):
                     self.task_list_widget.layout.removeItem(
                         self.task_list_widget.layout.itemAt(1)
                     )
+                    spacing = (self.timelines_widget.view_selector.height()
+                        + self.timelines_widget.month_widgets[0].height()
+                        )\
+                        - (self.task_list_widget.new_task_textedit.contentsMargins().top()
+                                 + self.task_list_widget.new_task_textedit.height()
+                                 + self.task_list_widget.new_task_textedit.contentsMargins().bottom())
                     self.task_list_widget.layout.insertSpacing(1,
-                                                               int(self.timelines_widget.month_widgets[0].height()
-                                                                   + self.timelines_widget.view_selector.height()
-                                                                   + self.timelines_widget.view_selector.y()
-                                                                   - self.task_list_widget.new_task_textedit.height()))
+                                                               spacing)
+                adjust_spacing()
+
                 self.timelines_widget.view_type_changed.connect(lambda **kwargs: adjust_spacing())
 
                 if self._style is not None:
@@ -196,6 +201,8 @@ class PlannerWidget(QTabWidget):
                         # Layout
                         self.layout = QVBoxLayout(self)
                         self.layout.setAlignment(Qt.AlignTop)
+                        self.setContentsMargins(0, 0, 0, 0)
+                        self.layout.setContentsMargins(0, 0, 0, 0)
                         # Horizontal layout for settings
                         self.settings_layout = QHBoxLayout()
                         self.layout.addLayout(self.settings_layout)
@@ -217,9 +224,14 @@ class PlannerWidget(QTabWidget):
                         # Vertical layout for timelines
                         self.timelines_layout = QVBoxLayout()
                         self.layout.addLayout(self.timelines_layout)
+                        self.timelines_layout.setContentsMargins(0,
+                                                                 0,
+                                                                 0,
+                                                                 0)
                         # Timelines
                         self.timelines_layout.addStretch()
                         self.make_timelines()
+
 
                         slots = [slot for slot in self.planner.tasks_changed._slots if
                                  'TimelinesWidget.' in str(slot)]
@@ -343,6 +355,7 @@ class PlannerWidget(QTabWidget):
                                 self.week_widgets_layout = QHBoxLayout()
                                 self.week_widgets_layout.setAlignment(Qt.AlignLeft)
                                 self.layout.addLayout(self.week_widgets_layout)
+
                                 # Week widgets
                                 if timelines_widget.view_type in ['weekly',
                                                                   'daily']:
@@ -549,6 +562,8 @@ class PlannerWidget(QTabWidget):
                                 super().__init__(parent=parent)
                                 # Layout
                                 self.layout = QVBoxLayout(self)
+                                self.setContentsMargins(0, 0, 0, 0)
+                                self.layout.setContentsMargins(0, 0, 0, 0)
                                 # Horizontal layout for label
                                 self.label_layout = QHBoxLayout()
                                 self.layout.addLayout(self.label_layout)
@@ -569,7 +584,7 @@ class PlannerWidget(QTabWidget):
                                 self.label = QLabel()
                                 # Layout
                                 self.label_layout.addWidget(self.label)
-                                self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.035))
+                                self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.0365))
                                 # Set text
                                 self.label.setText(self.task.name)
                                 self.task.name_changed.connect(lambda **kwargs: self.label.setText(self.task.name))
@@ -657,7 +672,7 @@ class PlannerWidget(QTabWidget):
                                 pass#self.setFixedWidth(100)
 
                             def set_geometry(self):
-                                #self.set_start_position()
+                                self.set_start_position()
                                 self.set_length()
 
                             def set_visibility(self):

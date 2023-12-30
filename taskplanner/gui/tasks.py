@@ -1051,11 +1051,14 @@ class TaskWidgetSimple(QWidget):
                                                style=self._style)
         ## Offset the task line widget to the right, by an amount proportional to its depth in the task tree
         ## up to the main task. The latter may not necessarily be a top-level task.
-        margins = self.task_line_widget.contentsMargins()
         self.setContentsMargins(int(SCREEN_WIDTH*0.005)*len(self.task.ancestors),
-                                margins.top(),
-                                margins.right(),
-                                margins.bottom())
+                                0,
+                                int(SCREEN_WIDTH*0.003),
+                                0)
+        self.layout.setContentsMargins(int(SCREEN_WIDTH*0.005)*len(self.task.ancestors),
+                                       0,
+                                       int(SCREEN_WIDTH * 0.003),
+                                       0)
         self.layout.addWidget(self.task_line_widget)
         self.visibility_changed = Signal()
         # Subtasks
