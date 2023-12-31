@@ -1,7 +1,7 @@
 """
 This module defines a planner widget and related widgets.
 """
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -104,7 +104,7 @@ class PlannerWidget(QTabWidget):
                 # Task list widget
                 self.make_task_list_widget()
                 # To be reviewed
-                self.task_list_widget.layout.insertSpacing(1, 0)
+                #self.task_list_widget.layout.insertSpacing(1, 0)
                 ## Scroll area
                 self.task_list_scrollarea = QScrollArea()
                 self.task_list_scrollarea.setWidgetResizable(True)
@@ -129,17 +129,81 @@ class PlannerWidget(QTabWidget):
                     self.task_list_widget.layout.removeItem(
                         self.task_list_widget.layout.itemAt(1)
                     )
-                    spacing = (self.timelines_widget.view_selector.height()
-                        + self.timelines_widget.month_widgets[0].height()
-                        )\
-                        - (self.task_list_widget.new_task_textedit.contentsMargins().top()
-                                 + self.task_list_widget.new_task_textedit.height()
-                                 + self.task_list_widget.new_task_textedit.contentsMargins().bottom())
+                    spacing = 0
+                    if self.timelines_widget.view_type == 'daily':
+                        spacing = \
+                            (
+                                self.timelines_widget.view_selector.height()
+                                +
+                                self.timelines_widget.month_widgets[0].contentsMargins().top()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().top()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].contentsMargins().top()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].height()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].contentsMargins().bottom()
+                                +
+                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
+                                +
+                                self.timelines_widget.month_widgets[0].contentsMargins().bottom()
+                            ) \
+                            - \
+                            (self.task_list_widget.new_task_textedit.height())
+                    elif self.timelines_widget.view_type == 'weekly':
+                        spacing = \
+                            (
+                                    self.timelines_widget.view_selector.height()
+                                    +
+                                    self.timelines_widget.month_widgets[0].contentsMargins().top()
+                                    +
+                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().top()
+                                    +
+                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
+                                    +
+                                    self.timelines_widget.month_widgets[0].week_widgets[0].height()
+                                    +
+                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
+                                    +
+                                    self.timelines_widget.month_widgets[0].contentsMargins().bottom()
+                            )\
+                            - \
+                            (self.task_list_widget.new_task_textedit.height())
+                    elif self.timelines_widget.view_type == 'monthly':
+                        spacing = \
+                            (
+                                    self.timelines_widget.view_selector.height()
+                                    +
+                                    self.timelines_widget.month_widgets[0].contentsMargins().top()
+                                    +
+                                    self.timelines_widget.month_widgets[0].height()
+                                    +
+                                    self.timelines_widget.month_widgets[0].contentsMargins().bottom()
+                            ) \
+                            - \
+                            (self.task_list_widget.new_task_textedit.height())
+
                     self.task_list_widget.layout.insertSpacing(1,
                                                                spacing)
-                adjust_spacing()
 
-                self.timelines_widget.view_type_changed.connect(lambda **kwargs: adjust_spacing())
+                def adjust_position():
+                    print('Added task')
+                    frame_position = self.frameGeometry().topLeft()
+                    for i in range(len(self.task_list_widget.task_widgets)):
+                        print(f'\t adjusting position of task {self.task_list_widget.task_widgets[i].task.name}')
+                        task_position = self.task_list_widget.task_widgets[i].mapToGlobal(QPoint(0, 0))
+                        timeline_position = self.timelines_widget.timeline_widgets[i].mapToGlobal(QPoint(0, 0))
+                        offset_y = timeline_position.y() - frame_position.y()
+                        new_task_position = frame_position + QPoint(0, offset_y)
+                        self.task_list_widget.task_widgets[i].move(new_task_position)
+
+                #adjust_spacing()
+                adjust_position()
+                self.planner.tasks_changed.connect(lambda **kwargs: adjust_position())
+                #self.timelines_widget.month_widgets_updated.connect(lambda **kwargs: adjust_position())
 
                 if self._style is not None:
                     set_style(widget=self,
@@ -220,6 +284,7 @@ class PlannerWidget(QTabWidget):
                         self.month_widgets_layout = QHBoxLayout()
                         self.layout.addLayout(self.month_widgets_layout)
                         # Month widgets
+                        self.month_widgets_updated = Signal()
                         self.make_month_widgets()
                         # Vertical layout for timelines
                         self.timelines_layout = QVBoxLayout()
@@ -533,6 +598,7 @@ class PlannerWidget(QTabWidget):
                                                                parent=self,
                                                                style=self._style)]
                             self.month_widgets_layout.addWidget(self.month_widgets[-1])
+                        self.month_widgets_updated.emit()
 
                     def make_timelines(self):
                         class Timeline(QFrame):
@@ -672,7 +738,7 @@ class PlannerWidget(QTabWidget):
                                 pass#self.setFixedWidth(100)
 
                             def set_geometry(self):
-                                self.set_start_position()
+                                #self.set_start_position()
                                 self.set_length()
 
                             def set_visibility(self):
