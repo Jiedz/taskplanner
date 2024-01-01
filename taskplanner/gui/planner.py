@@ -15,7 +15,8 @@ from PyQt5.QtWidgets import \
     QCalendarWidget,
     QColorDialog,
     QTabWidget,
-    QFrame
+    QFrame,
+    QGridLayout
     )
 
 from signalslot import Signal
@@ -101,20 +102,22 @@ class PlannerWidget(QTabWidget):
                 self.layout.setAlignment(Qt.AlignLeft)
                 # Geometry
                 self.setGeometry(self.parent().geometry())
+                # Vertical layout for (new task textedit, task list widget)
+                self.new_task_task_list_layout = QVBoxLayout()
+                self.layout.addLayout(self.new_task_task_list_layout)
+                # New task textedit
+                self.make_new_task_textedit()
+                self.new_task_textedit.setFixedSize(int(self.width() * 0.15),
+                                                                     int(self.height() * 0.035))
                 # Task list widget
                 self.make_task_list_widget()
-                # To be reviewed
-                #self.task_list_widget.layout.insertSpacing(1, 0)
                 ## Scroll area
                 self.task_list_scrollarea = QScrollArea()
                 self.task_list_scrollarea.setWidgetResizable(True)
                 self.task_list_scrollarea.setFixedSize(int(self.width()*0.3),
                                                        int(self.height()*0.95))
                 self.task_list_scrollarea.setWidget(self.task_list_widget)
-                self.layout.addWidget(self.task_list_scrollarea)
-                ## New task textedit
-                self.task_list_widget.new_task_textedit.setFixedSize(int(self.width()*0.15),
-                                                                     int(self.height() * 0.035))
+                self.new_task_task_list_layout.addWidget(self.task_list_scrollarea)
                 # Timelines widget
                 self.make_timelines_widget()
                 ## Scroll area
@@ -123,92 +126,63 @@ class PlannerWidget(QTabWidget):
                 self.timelines_scrollarea.setWidget(self.timelines_widget)
                 self.layout.addWidget(self.timelines_scrollarea)
 
-                # To be reviewed
-                def adjust_spacing():
-                    # Remove previous spacing
-                    self.task_list_widget.layout.removeItem(
-                        self.task_list_widget.layout.itemAt(1)
-                    )
-                    spacing = 0
-                    if self.timelines_widget.view_type == 'daily':
-                        spacing = \
-                            (
-                                self.timelines_widget.view_selector.height()
-                                +
-                                self.timelines_widget.month_widgets[0].contentsMargins().top()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().top()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].contentsMargins().top()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].height()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].day_widgets[0].contentsMargins().bottom()
-                                +
-                                self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
-                                +
-                                self.timelines_widget.month_widgets[0].contentsMargins().bottom()
-                            ) \
-                            - \
-                            (self.task_list_widget.new_task_textedit.height())
-                    elif self.timelines_widget.view_type == 'weekly':
-                        spacing = \
-                            (
-                                    self.timelines_widget.view_selector.height()
-                                    +
-                                    self.timelines_widget.month_widgets[0].contentsMargins().top()
-                                    +
-                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().top()
-                                    +
-                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
-                                    +
-                                    self.timelines_widget.month_widgets[0].week_widgets[0].height()
-                                    +
-                                    self.timelines_widget.month_widgets[0].week_widgets[0].contentsMargins().bottom()
-                                    +
-                                    self.timelines_widget.month_widgets[0].contentsMargins().bottom()
-                            )\
-                            - \
-                            (self.task_list_widget.new_task_textedit.height())
-                    elif self.timelines_widget.view_type == 'monthly':
-                        spacing = \
-                            (
-                                    self.timelines_widget.view_selector.height()
-                                    +
-                                    self.timelines_widget.month_widgets[0].contentsMargins().top()
-                                    +
-                                    self.timelines_widget.month_widgets[0].height()
-                                    +
-                                    self.timelines_widget.month_widgets[0].contentsMargins().bottom()
-                            ) \
-                            - \
-                            (self.task_list_widget.new_task_textedit.height())
-
-                    self.task_list_widget.layout.insertSpacing(1,
-                                                               spacing)
-
+                '''
                 def adjust_position():
                     print('Added task')
                     frame_position = self.frameGeometry().topLeft()
                     for i in range(len(self.task_list_widget.task_widgets)):
-                        print(f'\t adjusting position of task {self.task_list_widget.task_widgets[i].task.name}')
-                        task_position = self.task_list_widget.task_widgets[i].mapToGlobal(QPoint(0, 0))
-                        timeline_position = self.timelines_widget.timeline_widgets[i].mapToGlobal(QPoint(0, 0))
-                        offset_y = timeline_position.y() - frame_position.y()
-                        new_task_position = frame_position + QPoint(0, offset_y)
-                        self.task_list_widget.task_widgets[i].move(new_task_position)
-
-                #adjust_spacing()
-                adjust_position()
-                self.planner.tasks_changed.connect(lambda **kwargs: adjust_position())
-                #self.timelines_widget.month_widgets_updated.connect(lambda **kwargs: adjust_position())
-
+                        task_widget = self.task_list_widget.task_widgets[i]
+                        timeline = self.timelines_widget.timeline_widgets[i]
+                        print(f'\t adjusting position of task {task_widget.task.name}')
+                        task_position = task_widget.mapToGlobal(QPoint(0, 0))
+                        timeline_position = timeline.mapToGlobal(QPoint(0, 0))
+                        task_list_widget_position = self.task_list_widget.mapToGlobal(QPoint(0, 0))
+                        timelines_widget_position = self.timelines_widget.mapToGlobal(QPoint(0, 0))
+                        offset = (timeline_position - task_position)
+                        offset = QPoint(0, offset.y())
+                        new_task_position = QPoint(0, 0)
+                        print(f'\t\tTask widget position: {task_position}\n',
+                              f'\t\tTimeline widget position: {timeline_position}\n',
+                              f'\t\tOffset: {offset}')
+                        task_widget.move(0, (task_position - task_list_widget_position + offset).y())
+                        self.layout.addStretch()
+                '''
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab'])
+
+            def make_new_task_textedit(self):
+                # textedit to define a new assignee when the 'plus' button is clicked
+                self.new_task_textedit = QTextEdit()
+                # Layout
+                self.new_task_task_list_layout.addWidget(self.new_task_textedit)
+
+                def callback():
+                    if '\n' in self.new_task_textedit.toPlainText():
+                        new_task = Task(name=self.new_task_textedit.toPlainText()[:-1])
+                        self.new_task_textedit.blockSignals(True)
+                        self.new_task_textedit.setText('')
+                        self.new_task_textedit.blockSignals(False)
+                        """
+                        For some reason, the cursor is normally reset to the start of the 
+                        widget. One then needs to move the cursor to the end and then reset the cursor
+                        """
+                        # Move cursor to the end
+                        cursor = self.new_task_textedit.textCursor()
+                        cursor.movePosition(cursor.Left,
+                                            cursor.MoveAnchor,
+                                            0)
+                        """
+                        For some other reason, all text is also automatically selected, so one needs to
+                        clear the selection.
+                        """
+                        cursor.clearSelection()
+                        # Add new subtask
+                        self.planner.add_tasks(new_task)
+
+                self.new_task_textedit.textChanged.connect(lambda: callback())
+                self.new_task_textedit.setPlaceholderText("+ New Task")
 
 
             def make_task_list_widget(self):
@@ -261,6 +235,7 @@ class PlannerWidget(QTabWidget):
                         self._view_type = view_type
                         self.n_months = n_months
                         self.view_type_changed = Signal()
+                        self.timelines_updated = Signal()
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout(self)
@@ -527,7 +502,6 @@ class PlannerWidget(QTabWidget):
                                                 # Layout
                                                 self.layout.addWidget(self.label)
                                                 self.label.setAlignment(Qt.AlignCenter)
-                                                self.setFixedWidth(int(self.task_list_widget.new_task_textedit.width()*0.3))
                                                 # Set text
                                                 self.label.setText(self.date.strftime('%A')[:3]
                                                                    + ' ' + str(self.date.day))
@@ -826,6 +800,8 @@ class PlannerWidget(QTabWidget):
                                     else:
                                         break
 
+                            self.timelines_updated.emit()
+
 
 
 
@@ -871,8 +847,6 @@ class TaskListWidget(QWidget):
         # Layout
         self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
-        # New task textedit
-        self.make_new_task_textedit()
         # Subtask widgets
         self.task_widgets = []
         self.layout.addStretch()
@@ -883,38 +857,6 @@ class TaskListWidget(QWidget):
         for slot in slots:
             self.planner.tasks_changed.disconnect(slot)
         self.planner.tasks_changed.connect(lambda **kwargs: self.make_task_widgets())
-
-    def make_new_task_textedit(self):
-        # textedit to define a new assignee when the 'plus' button is clicked
-        self.new_task_textedit = QTextEdit()
-        # Layout
-        self.layout.addWidget(self.new_task_textedit)
-
-        def callback():
-            if '\n' in self.new_task_textedit.toPlainText():
-                new_task = Task(name=self.new_task_textedit.toPlainText()[:-1])
-                self.new_task_textedit.blockSignals(True)
-                self.new_task_textedit.setText('')
-                self.new_task_textedit.blockSignals(False)
-                """
-                For some reason, the cursor is normally reset to the start of the 
-                widget. One then needs to move the cursor to the end and then reset the cursor
-                """
-                # Move cursor to the end
-                cursor = self.new_task_textedit.textCursor()
-                cursor.movePosition(cursor.Left,
-                                    cursor.MoveAnchor,
-                                    0)
-                """
-                For some other reason, all text is also automatically selected, so one needs to
-                clear the selection.
-                """
-                cursor.clearSelection()
-                # Add new subtask
-                self.planner.add_tasks(new_task)
-
-        self.new_task_textedit.textChanged.connect(lambda: callback())
-        self.new_task_textedit.setPlaceholderText("+ New Task")
 
     def make_task_widgets(self):
         self.layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
