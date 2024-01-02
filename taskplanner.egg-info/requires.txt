@@ -3,3 +3,4 @@ anytree
 pyqt5
 screeninfo
 signalslot
+python-dateutil

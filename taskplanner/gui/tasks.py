@@ -19,9 +19,10 @@ from PyQt5.QtWidgets import \
     QComboBox,
     QScrollArea,
     QCalendarWidget,
-    QColorDialog
+    QColorDialog,
+    QFrame
     )
-
+from signalslot import Signal
 from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
@@ -1015,7 +1016,6 @@ class TaskWidget(QWidget):
         self.layout.addWidget(self.subtask_list_widget)
 
 
-
 class TaskWidgetSimple(QWidget):
     """
     This widget contains a tree of widgets representing all the subtasks contained in the input task.
@@ -1036,6 +1036,7 @@ class TaskWidgetSimple(QWidget):
             If 'True', the widget is hidden
         """
         self.task, self.planner = task, planner
+        self.is_visible = True
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout()
@@ -1050,19 +1051,16 @@ class TaskWidgetSimple(QWidget):
                                                style=self._style)
         ## Offset the task line widget to the right, by an amount proportional to its depth in the task tree
         ## up to the main task. The latter may not necessarily be a top-level task.
-        def find_spacing(task_widget_simple: TaskWidgetSimple,
-                         spacing: int):
-            if 'TaskWidgetSimple' not in str(type(task_widget_simple.parent())):
-                return spacing
-            else:
-                return find_spacing(task_widget_simple = task_widget_simple.parent(),
-                                    spacing=spacing + 20)
-
-
-        self.task_line_widget.layout.insertSpacing(0,
-                                                   find_spacing(self,
-                                                                0))
+        self.setContentsMargins(int(SCREEN_WIDTH*0.005)*len(self.task.ancestors),
+                                0,
+                                int(SCREEN_WIDTH*0.003),
+                                0)
+        self.layout.setContentsMargins(int(SCREEN_WIDTH*0.005)*len(self.task.ancestors),
+                                       0,
+                                       int(SCREEN_WIDTH * 0.003),
+                                       0)
         self.layout.addWidget(self.task_line_widget)
+        self.visibility_changed = Signal()
         # Subtasks
         self.subtask_widgets = []
         self.make_subtasks()
@@ -1073,6 +1071,8 @@ class TaskWidgetSimple(QWidget):
                       stylesheets=self._style.stylesheets['simple view'])
         if hide:
             self.hide()
+        else:
+            self.show()
 
         slots = [slot for slot in self.task.children_changed._slots if 'TaskWidget.' in str(slot)]
         for slot in slots:
@@ -1092,7 +1092,7 @@ class TaskWidgetSimple(QWidget):
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
                                                   planner=self.planner,
-                                                  hide=not self.task_line_widget.expanded,
+                                                  hide=True,#not self.task_line_widget.expanded,
                                                   style=self._style
                                                   )
                 self.layout.addWidget(subtask_widget)
@@ -1102,14 +1102,28 @@ class TaskWidgetSimple(QWidget):
             if widget.task not in self.task.children:
                 widget.hide()
                 self.subtask_widgets.remove(widget)
+                self.layout.removeWidget(widget)
 
-class TaskLineWidget(QWidget):
+
+    def show(self):
+        super().show()
+        self.is_visible = True
+        self.visibility_changed.emit()
+
+    def hide(self):
+        super().hide()
+        self.is_visible = False
+        self.visibility_changed.emit()
+        print(f'TaskWidgetSimple hidden: {self.task.name}')
+
+
+class TaskLineWidget(QFrame):
     """
     This widget contains:
         - A pushbutton containing the name of the widget
         - The priority level
         - The end date
-        - A pushbutton that enables to view the subtasks
+        - A pushbutton that allows to view the subtasks
     """
 
     def __init__(self,
@@ -1146,9 +1160,23 @@ class TaskLineWidget(QWidget):
         self.make_expand_pushbutton()
         self.layout.addStretch()
         # Set style
+        self.set_style()
+        self.task.color_changed.connect(lambda **kwargs: self.set_style())
+
+    def set_style(self):
         if self._style is not None:
+            self._style.stylesheets['simple view']['task_line_widget']['main'] \
+                = '''
+                  QWidget
+                  {
+                    border:2px solid %s;
+                  }
+                  ''' % self.task.color
             set_style(widget=self,
-                      stylesheets=self._style.stylesheets['simple view']['task_line_widget'])
+                      stylesheets=self._style.stylesheets
+                      ['simple view']
+                      ['task_line_widget'])
+
 
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()
@@ -1236,11 +1264,17 @@ class TaskLineWidget(QWidget):
         # Callback
         def callback():
             self.expanded = not self.expanded
-            for subtask_widget in self.parent().subtask_widgets:
-                if subtask_widget.isVisible():
-                    subtask_widget.hide()
+            # Hide or show all descendant TaskWidgetSimple according to the expanded state of this TaskLineWidget
+            def set_visibilities(task_widget: TaskWidgetSimple):
+                if task_widget.parent().task_line_widget.expanded:
+                    task_widget.show()
                 else:
-                    subtask_widget.show()
+                    task_widget.hide()
+                for subtask_widget in task_widget.subtask_widgets:
+                    set_visibilities(subtask_widget)
+
+            for subtask_widget in self.parent().subtask_widgets:
+                set_visibilities(subtask_widget)
             # Set icon
             icon_path = self.parent()._style.icon_path
             name = 'expanded' if self.expanded else 'not-expanded'

@@ -1,6 +1,7 @@
 README.md
 setup.py
 taskplanner/__init__.py
+taskplanner/planner.py
 taskplanner/tasks.py
 taskplanner.egg-info/PKG-INFO
 taskplanner.egg-info/SOURCES.txt

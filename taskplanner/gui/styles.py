@@ -460,7 +460,9 @@ class TaskWidgetStyle:
                                 QWidget
                                 {
                                     /* background-color:%s; */
-                                    border:2px solid %s;
+                                    border:1px solid %s;
+                                    margin:0px;
+                                    padding:0px;
                                 }
                                 ''' % (self.color_palette['background 2'],
                                        self.color_palette['border']),
@@ -504,6 +506,7 @@ class TaskWidgetStyle:
                                 QPushButton
                                 {
                                     icon-size:%spx;
+                                    border:None;
                                 }
                                 QPushButton:hover
                                 {
@@ -516,13 +519,25 @@ class TaskWidgetStyle:
                                 QPushButton
                                 {
                                     icon-size:%spx;
+                                    border:None
                                 }
                                 QPushButton:hover
                                 {
                                     background-color:%s;
                                 }
                                 ''' % (ICON_SIZES['small'].width(),
-                                       self.color_palette['background 2'])
+                                       self.color_palette['background 2']),
+                            'end_date_label':
+                                '''
+                                QLabel
+                                {
+                                    border:1px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text - light'],
+                                       self.font['size - text']),
                         }
                 }
         }
@@ -649,9 +664,141 @@ class PlannerWidgetStyle:
                            self.color_palette['background 1'],
                            self.color_palette['border'],
                            ),
+                        'timelines_scrollarea':
+                            '''
+                                QWidget
+                                {
+                                    border:None;
+                                    margin-top:0px;
+                                }
+                            ''',
                         'timelines_widget':
                             {
-
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:None;
+                                    }
+                                    '''
+                            },
+                        'month_widget':
+                            {
+                                'main':
+                                    '''
+                                    QFrame
+                                    {
+                                        border:3px solid %s;
+                                        padding:0px;
+                                    }
+                                    ''' % (self.color_palette['border']),
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - title 2']),
+                            },
+                        'week_widget':
+                            {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:2px solid %s;
+                                        padding:0px;
+                                    }
+                                    ''' % (self.color_palette['border']),
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text']),
+                            },
+                        'day_widget':
+                            {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:1px solid %s;
+                                    }
+                                    ''' % (self.color_palette['border']),
+                                'label':
+                                    '''
+                                    QLabel
+                                    {   
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text - small']),
+                            },
+                        'view_selector':
+                            {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        border:None;
+                                    }
+                                    ''',
+                                'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                                'combobox':
+                                    '''
+                                    QComboBox
+                                    {
+                                        border:2px solid %s;
+                                        color:%s;
+                                        font-size:%s;
+                                        icon-size:%spx;
+                                    }
+                                    QComboBox:item:selected
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.color_palette['border'],
+                                           self.color_palette['text'],
+                                           self.font['size - text - small'],
+                                           ICON_SIZES['small'].width(),
+                                           self.color_palette['background 2']),
+                            },
+                        'timeline':
+                            {
+                                'main':
+                                    '''
+                                    QWidget
+                                    {
+                                        margin-left:0px;
+                                        padding:0px;
+                                    }
+                                    ''',
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.font['size - text'])
                             }
                     }
             }

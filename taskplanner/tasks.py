@@ -235,6 +235,14 @@ class Task(Node):
         '''
         if self in children:
             raise ValueError(f'Cannot add task {self.name} to its own children.')
+        for child in children:
+            if child.start_date == child.end_date and child.start_date == date.today():
+                child._start_date = self.start_date
+                child.start_date_changed.emit()
+                child._end_date = self.end_date
+                child.end_date_changed.emit()
+            if child.color is None:
+                child.color = self.color
         all_children = tuple(list(self.children) + list(children))
         parent = self.parent
         if self.parent in all_children:
@@ -262,10 +270,6 @@ class Task(Node):
         # Propagate the signal to all ancestors
         for a in self.ancestors:
             a.children_changed.emit()
-        # Set the color of all color-less descendants to the parent's color
-        for subtask in self.descendants:
-            if subtask.color is None:
-                subtask.color = self.color
 
     def remove_children_tasks(self, *children):
         '''
