@@ -672,7 +672,7 @@ class PlannerWidgetStyle:
                                     margin-top:0px;
                                 }
                             ''',
-                        'timelines_widget':
+                        'calendar_widget':
                             {
                                 'main':
                                     '''
