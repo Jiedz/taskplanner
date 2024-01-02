@@ -109,7 +109,8 @@ class PlannerWidget(QTabWidget):
                 self.make_new_task_textedit()
                 self.new_task_textedit.setFixedSize(int(self.width() * 0.15),
                                                     int(self.height() * 0.035))
-                self.new_task_settings_layout.addStretch(1)
+                self.new_task_settings_layout.addSpacing(int(SCREEN_WIDTH * 0.25)
+                                                         - self.new_task_textedit.width())
                 # Vertical layout for task list widget
                 self.task_list_layout = QVBoxLayout()
                 self.task_list_layout.setAlignment(Qt.AlignTop)
@@ -127,8 +128,6 @@ class PlannerWidget(QTabWidget):
                 ## Scroll area
                 self.task_list_scrollarea = QScrollArea()
                 self.task_list_scrollarea.setWidgetResizable(True)
-                self.task_list_scrollarea.setFixedSize(int(self.width() * 0.3),
-                                                       int(self.height() * 0.95))
                 self.task_list_scrollarea.setWidget(self.task_list_widget)
                 self.task_list_layout.addWidget(self.task_list_scrollarea)
                 self.task_list_scrollarea.setFixedWidth(int(SCREEN_WIDTH * 0.25))
@@ -143,11 +142,6 @@ class PlannerWidget(QTabWidget):
                 # Adjust task list widget vertical position
                 self.task_list_layout.insertSpacing(0,
                                                     self.calendar_widget.month_widgets[0].height())
-                def adjust_task_list_position():
-                    self.task_list_layout.removeItem(self.task_list_layout.itemAt(0))
-                    self.task_list_layout.insertSpacing(0,
-                                                        self.calendar_widget.month_widgets[0].height())
-                #self.calendar_widget.month_widgets_updated.connect(lambda **kwargs: adjust_task_list_position())
                 # View selector
                 self.make_view_selector()
                 task_widget_example = TaskWidget(task=Task(),
@@ -155,7 +149,6 @@ class PlannerWidget(QTabWidget):
                                                                        font=self._style.font_name))
                 self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
                 self.view_selector.setFixedHeight(int(self.height() * 0.08))
-                self.new_task_settings_layout.addStretch(3)
 
                 if self._style is not None:
                     set_style(widget=self,
@@ -393,6 +386,8 @@ class CalendarWidget(QWidget):
         # Horizontal layout for month widgets
         self.month_widgets_layout = QHBoxLayout()
         self.layout.addLayout(self.month_widgets_layout)
+        self.month_widgets_layout.setContentsMargins(0, 0, 0, 0)
+        self.month_widgets_layout.setSpacing(0)
         # Month widgets
         self.month_widgets_updated = Signal()
         self.make_month_widgets()
@@ -461,7 +456,7 @@ class CalendarWidget(QWidget):
                 # Layout
                 self.layout = QVBoxLayout(self)
                 self.layout.setAlignment(Qt.AlignCenter)
-                self.setFixedHeight(int(SCREEN_WIDTH * 0.085))
+                self.setFixedHeight(int(SCREEN_HEIGHT * 0.1))
                 # Month label
                 self.make_label()
                 # Horizontal layout for week widgets
@@ -472,7 +467,12 @@ class CalendarWidget(QWidget):
                 # Week widgets
                 if calendar_widget.view_type in ['weekly',
                                                  'daily']:
+                    self.layout.setContentsMargins(0, 0, 0, 0)
+                    self.week_widgets_layout.setSpacing(0)
                     self.make_week_widgets()
+                    self.layout.insertStretch(1)
+                else:
+                    self.setFixedWidth(int(SCREEN_WIDTH*0.13))
                 # Set style
                 if self._style is not None:
                     set_style(widget=self,
@@ -520,11 +520,14 @@ class CalendarWidget(QWidget):
                         # Horizontal layout for week widgets
                         self.day_widgets_layout = QHBoxLayout()
                         self.day_widgets_layout.setAlignment(Qt.AlignLeft)
-                        self.day_widgets_layout.setSpacing(5)
                         self.layout.addLayout(self.day_widgets_layout)
                         # Day widgets
                         if calendar_widget.view_type == 'daily':
+                            self.layout.setContentsMargins(0, 0, 0, 0)
+                            self.day_widgets_layout.setSpacing(0)
                             self.make_day_widgets()
+                        else:
+                            self.setFixedWidth(int(SCREEN_WIDTH*0.05))
                         # Set style
                         if self._style is not None:
                             set_style(widget=self,
@@ -561,6 +564,7 @@ class CalendarWidget(QWidget):
                                 # Layout
                                 self.layout = QVBoxLayout(self)
                                 self.layout.setAlignment(Qt.AlignTop)
+                                self.setFixedWidth(int(SCREEN_WIDTH*0.035))
                                 # Day label
                                 self.make_label()
                                 # Set style
@@ -680,6 +684,7 @@ class CalendarWidget(QWidget):
                 self.layout.setContentsMargins(0, 0, 0, 0)
                 # Horizontal layout for label
                 self.label_layout = QHBoxLayout()
+                self.label_layout.setAlignment(Qt.AlignLeft)
                 self.layout.addLayout(self.label_layout)
                 # Insert first spacing
                 self.label_layout.insertSpacing(0, 0)
@@ -709,7 +714,7 @@ class CalendarWidget(QWidget):
                 self.set_geometry()
                 self.task.start_date_changed.connect(lambda **kwargs: self.set_geometry())
                 self.task.end_date_changed.connect(lambda **kwargs: self.set_geometry())
-                self.calendar_widget.view_type_changed.connect(lambda **kwargs: self.set_geometry())
+                self.calendar_widget.month_widgets_updated.connect(lambda **kwargs: self.set_geometry())
                 # Set visibility
                 self.set_visibility()
                 self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
@@ -734,58 +739,40 @@ class CalendarWidget(QWidget):
                 # Remove spacing
                 self.label_layout.removeItem(self.label_layout.itemAt(0))
                 if self.calendar_widget.view_type == 'daily':
-                    month_widgets = [w for w in self.calendar_widget.month_widgets
-                                     if w.date <= self.task.start_date]
-                    for month_widget in month_widgets:
-                        spacing += month_widget.layout.contentsMargins().left()
-                        print(f'MONTH DATE: {month_widget.date}')
-                        week_widgets = month_widget.week_widgets
-                        for week_widget in week_widgets:
-                            spacing += week_widget.layout.contentsMargins().left()
-                            print(f'\tWEEK DATE: {week_widget.date}')
-                            day_widgets = week_widget.day_widgets
-                            for day_widget in day_widgets:
-                                print(f'\t\tDAY DATE: {day_widget.date}')
-                                if day_widget.date < self.task.start_date:
-                                    spacing += day_widget.width()
-                                    spacing += day_widget.layout.contentsMargins().right()
-                                else:
-                                    # Insert spacing
-                                    self.label_layout.insertSpacing(0, spacing)
-                                    return
-                            spacing += week_widget.layout.contentsMargins().right()
-                        spacing += month_widget.layout.contentsMargins().right()
+                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                    spacing = (delta_date.days + 1)*day_width
                 elif self.calendar_widget.view_type == 'weekly':
-                    month_widgets = [w for w in self.calendar_widget.month_widgets
-                                     if w.date <= self.task.start_date]
-                    for month_widget in month_widgets:
-                        print(f'MONTH DATE: {month_widget.date}')
-                        week_widgets = month_widget.week_widgets
-                        for week_widget in week_widgets:
-                            print(f'\tWEEK DATE: {week_widget.date}')
-                            if week_widget.date < self.task.start_date:
-                                spacing += week_widget.width()
+                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                    n_days = delta_date.days + 1
+                    n_weeks = int(n_days / 7) + n_days % 7 / 7
+                    spacing = int(week_width * n_weeks) + 1
+                elif self.calendar_widget.view_type == 'monthly':
+                        month_widgets = [w for w in self.calendar_widget.month_widgets
+                                         if w.date <= self.task.start_date]
+                        for month_widget in month_widgets:
+                            print(f'MONTH DATE: {month_widget.date}')
+                            if month_widget.date < self.task.start_date:
+                                spacing += month_widget.width()
                             else:
                                 # Insert spacing
-                                # self.label_layout.insertSpacing(0, spacing)
+                                self.label_layout.insertSpacing(0, spacing)
                                 return
-                elif self.calendar_widget.view_type == 'monthly':
-                    month_widgets = [w for w in self.calendar_widget.month_widgets
-                                     if w.date <= self.task.start_date]
-                    for month_widget in month_widgets:
-                        print(f'MONTH DATE: {month_widget.date}')
-                        if month_widget.date < self.task.start_date:
-                            spacing += month_widget.width()
-                        else:
-                            # Insert spacing
-                            self.label_layout.insertSpacing(0, spacing)
-                            return
+                self.label_layout.insertSpacing(0, spacing)
 
             def set_length(self):
-                pass  # self.setFixedWidth(100)
+                view_type = self.calendar_widget.view_type
+                if view_type == 'daily':
+                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                    n_days = (self.task.end_date - self.task.start_date).days + 1
+                    self.label.setFixedWidth(day_width*n_days)
+                elif view_type == 'weekly':
+                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                    n_days = (self.task.end_date - self.task.start_date).days + 1
+                    n_weeks = int(n_days / 7) + n_days % 7 / 7
+                    self.label.setFixedWidth(int(week_width * n_weeks))
 
             def set_geometry(self):
-                # self.set_start_position()
+                self.set_start_position()
                 self.set_length()
 
             def set_visibility(self):
