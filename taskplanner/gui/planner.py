@@ -585,6 +585,7 @@ class CalendarWidget(QWidget):
                                                    + ' ' + str(self.date.day))
 
                         self.dates = []
+                        self.day_widgets = []
                         import calendar
                         is_day_of_week, is_day_of_month = True, True
                         self.n_days = 0
@@ -610,6 +611,7 @@ class CalendarWidget(QWidget):
                                 self.day_widgets_layout.addWidget(self.day_widgets[-1])
 
                 self.dates = []
+                '''
                 import calendar
                 self.n_weeks = len(calendar.monthcalendar(self.date.year,
                                                           self.date.month)
@@ -630,6 +632,33 @@ class CalendarWidget(QWidget):
                     else:
                         self.dates += [self.week_widgets[-1].date + relativedelta(weeks=1)]
                     self.week_widgets_layout.addWidget(self.week_widgets[-1])
+                '''
+                self.dates = []
+                self.week_widgets = []
+                is_day_of_month = True
+                d = date(self.date.year,
+                         self.date.month,
+                         1)
+                while is_day_of_month:
+                    self.dates += [d]
+                    self.week_widgets += [WeekWidget(planner=self.planner,
+                                                     task_list_widget=self.task_list_widget,
+                                                     calendar_widget=self.calendar_widget,
+                                                     date=self.dates[-1],
+                                                     parent=self,
+                                                     style=self._style)]
+                    self.week_widgets_layout.addWidget(self.week_widgets[-1])
+                    is_day_of_week = True
+                    while is_day_of_week:
+                        d_previous = date(d.year, d.month, d.day)
+                        d += relativedelta(days=1)
+                        if d.weekday() % 7 < d_previous.weekday() % 7:
+                            is_day_of_week = False
+                        if d.month != self.date.month:
+                            is_day_of_week = False
+                            is_day_of_month = False
+
+
 
         # Delete old month widgets
         for widget in self.month_widgets:
@@ -745,26 +774,12 @@ class CalendarWidget(QWidget):
                     spacing = n_day_widths * day_width
                 elif self.calendar_widget.view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    n_days = delta_date.days + 2
                     month_widgets = [m for m in self.calendar_widget.month_widgets if m.date <= self.task.start_date]
-                    import calendar
                     n_weeks = 0
-                    last_week_was_split = False
-                    last_week_widget = None
                     for m in month_widgets:
-                        if m != month_widgets[0]:
-                            last_week_widget = week_widgets[-1]
                         week_widgets = [w for w in m.week_widgets if w.date <= self.task.start_date]
                         n_weeks += len(week_widgets)
-                        if m != month_widgets[0]:
-                            if week_widgets[-1].date.weekday != 1 and last_week_widget.date.weekday != 1:
-                                last_week_was_split = True
-                            elif last_week_was_split:
-                                n_weeks += 1
-                                last_week_was_split = False
                     n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
-                    print(f'Number of weeks: {n_weeks}')
-                    #print(f'Last week dates: {[d for d in week_widgets[-1].dates]}')
                     spacing = int(week_width * n_weeks)
                 elif self.calendar_widget.view_type == 'monthly':
                     month_width = self.calendar_widget.month_widgets[0].width()
@@ -785,9 +800,23 @@ class CalendarWidget(QWidget):
                     self.label.setFixedWidth(day_width*n_days)
                 elif view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    n_days = (self.task.end_date - self.task.start_date).days + 1
-                    n_weeks = int(n_days / 7) + n_days % 7 / 7
+                    month_widgets = [m for m in self.calendar_widget.month_widgets
+                                     if m.date > self.task.start_date - relativedelta(months=1) and m.date <= self.task.end_date + relativedelta(months=1)]
+                    n_weeks = 0
+                    for m in month_widgets:
+                        week_widgets = [w for w in m.week_widgets
+                                        if w.date > self.task.start_date and w.date <= self.task.end_date]
+                        n_weeks += len(week_widgets)
+                    n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.end_date.weekday() + 1) / 7
                     self.label.setFixedWidth(int(week_width * n_weeks))
+                elif view_type == 'monthly':
+                    month_width = self.calendar_widget.month_widgets[0].width()
+
+                    month_widgets = [m for m in self.calendar_widget.month_widgets
+                                     if m.date > self.task.start_date and m.date < self.task.end_date]
+                    n_months = len(month_widgets)
+                    n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
+                    self.label.setFixedWidth(int(n_months * month_width))
 
             def set_geometry(self):
                 self.set_start_position()
