@@ -5,6 +5,12 @@ Summary: Task manager with Gantt chart.
 Home-page: https://github.com/Jiedz/taskplanner
 Author: Jiedz
 Author-email: 
+Requires-Dist: numpy
+Requires-Dist: anytree
+Requires-Dist: pyqt5
+Requires-Dist: screeninfo
+Requires-Dist: signalslot
+Requires-Dist: python-dateutil
 
 # taskplanner
 A task manager with Gantt Chart
