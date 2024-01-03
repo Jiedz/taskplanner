@@ -750,9 +750,8 @@ class CalendarWidget(QWidget):
                     import calendar
                     n_weeks = 0
                     for m in month_widgets:
-                        #week_widgets = [w for w in m.week_widgets if w.dates <= self.task.start_date]
-                        n_weeks += len(calendar.monthcalendar(m.date.year,
-                                                              m.date.month))
+                        week_widgets = [w for w in m.week_widgets if w.date <= self.task.start_date]
+                        n_weeks += len(week_widgets)
                     n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
                     print(f'Number of weeks: {n_weeks}')
                     #print(f'Last week dates: {[d for d in week_widgets[-1].dates]}')
