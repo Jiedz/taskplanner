@@ -749,9 +749,19 @@ class CalendarWidget(QWidget):
                     month_widgets = [m for m in self.calendar_widget.month_widgets if m.date <= self.task.start_date]
                     import calendar
                     n_weeks = 0
+                    last_week_was_split = False
+                    last_week_widget = None
                     for m in month_widgets:
+                        if m != month_widgets[0]:
+                            last_week_widget = week_widgets[-1]
                         week_widgets = [w for w in m.week_widgets if w.date <= self.task.start_date]
                         n_weeks += len(week_widgets)
+                        if m != month_widgets[0]:
+                            if week_widgets[-1].date.weekday != 1 and last_week_widget.date.weekday != 1:
+                                last_week_was_split = True
+                            elif last_week_was_split:
+                                n_weeks += 1
+                                last_week_was_split = False
                     n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
                     print(f'Number of weeks: {n_weeks}')
                     #print(f'Last week dates: {[d for d in week_widgets[-1].dates]}')
