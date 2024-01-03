@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import \
     )
 
 from signalslot import Signal
+from numpy import floor, ceil
 from datetime import date
 import logging
 from dateutil.relativedelta import relativedelta
@@ -564,7 +565,7 @@ class CalendarWidget(QWidget):
                                 # Layout
                                 self.layout = QVBoxLayout(self)
                                 self.layout.setAlignment(Qt.AlignTop)
-                                self.setFixedWidth(int(SCREEN_WIDTH*0.035))
+                                self.setFixedWidth(int(SCREEN_WIDTH*0.04))
                                 # Day label
                                 self.make_label()
                                 # Set style
@@ -740,23 +741,31 @@ class CalendarWidget(QWidget):
                 self.label_layout.removeItem(self.label_layout.itemAt(0))
                 if self.calendar_widget.view_type == 'daily':
                     day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    spacing = (delta_date.days + 1)*day_width
+                    n_day_widths = delta_date.days + 2
+                    spacing = n_day_widths * day_width
                 elif self.calendar_widget.view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    n_days = delta_date.days + 1
-                    n_weeks = int(n_days / 7) + n_days % 7 / 7
-                    spacing = int(week_width * n_weeks) + 1
+                    n_days = delta_date.days + 2
+                    month_widgets = [m for m in self.calendar_widget.month_widgets if m.date <= self.task.start_date]
+                    import calendar
+                    n_weeks = 0
+                    for m in month_widgets:
+                        #week_widgets = [w for w in m.week_widgets if w.dates <= self.task.start_date]
+                        n_weeks += len(calendar.monthcalendar(m.date.year,
+                                                              m.date.month))
+                    n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
+                    print(f'Number of weeks: {n_weeks}')
+                    #print(f'Last week dates: {[d for d in week_widgets[-1].dates]}')
+                    spacing = int(week_width * n_weeks)
                 elif self.calendar_widget.view_type == 'monthly':
-                        month_widgets = [w for w in self.calendar_widget.month_widgets
-                                         if w.date <= self.task.start_date]
-                        for month_widget in month_widgets:
-                            print(f'MONTH DATE: {month_widget.date}')
-                            if month_widget.date < self.task.start_date:
-                                spacing += month_widget.width()
-                            else:
-                                # Insert spacing
-                                self.label_layout.insertSpacing(0, spacing)
-                                return
+                    month_width = self.calendar_widget.month_widgets[0].width()
+
+                    month_widgets = [m for m in self.calendar_widget.month_widgets
+                                     if m.date <= self.task.start_date]
+                    n_months = len(month_widgets) - 1
+                    n_months = n_months + self.task.start_date.day / 30
+                    spacing = int(n_months * month_width)
+                # Add left spacing
                 self.label_layout.insertSpacing(0, spacing)
 
             def set_length(self):

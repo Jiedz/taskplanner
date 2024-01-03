@@ -688,7 +688,7 @@ class PlannerWidgetStyle:
                                     '''
                                     QFrame
                                     {
-                                        border:3px solid %s;
+                                        border:0px solid %s;
                                         padding:0px;
                                     }
                                     ''' % (self.color_palette['border']),
@@ -696,12 +696,15 @@ class PlannerWidgetStyle:
                                     '''
                                     QLabel
                                     {   
-                                        border:None;
+                                        border:1px solid %s;
                                         color:%s;
                                         font-size:%s;
+                                        background-color:%s
                                     }
-                                    ''' % (self.color_palette['text - light'],
-                                           self.font['size - title 2']),
+                                    ''' % (self.color_palette['border'],
+                                           self.color_palette['text - light'],
+                                           self.font['size - title 2'],
+                                           self.color_palette['background 2']),
                             },
                         'week_widget':
                             {
@@ -709,7 +712,7 @@ class PlannerWidgetStyle:
                                     '''
                                     QWidget
                                     {
-                                        border:2px solid %s;
+                                        border:0px solid %s;
                                         padding:0px;
                                     }
                                     ''' % (self.color_palette['border']),
@@ -717,11 +720,12 @@ class PlannerWidgetStyle:
                                     '''
                                     QLabel
                                     {   
-                                        border:None;
+                                        border:0px solid %s;
                                         color:%s;
                                         font-size:%s;
                                     }
-                                    ''' % (self.color_palette['text - light'],
+                                    ''' % (self.color_palette['border'],
+                                           self.color_palette['text - light'],
                                            self.font['size - text']),
                             },
                         'day_widget':
@@ -730,7 +734,7 @@ class PlannerWidgetStyle:
                                     '''
                                     QWidget
                                     {
-                                        border:1px solid %s;
+                                        border:0.5px solid %s;
                                     }
                                     ''' % (self.color_palette['border']),
                                 'label':
