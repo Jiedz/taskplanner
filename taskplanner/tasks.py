@@ -458,9 +458,16 @@ class Task(Node):
         while index < len(task_strings) - 1:
             subtask_string = [task_strings[index]]
             index += 1
-            while index < len(task_strings) - 1 and indent_pattern in task_strings[index]:
-                subtask_string += [task_strings[index]]
-                index += 1
+            while index < len(task_strings) - 1:
+                try:
+                    indent_pattern_index = ''.join(reversed(task_strings[index][1])).index(indent_pattern)
+                except:
+                    break
+                if indent_pattern_index != len(task_strings[index][1]) - 1:
+                    index += 1
+                    break
+                else:
+                    subtask_string += [task_strings[index]]
             task.add_children_tasks(Task._from_string('TASK___\n'.join(subtask_string)))
 
         return task
