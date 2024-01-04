@@ -1,7 +1,7 @@
 """
 This module defines a task widget.
 """
-
+import logging
 import os
 from datetime import date as dt
 

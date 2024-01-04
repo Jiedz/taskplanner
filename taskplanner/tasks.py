@@ -5,6 +5,8 @@ This module describes a task and the relation between parent and children tasks.
 from datetime import date
 from inspect import currentframe, getargvalues
 from logging import warning
+import os
+import textwrap
 
 # %% Imports
 from anytree import Node, RenderTree
@@ -158,7 +160,7 @@ class Task(Node):
     @priority.setter
     def priority(self, value):
         if value not in PRIORITY_LEVELS:
-            raise ValueError(f"Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}")
+            raise ValueError(f'Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}')
         self._priority = value
         self.priority_changed.emit()
 
@@ -368,7 +370,114 @@ class Task(Node):
                 child.make_dict()
                 self.dict[child.name] = child.dict
 
-    def to_file(self, filename: str = None):
+    def to_string(self,
+                  string: str = '',
+                  indent_pattern: str = '\t'):
+        # Write all the data except subtasks first
+        string += f'TASK___\n'
+        # name
+        string += f'name: {self.name}\n'
+        # category
+        string += f'category: {self.category}\n'
+        # description
+        string += f'description: {self.description}\n'
+        # priority
+        string += f'priority: {self.priority}\n'
+        # assignee
+        string += f'assignee: {self.assignee}\n'
+        # start date
+        string += f'start date: {self.start_date.day}/{self.start_date.month}/{self.start_date.year}\n'
+        # end date
+        string += f'end date: {self.end_date.day}/{self.end_date.month}/{self.end_date.year}\n'
+        # color
+        string += f'color: {self.color}'
+        # Write all subtasks
+        for subtask in self.children:
+            len_before = len(string)
+            string = subtask.to_string(string=string+'\n',
+                                       indent_pattern=indent_pattern)
+            string = string.replace(string[len_before:],
+                                    textwrap.indent(string[len_before:],
+                                                    indent_pattern))
+        return string
+
+    @classmethod
+    def _from_string(cls,
+                     string: str = '',
+                     indent_pattern: str = '\t'):
+        lines = string.split('\n')
+        for i in range(len(lines)):
+            line = lines[i]
+            if indent_pattern in line:
+                # Remove one indentation level
+                lines[i] = line[len(indent_pattern):]
+        string = "\n".join(lines)
+        print(string)
+
+        task_strings = string.split('TASK___\n')[1:]
+        # Main task properties
+        task = Task()
+        # Read all the data except subtasks first
+        main_task_string = task_strings[0]
+        lines = main_task_string.splitlines()
+        attributes = ['name',
+                      'category',
+                      'description',
+                      'priority',
+                      'assignee',
+                      'start date',
+                      'end date',
+                      'color']
+        #print(lines)
+        # Set description
+        index = [i for i in range(len(lines)) if 'description: ' in lines[i]][0]
+        description = lines[index].replace('description: ', '')
+        line = lines[index+1]
+        while 'priority: ' not in line:
+            line = lines[index+1]
+            description += '\n' + line
+            # Delete all the lines that were misleadingly created by the description
+            lines.remove(line)
+        lines.insert(index+1, line) # add last line back ("priority: ")
+        task.description = description
+        # Set name, category, priority, assignee, color
+        for i in [0, 1, 3, 4, -1]:
+            attr_name = attributes[i].replace(' ', '_')
+            value = lines[i].replace(attributes[i]+': ', '')
+            if value == 'None':
+                value = None
+            setattr(task, attr_name, value)
+        # Set start and end date
+        for i in [-2, -3]:
+            attr_name = attributes[i].replace(' ', '_')
+            value = lines[i].replace(attributes[i]+': ', '')
+            day, month, year = [int(v) for v in value.split('/')]
+            setattr(task, attr_name, date(year, month, day))
+        # Set all subtasks
+        index = 1
+        while index < len(task_strings) - 1:
+            subtask_string = [task_strings[index]]
+            task_count = 1
+            if index + task_count >= len(task_strings):
+                break
+            else:
+                while indent_pattern in task_strings[index+task_count][0]:
+                    subtask_string += [task_strings[index+task_count]]
+                    task_count += 1
+                    if index + task_count >= len(task_strings):
+                        break
+                index += task_count
+            task.add_children_tasks(Task._from_string('TASK___\n'.join(subtask_string)))
+
+        return task
+
+
+
+
+
+    def to_file(self,
+                filename: str = None,
+                full_content: bool = True):
         '''
         Writes the content of the tree into a .txt file.
 
@@ -377,28 +486,41 @@ class Task(Node):
         filename : str, optional
             The absolute path of the file where the object tree is saved.
 
+
         Returns
         -------
         None.
 
         '''
-        access_mode = "w"
-        if not hasattr(self, "file") and filename is None:
-            '''
-            directory = select_directory(
-                title=f"Saving Task Tree {self.name} to .txt File: Select the Directory Where the .txt File is Created")
-            name = self.name if "/" not in self.name else "task-tree"
-            filename = os.path.join(os.path.abspath(directory), name)
-            '''
-            raise FileNotFoundError(f'File name is needed to save task {self.name} into a file.')
-        elif hasattr(self, "file"):
-            filename = self.filename
-        self.filename = filename
-        self.file = open(filename, access_mode, encoding="utf-8")
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if filename is None:
+            if not hasattr(self, 'filename'):
+                raise ValueError(f'Task {self.name} has no file configured.')
+            else:
+                directory = os.path.sep.join(os.path.abspath(self.filename).split(os.path.sep)[:-1])
+                if not os.path.exists(directory):
+                    raise ValueError(f'No such file directory "{directory}".')
+        else:
+            directory = os.path.sep.join(os.path.abspath(filename).split(os.path.sep)[:-1])
+            if not os.path.exists(directory):
+                warning(f'No such file directory "{directory}". '
+                                f'Attempting to use internal file name {self.filename}')
+                self.to_file(filename=self.filename)
+            else:
+                self.filename = filename
         if ".txt" not in filename:
             filename += ".txt"
-        self.file.write(self.__str__())
-        self.file.close()
+        # Define file
+        file = open(filename, mode='w', encoding='utf-8')
+
+        if not full_content:
+            file.write(self.__str__())
+            file.close()
+        else:
+            pass
+
+
 
 def _signal_changed_property(task: Task,
                              signal: Signal,
@@ -418,3 +540,5 @@ def _signal_changed_property(task: Task,
     getattr(task, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
     for subtask in task.descendants:
         getattr(subtask, f'{property_name}_changed').connect(lambda **kwargs: signal.emit())
+
+
