@@ -412,7 +412,7 @@ class Task(Node):
                 # Remove one indentation level
                 lines[i] = line[len(indent_pattern):]
         string = "\n".join(lines)
-        print(string)
+        print(f'WHOLE TASK STRING: \n\n{string}')
 
         task_strings = string.split('TASK___\n')[1:]
         # Main task properties
@@ -453,20 +453,14 @@ class Task(Node):
             value = lines[i].replace(attributes[i]+': ', '')
             day, month, year = [int(v) for v in value.split('/')]
             setattr(task, attr_name, date(year, month, day))
-        # Set all subtasks
+        # Set subtasks
         index = 1
         while index < len(task_strings) - 1:
             subtask_string = [task_strings[index]]
-            task_count = 1
-            if index + task_count >= len(task_strings):
-                break
-            else:
-                while indent_pattern in task_strings[index+task_count][0]:
-                    subtask_string += [task_strings[index+task_count]]
-                    task_count += 1
-                    if index + task_count >= len(task_strings):
-                        break
-                index += task_count
+            index += 1
+            while index < len(task_strings) - 1 and indent_pattern in task_strings[index]:
+                subtask_string += [task_strings[index]]
+                index += 1
             task.add_children_tasks(Task._from_string('TASK___\n'.join(subtask_string)))
 
         return task
