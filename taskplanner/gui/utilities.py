@@ -1,3 +1,6 @@
+import sys
+
+
 def set_style(widget, stylesheets):
     """
     Recursively set style sheets to a widget and all its sub-widgets.
@@ -37,3 +40,22 @@ def get_pixel_ratio():
         rect = screen.geometry()
         if rect.contains(pos):
             return screen.devicePixelRatio()
+
+from PyQt5.QtWidgets import QFileDialog, QApplication
+import os
+def select_file(start_directory=None, title="Select file"):
+    """
+    INPUTS
+    -----------
+    start_directory : str
+        the absolute path of the starting directory.
+    """
+    if start_directory is None:
+        start_directory = os.getcwd()
+    #Let the user choose a different data path, if needed.
+    #--------------------------------
+    #app = QApplication(sys.argv)
+    file_path = QFileDialog.getOpenFileName(caption=title, directory=start_directory)[0]
+    #app.exec_()
+
+    return file_path

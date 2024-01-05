@@ -4,6 +4,9 @@ This module defines a task planner.
 from taskplanner.tasks import Task, _signal_changed_property
 from signalslot import Signal
 from PyQt5.Qt import QCalendar
+from logging import warning
+import textwrap
+import os
 
 class Planner:
     """
@@ -124,4 +127,81 @@ class Planner:
                                      signal=signal,
                                      property_name=property_name)
         '''
+
+    def to_string(self):
+        # Write all the data except subtasks first
+        string = '___PLANNER___'
+        # Add tasks
+        for task in self.tasks:
+            string += f'\n___TOP LEVEL TASK___\n{task.to_string()}'
+        return string
+
+    @classmethod
+    def from_string(cls,
+                    string: str):
+        planner = Planner()
+        s = ''.join(string.split('___PLANNER___')[1:])
+        task_strings = s.split('\n___TOP LEVEL TASK___')[1:]
+        for task_string in task_strings:
+            planner.add_tasks(Task.from_string(task_string))
+        return planner
+
+    def to_file(self,
+                filename: str = None,
+                access_mode:str = 'r+'):
+        '''
+        Writes the content of the tree into a .txt file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The absolute path of the file where the object tree is saved.
+
+
+        Returns
+        -------
+        None.
+
+        '''
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if filename is None:
+            if not hasattr(self, 'filename'):
+                raise ValueError(f'Planner {self.name} has no file configured.')
+            else:
+                directory = os.path.sep.join(os.path.abspath(self.filename).split(os.path.sep)[:-1])
+                if not os.path.exists(directory):
+                    raise ValueError(f'No such directory "{directory}".')
+        else:
+            directory = os.path.sep.join(os.path.abspath(filename).split(os.path.sep)[:-1])
+            if not os.path.exists(directory):
+                warning(f'No such directory "{directory}". '
+                        f'Attempting to use internal file name {self.filename}')
+                self.to_file(filename=self.filename)
+            else:
+                self.filename = filename
+        if ".txt" not in filename:
+            filename += ".txt"
+        access_mode = 'w' if not os.path.exists(filename) else access_mode
+        # Define file
+        file = open(filename, mode=access_mode, encoding='utf-8')
+        file.write(self.to_string())
+        file.close()
+
+    @classmethod
+    def from_file(cls,
+                  filename: str,
+                  full_content: bool = True):
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if ".txt" not in filename:
+            filename += ".txt"
+        if not os.path.exists(filename):
+            raise ValueError(f'No such file or directory "{filename}".')
+        # Define file
+        file = open(filename, mode='r', encoding='utf-8')
+        planner = Planner.from_string(file.read())
+        planner.filename = filename
+        file.close()
+        return planner
 

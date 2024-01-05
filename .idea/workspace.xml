@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5ca1642a-fb66-4c71-845e-986282d98d24" name="Changes" comment="" />
+    <list default="true" id="5ca1642a-fb66-4c71-845e-986282d98d24" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/styles.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/styles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/test/PlannerWidget_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/test/PlannerWidget_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/gui/utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/gui/utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskplanner/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskplanner/tasks.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,6 +48,14 @@
     ]
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\KoherasLab\OneDrive - NKT Photonics\Documents\Software\Python\taskplanner" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\KoherasLab\AppData\Roaming\JetBrains\PyCharmCE2023.2\scratches" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

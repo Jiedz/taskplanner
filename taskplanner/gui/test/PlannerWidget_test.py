@@ -9,9 +9,10 @@ planner = Planner()
 # Build application2
 app = QApplication(sys.argv)
 # Task widget - standard view
-style = PlannerWidgetStyle(color_palette='dark material')
-planner_widget = PlannerWidget(planner=planner,
-                               style=style)
+try:
+    planner_widget = PlannerWidget.from_file()
+except:
+    planner_widget = PlannerWidget(planner=Planner())
 planner_widget.show()
 # Show Fonts
 '''

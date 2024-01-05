@@ -374,7 +374,7 @@ class Task(Node):
                   string: str = '',
                   indent_pattern: str = '\t'):
         # Write all the data except subtasks first
-        string += f'TASK___\n'
+        string += f'___TASK___\n'
         # name
         string += f'name: {self.name}\n'
         # category
@@ -402,23 +402,23 @@ class Task(Node):
         return string
 
     @classmethod
-    def _from_string(cls,
-                     string: str = '',
-                     indent_pattern: str = '\t'):
+    def from_string(cls,
+                    string: str,
+                    indent_pattern: str = '\t'):
         lines = string.split('\n')
+        # Remove one indentation level from all task strings
         for i in range(len(lines)):
             line = lines[i]
             if indent_pattern in line:
-                # Remove one indentation level
                 lines[i] = line[len(indent_pattern):]
         string = "\n".join(lines)
-        print(f'WHOLE TASK STRING: \n\n{string}')
-
-        task_strings = string.split('TASK___\n')[1:]
-        # Main task properties
+        # Divide all tasks into a list of task strings
+        task_strings = string.split('___TASK___\n')[1:]
+        # Consider the top-level task string
+        main_task_string = task_strings[0]
+        # Top-level task properties
         task = Task()
         # Read all the data except subtasks first
-        main_task_string = task_strings[0]
         lines = main_task_string.splitlines()
         attributes = ['name',
                       'category',
@@ -434,11 +434,13 @@ class Task(Node):
         description = lines[index].replace('description: ', '')
         line = lines[index+1]
         while 'priority: ' not in line:
-            line = lines[index+1]
-            description += '\n' + line
-            # Delete all the lines that were misleadingly created by the description
-            lines.remove(line)
-        lines.insert(index+1, line) # add last line back ("priority: ")
+            line = lines[index + 1]
+            if 'priority: ' in line:
+                pass
+            else:
+                description += '\n' + line
+                # Delete all the lines that were misleadingly created by the description
+                lines.remove(line)
         task.description = description
         # Set name, category, priority, assignee, color
         for i in [0, 1, 3, 4, -1]:
@@ -454,22 +456,22 @@ class Task(Node):
             day, month, year = [int(v) for v in value.split('/')]
             setattr(task, attr_name, date(year, month, day))
         # Set subtasks
-        index = 1
-        while index < len(task_strings) - 1:
-            subtask_string = [task_strings[index]]
-            index += 1
-            while index < len(task_strings) - 1:
-                try:
-                    indent_pattern_index = ''.join(reversed(task_strings[index][1])).index(indent_pattern)
-                except:
-                    break
-                if indent_pattern_index != len(task_strings[index][1]) - 1:
-                    index += 1
-                    break
-                else:
-                    subtask_string += [task_strings[index]]
-            task.add_children_tasks(Task._from_string('TASK___\n'.join(subtask_string)))
+        task_strings = task_strings[1:]
+        children_indices = [i for i in range(len(task_strings))
+                            if task_strings[i][0] != indent_pattern]
+        children_indices += [len(task_strings)]
 
+        for i in range(len(children_indices) - 1):
+            subtask_string = task_strings[children_indices[i]:children_indices[i+1]]
+            if len(subtask_string) == 0:
+                pass
+            elif len(subtask_string) == 1:
+                subtask_string = '___TASK___\n' + subtask_string[0]
+            else:
+                subtask_string = '___TASK___\n'.join(subtask_string)
+                subtask_string = '___TASK___\n' + subtask_string
+
+            task.add_children_tasks(Task.from_string(subtask_string))
         return task
 
 
@@ -478,6 +480,7 @@ class Task(Node):
 
     def to_file(self,
                 filename: str = None,
+                access_mode:str = 'r+',
                 full_content: bool = True):
         '''
         Writes the content of the tree into a .txt file.
@@ -501,25 +504,45 @@ class Task(Node):
             else:
                 directory = os.path.sep.join(os.path.abspath(self.filename).split(os.path.sep)[:-1])
                 if not os.path.exists(directory):
-                    raise ValueError(f'No such file directory "{directory}".')
+                    raise ValueError(f'No such directory "{directory}".')
         else:
             directory = os.path.sep.join(os.path.abspath(filename).split(os.path.sep)[:-1])
             if not os.path.exists(directory):
-                warning(f'No such file directory "{directory}". '
-                                f'Attempting to use internal file name {self.filename}')
+                warning(f'No such directory "{directory}". '
+                        f'Attempting to use internal file name {self.filename}')
                 self.to_file(filename=self.filename)
             else:
                 self.filename = filename
         if ".txt" not in filename:
             filename += ".txt"
+        access_mode = 'w' if not os.path.exists(filename) else access_mode
         # Define file
-        file = open(filename, mode='w', encoding='utf-8')
+        file = open(filename, mode=access_mode, encoding='utf-8')
 
         if not full_content:
             file.write(self.__str__())
             file.close()
         else:
-            pass
+            file.write(self.to_string())
+            file.close()
+
+    @classmethod
+    def from_file(cls,
+                  filename: str,
+                  full_content: bool = True):
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if ".txt" not in filename:
+            filename += ".txt"
+        if not os.path.exists(filename):
+            raise ValueError(f'No such file or directory "{filename}".')
+        # Define file
+        file = open(filename, mode='r', encoding='utf-8')
+        task = Task.from_string(file.read())
+        task.filename = filename
+        file.close()
+        return task
+
 
 
 

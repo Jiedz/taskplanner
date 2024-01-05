@@ -1,6 +1,7 @@
 """
 This module define the styles to be used by the task-related widgets.
 """
+import ast
 import os
 
 from taskplanner.gui.utilities import get_primary_screen
@@ -806,6 +807,30 @@ class PlannerWidgetStyle:
                             }
                     }
             }
+
+    def to_string(self):
+        string = '___PLANNER WIDGET STYLE___'
+        # Color Palette
+        string += f'\ncolor palette: {self.color_palette}'
+        # Font
+        string += f'\nfont: {self.font}'
+        return string
+
+    import ast
+
+    @classmethod
+    def from_string(cls,
+                    string: str):
+        s = ''.join(string.split('___PLANNER WIDGET STYLE___')[1:])
+        lines = s.splitlines()[1:]
+        # Color palette
+        color_palette = ast.literal_eval(lines[0].replace('color palette: ', ''))
+        # Font
+        font = ast.literal_eval(lines[1].replace('font: ', ''))
+        style = PlannerWidgetStyle()
+        style._color_palette = color_palette
+        style._font = font
+        return style
 
     @property
     def font(self):

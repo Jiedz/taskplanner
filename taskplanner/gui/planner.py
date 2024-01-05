@@ -20,9 +20,10 @@ from PyQt5.QtWidgets import \
     )
 
 from signalslot import Signal
+import os
+from logging import warning
 from numpy import floor, ceil
 from datetime import date
-import logging
 from dateutil.relativedelta import relativedelta
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
@@ -41,6 +42,7 @@ TIMELINE_VIEW_TYPES = ['daily',
                        'weekly',
                        'monthly']
 
+
 class PlannerWidget(QTabWidget):
     """
     This widget contains:
@@ -50,8 +52,7 @@ class PlannerWidget(QTabWidget):
     def __init__(self,
                  planner: Planner,
                  parent: QWidget = None,
-                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
-                 ):
+                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
         """
 
         :param planner: :py:class:'taskplanner.planner.Planner'
@@ -76,6 +77,11 @@ class PlannerWidget(QTabWidget):
         if self._style is not None:
             set_style(widget=self,
                       stylesheets=self._style.stylesheets)
+        self.planner.tasks_changed.connect(lambda **kwargs: self.to_file())
+
+    def closeEvent(self, a0):
+        self.to_file()
+        a0.accept()
 
     def make_planner_tab(self):
         class PlannerTab(QWidget):
@@ -267,6 +273,105 @@ class PlannerWidget(QTabWidget):
                                       style=self._style)
         self.addTab(self.planner_tab, 'Planner')
 
+    def to_string(self):
+        # Write all the data except subtasks first
+        string = '___PLANNER WIDGET___'
+        # Add style
+        string += f'\n{self._style.to_string()}'
+        # Add planner
+        string += f'\n{self.planner.to_string()}'
+        return string
+
+    @classmethod
+    def from_string(cls,
+                    string: str):
+        s = ''.join(string.split('___PLANNER WIDGET___')[1:])
+        # Planner
+        planner_string = '___PLANNER___'+s.split('___PLANNER___')[1]
+        planner = Planner.from_string(planner_string)
+        string = s.split('___PLANNER___')[0]
+        # Style
+        style_string = '___PLANNER WIDGET STYLE___'+s.split('___PLANNER WIDGET STYLE___')[1]
+        style = PlannerWidgetStyle.from_string(style_string)
+        string = s.split('___PLANNER WIDGET STYLE___')[0]
+        widget = PlannerWidget(planner=planner,
+                               style=style)
+        return widget
+
+    def to_file(self,
+                filename: str = None,
+                access_mode: str = 'r+'):
+        '''
+        Writes the content of the tree into a .txt file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The absolute path of the file where the object tree is saved.
+
+
+        Returns
+        -------
+        None.
+
+        '''
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if filename is None:
+            if not hasattr(self, 'filename'):
+                from taskplanner.gui.utilities import select_file
+                filename = select_file(title=f'Select an empty configuration file'
+                                             f'to save the task planner.')
+                self.filename = filename
+            else:
+                directory = os.path.sep.join(os.path.abspath(self.filename).split(os.path.sep)[:-1])
+                if not os.path.exists(directory):
+                    warning(f'No such directory "{directory}". Asking user to select '
+                                     f'an empty configuration file')
+                    from taskplanner.gui.utilities import select_file
+                    filename = select_file(title=f'Select an empty configuration file '
+                                                 f'to save task planner')
+                    self.filename = filename
+        else:
+            directory = os.path.sep.join(os.path.abspath(filename).split(os.path.sep)[:-1])
+            if not os.path.exists(directory):
+                warning(f'No such directory "{directory}". '
+                        f'Attempting to use internal file name {self.filename}')
+                self.to_file(filename=self.filename)
+            else:
+                self.filename = filename
+        if ".txt" not in self.filename:
+            self.filename += ".txt"
+        access_mode = 'w' # if not os.path.exists(filename) else access_mode
+        # Define file
+        file = open(self.filename, mode=access_mode, encoding='utf-8')
+
+        file.write(self.to_string())
+        file.close()
+
+    @classmethod
+    def from_file(cls,
+                  filename: str = None,
+                  full_content: bool = True):
+        # Recognize the input file name or use the internally defined file name, if any.
+        # Else, raise an error.
+        if filename is None or not os.path.exists(filename):
+            from taskplanner.gui.utilities import select_file
+            filename = select_file(title=f'Select a non-empty configuration file to load a task planner')
+        if ".txt" not in filename:
+            filename += ".txt"
+        # Define file
+        file = open(filename, mode='r', encoding='utf-8')
+        widget = PlannerWidget.from_string(file.read())
+        widget.filename = filename
+        # Refresh planner
+        tasks = [t for t in widget.planner.tasks]
+        widget.planner.remove_tasks(*tasks)
+        print(tasks)
+        widget.planner.add_tasks(*tasks)
+        file.close()
+        return widget
+
 
 class TaskListWidget(QWidget):
     """
@@ -396,7 +501,7 @@ class CalendarWidget(QWidget):
         self.timelines_layout = QVBoxLayout()
         self.timelines_layout.setAlignment(Qt.AlignTop)
         self.layout.addLayout(self.timelines_layout)
-        self.timelines_layout.addStretch()
+        #self.timelines_layout.addStretch()
         self.make_timelines()
 
         slots = [slot for slot in self.planner.tasks_changed._slots if
@@ -410,6 +515,7 @@ class CalendarWidget(QWidget):
                       stylesheets=self._style.stylesheets
                       ['planner_tab']
                       ['calendar_widget'])
+        self.layout.addStretch()
 
     @property
     def view_type(self):
@@ -429,7 +535,7 @@ class CalendarWidget(QWidget):
         self.make_timelines()
 
     def make_start_end_date_widgets(self):
-        logging.warning(f'Funtion "make_start_end_date_widgets" of widget {self} is not implemented yet.')
+        warning(f'Funtion "make_start_end_date_widgets" of widget {self} is not implemented yet.')
 
     def make_month_widgets(self):
         # Make month widget
@@ -837,21 +943,26 @@ class CalendarWidget(QWidget):
                                                 parent=self,
                                                 style=self._style)
                         # Add the sub-timeline to the main timelines layout
-                        l.removeItem(l.itemAt(l.count() - 1))
+                        #l.removeItem(l.itemAt(l.count() - 1))
                         # Find the correct position in the layout
                         # where the sub-timeline is inserted
                         index = self.task.descendants.index(subtask)
+                        print(f'index of {subtask.name} in timelines descendants of {self.task.name}: {index}')
                         index += l.indexOf(self) + 1
+                        print(f'Widgets in layout: {[l.itemAt(i) for i in range(l.count())]}')
+                        print(f'Index of self in layout: {l.indexOf(self)}')
+                        print(f'index of {subtask.name} in timelines layout: {index}')
                         l.insertWidget(index, sub_timeline)
                         # sub_timeline.setFixedHeight(self.height())
-                        l.addStretch()
+                        #l.addStretch()
                         self.sub_timelines += [sub_timeline]
                 # Remove non-existent sub-timelines
+                '''
                 for widget in self.sub_timelines:
                     if widget.task not in self.task.children:
                         index = l.indexOf(widget)
                         w = widget
-                        while w == widget or (w is not None and widget.task in w.task.ancestors):
+                        while w == widget or (w is not None and widget.task in w.task.descendants):
                             w.hide()
                             try:  # It may be that the widget had been removed from the list, but not hidden
                                 self.calendar_widget.timeline_widgets.remove(w)
@@ -865,9 +976,30 @@ class CalendarWidget(QWidget):
                                     break
                             else:
                                 break
+                '''
+
+                for widget in self.sub_timelines:
+                    if widget.task not in self.task.children:
+                        index = l.indexOf(widget)
+                        w = widget
+                        while w == widget or (w is not None and w.task in widget.task.descendants):
+                            w.hide()
+                            try:  # It may be that the widget had been removed from the list, but not hidden
+                                self.calendar_widget.timeline_widgets.remove(w)
+                            except:
+                                pass
+                            l.removeWidget(w)
+                            if l.count() > 0:
+                                try:
+                                    index += 1
+                                    w = l.itemAt(index).widget()
+                                except:
+                                    break
+                            else:
+                                break
 
         # Remove stretch
-        self.timelines_layout.removeItem(self.timelines_layout.itemAt(self.timelines_layout.count() - 1))
+        #self.timelines_layout.removeItem(self.timelines_layout.itemAt(self.timelines_layout.count() - 1))
 
         def add_timeline(task_w):
             if task not in [widget.task_widget.task for widget in self.timeline_widgets]:
@@ -879,6 +1011,8 @@ class CalendarWidget(QWidget):
                                   style=self._style)
                 self.timelines_layout.addWidget(widget)
                 self.timeline_widgets += [widget]
+                if not widget.isVisible():
+                    widget.show()
 
         for task in self.planner.tasks:
             add_timeline(task)
@@ -892,7 +1026,7 @@ class CalendarWidget(QWidget):
             if widget.task not in self.planner.tasks:
                 index = self.timelines_layout.indexOf(widget)
                 w = widget
-                while w == widget or widget.task in w.task.ancestors:
+                while w == widget or w.task in widget.task.descendants:
                     w.hide()
                     try:  # It may be that the widget had been removed from the list, but not hidden
                         self.timeline_widgets.remove(w)
@@ -901,13 +1035,13 @@ class CalendarWidget(QWidget):
                     self.timelines_layout.removeWidget(w)
                     if self.timelines_layout.count() > 0:
                         try:
+                            index += 1
                             w = self.timelines_layout.itemAt(index).widget()
                         except:
                             break
                     else:
                         break
-
-            self.timelines_updated.emit()
+        self.timelines_updated.emit()
 
         # Add stretch back
-        self.timelines_layout.addStretch()
+        #self.timelines_layout.addStretch()
