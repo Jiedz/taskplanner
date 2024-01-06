@@ -155,7 +155,7 @@ class PlannerWidget(QTabWidget):
                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
                                                                        font=self._style.font_name))
                 self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
-                self.view_selector.setFixedSize(self.new_task_textedit.width(),
+                self.view_selector.setFixedSize(int(SCREEN_WIDTH * 0.08),
                                                 int(self.height() * 0.08))
 
                 if self._style is not None:
@@ -713,29 +713,6 @@ class CalendarWidget(QWidget):
                                 self.day_widgets_layout.addWidget(self.day_widgets[-1])
 
                 self.dates = []
-                '''
-                import calendar
-                self.n_weeks = len(calendar.monthcalendar(self.date.year,
-                                                          self.date.month)
-                                   )
-                reference_date = date(self.date.year,
-                                      self.date.month,
-                                      1)
-                self.dates += [reference_date]
-                for count in range(self.n_weeks):
-                    self.week_widgets += [WeekWidget(planner=self.planner,
-                                                     task_list_widget=self.task_list_widget,
-                                                     calendar_widget=self.calendar_widget,
-                                                     date=self.dates[-1],
-                                                     parent=self,
-                                                     style=self._style)]
-                    if len(self.week_widgets[-1].dates) > 0:
-                        self.dates += [self.week_widgets[-1].dates[-1] + relativedelta(days=1)]
-                    else:
-                        self.dates += [self.week_widgets[-1].date + relativedelta(weeks=1)]
-                    self.week_widgets_layout.addWidget(self.week_widgets[-1])
-                '''
-                self.dates = []
                 self.week_widgets = []
                 is_day_of_month = True
                 d = date(self.date.year,
@@ -804,7 +781,8 @@ class CalendarWidget(QWidget):
                          task_widget: TaskWidgetSimple,
                          calendar_widget: CalendarWidget,
                          parent: QWidget = None,
-                         style: PlannerWidgetStyle = None):
+                         style: PlannerWidgetStyle = None,
+                         add_to_timelines_layout: bool = False):
                 self.task_widget = task_widget
                 self.task = self.task_widget.task
                 self.calendar_widget = calendar_widget
@@ -814,6 +792,8 @@ class CalendarWidget(QWidget):
                 self.layout = QVBoxLayout(self)
                 self.setContentsMargins(0, 0, 0, 0)
                 self.layout.setContentsMargins(0, 0, 0, 0)
+                if add_to_timelines_layout and hasattr(self.parent(), 'timelines_layout'):
+                    self.parent().timelines_layout.addWidget(self)
                 # Horizontal layout for label
                 self.label_layout = QHBoxLayout()
                 self.label_layout.setAlignment(Qt.AlignLeft)
@@ -915,7 +895,7 @@ class CalendarWidget(QWidget):
                     month_width = self.calendar_widget.month_widgets[0].width()
 
                     month_widgets = [m for m in self.calendar_widget.month_widgets
-                                     if m.date > self.task.start_date and m.date < self.task.end_date]
+                                     if m.date > self.task.start_date and m.date <= self.task.end_date]
                     n_months = len(month_widgets)
                     n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
                     self.label.setFixedWidth(int(n_months * month_width))
@@ -936,21 +916,17 @@ class CalendarWidget(QWidget):
                                           if w.task == subtask][0]
                         sub_timeline = Timeline(task_widget=subtask_widget,
                                                 calendar_widget=self.calendar_widget,
-                                                parent=self,
-                                                style=self._style)
+                                                parent=self.parent(),
+                                                style=self._style,
+                                                add_to_timelines_layout=True)
                         # Add the sub-timeline to the main timelines layout
-                        #l.removeItem(l.itemAt(l.count() - 1))
                         # Find the correct position in the layout
                         # where the sub-timeline is inserted
+                        l.removeWidget(sub_timeline)
                         index = self.task.descendants.index(subtask)
-                        print(f'index of {subtask.name} in timelines descendants of {self.task.name}: {index}')
                         index += l.indexOf(self) + 1
-                        print(f'Widgets in layout: {[l.itemAt(i) for i in range(l.count())]}')
-                        print(f'Index of self in layout: {l.indexOf(self)}')
-                        print(f'index of {subtask.name} in timelines layout: {index}')
                         l.insertWidget(index, sub_timeline)
                         # sub_timeline.setFixedHeight(self.height())
-                        #l.addStretch()
                         self.sub_timelines += [sub_timeline]
                 # Remove non-existent sub-timelines
                 '''
@@ -994,9 +970,6 @@ class CalendarWidget(QWidget):
                             else:
                                 break
 
-        # Remove stretch
-        #self.timelines_layout.removeItem(self.timelines_layout.itemAt(self.timelines_layout.count() - 1))
-
         def add_timeline(task_w):
             if task not in [widget.task_widget.task for widget in self.timeline_widgets]:
                 task_widget = [w for w in self.task_list_widget.task_widgets
@@ -1004,8 +977,9 @@ class CalendarWidget(QWidget):
                 widget = Timeline(task_widget=task_widget,
                                   calendar_widget=self,
                                   parent=self,
-                                  style=self._style)
-                self.timelines_layout.addWidget(widget)
+                                  style=self._style,
+                                  add_to_timelines_layout=True)
+                #self.timelines_layout.addWidget(widget)
                 self.timeline_widgets += [widget]
                 if not widget.isVisible():
                     widget.show()
@@ -1038,6 +1012,3 @@ class CalendarWidget(QWidget):
                     else:
                         break
         self.timelines_updated.emit()
-
-        # Add stretch back
-        #self.timelines_layout.addStretch()

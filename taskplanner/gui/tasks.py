@@ -32,6 +32,9 @@ SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
 SCREEN_HEIGHT = SCREEN.height
 
+# Signals
+task_widget_widget_open = Signal()
+
 class TaskWidget(QWidget):
     """
     This class defines a task widget.
@@ -143,10 +146,17 @@ class TaskWidget(QWidget):
         if self._style is not None:
             set_style(widget=self,
                       stylesheets=self._style.stylesheets['standard view'])
+        task_widget_widget_open.emit()
+        task_widget_widget_open.connect(lambda **kwargs: self.hide())
 
     def show(self):
         super().show()
         self.scrollarea.show()
+
+    def hide(self):
+        super().hide()
+        self.scrollarea.hide()
+
 
     def make_path_widget(self):
         class PathWidget(QWidget):
@@ -1114,7 +1124,6 @@ class TaskWidgetSimple(QWidget):
         super().hide()
         self.is_visible = False
         self.visibility_changed.emit()
-        print(f'TaskWidgetSimple hidden: {self.task.name}')
 
 
 class TaskLineWidget(QFrame):
