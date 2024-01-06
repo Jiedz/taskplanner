@@ -843,7 +843,8 @@ class CalendarWidget(QWidget):
                 self.setStyleSheet(style_sheet)
 
             def set_height(self):
-                self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))
+                #self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))
+                self.label.setFixedHeight(self.task_widget.task_line_widget.height())
 
             def set_start_position(self):
                 delta_date = self.task.start_date - self.calendar_widget.month_widgets[0].date

@@ -1154,6 +1154,10 @@ class TaskLineWidget(QFrame):
         # Layout
         self.layout = QHBoxLayout(self)
         self.layout.setAlignment(Qt.AlignLeft)
+        self.layout.setSpacing(int(SCREEN_WIDTH*0.01))
+        self.layout.setContentsMargins(int(SCREEN_WIDTH*0.01), 0,
+                                       int(SCREEN_WIDTH*0.01), 0)
+        self.setFixedHeight(int(SCREEN_HEIGHT*0.04))
         # Priority
         self.make_priority_label()
         # Progress
@@ -1161,7 +1165,7 @@ class TaskLineWidget(QFrame):
         # Name
         self.make_name_pushbutton()
         # End date
-        self.make_end_date_label()
+        self.make_date_widgets()
         # Remove pushbutton
         self.make_remove_pushbutton()
         # Expand pushbutton
@@ -1244,21 +1248,109 @@ class TaskLineWidget(QFrame):
         # Set initial text
         update_widget()
 
-    def make_end_date_label(self):
-        self.end_date_label = QLabel()
-        self.layout.addWidget(self.end_date_label)
-        # Geometry
+    def make_date_widgets(self):
+        class DateWidget(QWidget):
+            """
+            This widget contains:
+                - An icon symbolizing the type of time mode (start, end, ...)
+                - A label indicating the selected date
+                - A calendar widget that allows the user to select a day
+            """
 
-        def update_widget():
-            year, month, day = self.task.end_date.year, \
-                self.task.end_date.month, \
-                self.task.end_date.day
-            self.end_date_label.setText(f'{day}/{month}/{year}')
+            def __init__(self,
+                         task: Task,
+                         parent: QWidget = None,
+                         time_mode: str = 'start'):
+                """
+                :param task: :py:class:'taskplanner.tasks.Task'
+                    The task associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                :param time_mode: str, optional
+                    The time mode, e.g., 'start', 'end'.
+                """
+                TIME_MODES = ['start', 'end']
+                if time_mode not in TIME_MODES:
+                    raise ValueError(f'Unrecognized time more {time_mode}. Possible time modes are {tuple(TIME_MODES)}')
+                self.task = task
+                self.time_mode = time_mode
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout()
+                self.setLayout(self.layout)
+                self.layout.setContentsMargins(0, 0, 0, 0)
+                # Label
+                #self.make_label()
+                # Label
+                self.make_pushbutton()
+                # Calendar widget
+                self.make_calendar_widget()
 
-        # Connect task and widget
-        self.task.end_date_changed.connect(lambda **kwargs: update_widget())
-        # Set initial text
-        update_widget()
+            def make_label(self):
+                self.label = QLabel(f'{self.time_mode.title()} Date')
+                self.layout.addWidget(self.label)
+                self.label.setAlignment(Qt.AlignLeft)
+
+            def make_pushbutton(self):
+                self.pushbutton = QPushButton()
+                # Layout
+                self.layout.addWidget(self.pushbutton)
+
+                # User interactions
+                def update_label():
+                    date = getattr(self.task, f'{self.time_mode}_date')
+                    self.pushbutton.setText(f'{date.day}/{date.month}/{date.year}')
+
+                getattr(self.task, f'{self.time_mode}_date_changed').connect(lambda **kwargs: update_label())
+                update_label()
+
+                def clicked():
+                    self.calendar_widget.show()
+
+                self.pushbutton.clicked.connect(clicked)
+
+            def make_calendar_widget(self):
+                self.calendar_widget = QCalendarWidget()
+                self.calendar_widget.setGridVisible(True)
+                # Geometry
+                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                                    'y',
+                                                                                    'width',
+                                                                                    'height']]
+                self.calendar_widget.setWindowTitle(f'{self.time_mode.title()} Date')
+                self.calendar_widget.setGeometry(int(x + 1.5 * w),
+                                                 int(y + h / 2),
+                                                 self.calendar_widget.width(),
+                                                 self.calendar_widget.height())
+
+                def callback():
+                    # Get date from calendar
+                    date = self.calendar_widget.selectedDate()
+                    # Set date to task
+                    old_date = getattr(self.task, f'{self.time_mode}_date')
+                    task_date = dt(date.year(),
+                                   date.month(),
+                                   date.day())
+                    try:
+                        setattr(self.task, f'{self.time_mode}_date', task_date)
+                    except ValueError:
+                        self.calendar_widget.setSelectedDate(QDate(old_date.year,
+                                                                   old_date.month,
+                                                                   old_date.day))
+                        callback()
+                    # Hide calendar
+                    self.calendar_widget.hide()
+
+                self.calendar_widget.clicked.connect(callback)
+
+        self.start_date_widget = DateWidget(task=self.task,
+                                            parent=self,
+                                            time_mode='start')
+        self.layout.addWidget(self.start_date_widget)
+        self.end_date_widget = DateWidget(task=self.task,
+                                          parent=self,
+                                          time_mode='end')
+        self.layout.addWidget(self.end_date_widget)
 
     def make_expand_pushbutton(self):
         self.expand_pushbutton = QPushButton()
