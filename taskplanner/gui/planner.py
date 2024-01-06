@@ -155,7 +155,8 @@ class PlannerWidget(QTabWidget):
                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
                                                                        font=self._style.font_name))
                 self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
-                self.view_selector.setFixedHeight(int(self.height() * 0.08))
+                self.view_selector.setFixedSize(self.new_task_textedit.width(),
+                                                int(self.height() * 0.08))
 
                 if self._style is not None:
                     set_style(widget=self,
@@ -364,11 +365,6 @@ class PlannerWidget(QTabWidget):
         file = open(filename, mode='r', encoding='utf-8')
         widget = PlannerWidget.from_string(file.read())
         widget.filename = filename
-        # Refresh planner
-        tasks = [t for t in widget.planner.tasks]
-        widget.planner.remove_tasks(*tasks)
-        print(tasks)
-        widget.planner.add_tasks(*tasks)
         file.close()
         return widget
 
@@ -870,13 +866,13 @@ class CalendarWidget(QWidget):
                 self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))
 
             def set_start_position(self):
-                delta_date = self.task.start_date - self.calendar_widget.start_date
+                delta_date = self.task.start_date - self.calendar_widget.month_widgets[0].date
                 spacing = 0
                 # Remove spacing
                 self.label_layout.removeItem(self.label_layout.itemAt(0))
                 if self.calendar_widget.view_type == 'daily':
                     day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    n_day_widths = delta_date.days + 2
+                    n_day_widths = delta_date.days #+ 2
                     spacing = n_day_widths * day_width
                 elif self.calendar_widget.view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
@@ -913,7 +909,7 @@ class CalendarWidget(QWidget):
                         week_widgets = [w for w in m.week_widgets
                                         if w.date > self.task.start_date and w.date <= self.task.end_date]
                         n_weeks += len(week_widgets)
-                    n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.end_date.weekday() + 1) / 7
+                    n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.start_date.weekday() + 1) / 7
                     self.label.setFixedWidth(int(week_width * n_weeks))
                 elif view_type == 'monthly':
                     month_width = self.calendar_widget.month_widgets[0].width()
