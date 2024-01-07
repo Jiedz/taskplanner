@@ -1,5 +1,0 @@
-___PLANNER WIDGET___
-___PLANNER WIDGET STYLE___
-color palette: {'background 1': '#232426', 'background 2': '#3a3c3f', 'text': '#ededecff', 'text - light': '#bcbec4', 'text - highlight': '#4273bc', 'border': '#3a3c3f'}
-font: {'family': 'Sans Serif', 'size - title 1': '22pt', 'size - title 2': '18pt', 'size - text': '12pt', 'size - text - small': '10pt'}
-___PLANNER___
