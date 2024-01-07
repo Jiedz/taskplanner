@@ -11,7 +11,8 @@ app = QApplication(sys.argv)
 # Task widget - standard view
 try:
     planner_widget = PlannerWidget.from_file()
-except:
+except Exception as e:
+    print(e)
     planner_widget = PlannerWidget(planner=Planner())
 planner_widget.show()
 # Show Fonts

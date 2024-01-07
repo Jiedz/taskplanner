@@ -1,7 +1,7 @@
 """
 This module defines a planner widget and related widgets.
 """
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, QDate
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -157,11 +157,22 @@ class PlannerWidget(QTabWidget):
                 self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
                 self.view_selector.setFixedSize(int(SCREEN_WIDTH * 0.08),
                                                 int(self.height() * 0.08))
+                # Calendar start and end dates
+                self.make_start_end_dates()
+                self.start_date_widget.setFixedSize(int(SCREEN_WIDTH * 0.05),
+                                                int(self.height() * 0.05))
+                self.end_date_widget.setFixedSize(int(SCREEN_WIDTH * 0.05),
+                                                    int(self.height() * 0.05))
+
 
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab'])
+
+                # Lock the vertical scrollbars of the timelines and the task list
+                self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
+
 
             def make_new_task_textedit(self):
                 # textedit to define a new assignee when the 'plus' button is clicked
@@ -266,8 +277,158 @@ class PlannerWidget(QTabWidget):
                                                         task_list_widget=self.task_list_widget,
                                                         parent=self,
                                                         start_date=date.today(),
-                                                        style=self._style,
-                                                        n_months=6)
+                                                        end_date=date.today() + relativedelta(months=6),
+                                                        style=self._style)
+
+            def make_start_end_dates(self):
+                class DateWidget(QWidget):
+                    """
+                    This widget contains:
+                        - An icon symbolizing the type of time mode (start, end, ...)
+                        - A label indicating the selected date
+                        - A calendar widget that allows the user to select a day
+                    """
+
+                    def __init__(self,
+                                 planner: Planner,
+                                 calendar_timelines_widget: CalendarWidget,
+                                 parent: QWidget = None,
+                                 time_mode: str = 'start'):
+                        """
+                        :param task: :py:class:'taskplanner.tasks.Task'
+                            The task associated to this widget
+                        :param parent: :py:class:'QWidget', optional
+                            The parent widget
+                        :param time_mode: str, optional
+                            The time mode, e.g., 'start', 'end'.
+                        """
+                        TIME_MODES = ['start', 'end']
+                        if time_mode not in TIME_MODES:
+                            raise ValueError(
+                                f'Unrecognized time more {time_mode}. Possible time modes are {tuple(TIME_MODES)}')
+                        self.planner = planner
+                        self.calendar_timelines_widget = calendar_timelines_widget
+                        self.time_mode = time_mode
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QVBoxLayout()
+                        self.setLayout(self.layout)
+                        self.layout.setContentsMargins(0, 0, 0, 0)
+                        # Label
+                        self.make_label()
+                        # Label
+                        self.make_pushbutton()
+                        # Calendar widget
+                        self.make_calendar_widget()
+
+                    def make_label(self):
+                        self.label = QLabel(f'{self.time_mode.title()} Date')
+                        self.layout.addWidget(self.label)
+                        self.label.setAlignment(Qt.AlignLeft)
+
+                    def make_pushbutton(self):
+                        self.pushbutton = QPushButton()
+                        # Layout
+                        self.layout.addWidget(self.pushbutton)
+                        # Connect tasks and date widget
+                        for task in self.planner.tasks:
+                            all_descendants = [task] + list(task.descendants)
+                            for t in all_descendants:
+                                getattr(t, f'{self.time_mode}_date_changed').connect
+                                (lambda **kwargs: self.update_label())
+                        self.update_label()
+
+                        def clicked():
+                            self.calendar_widget.show()
+
+                        self.pushbutton.clicked.connect(clicked)
+
+                    def make_calendar_widget(self):
+                        self.calendar_widget = QCalendarWidget()
+                        self.calendar_widget.setGridVisible(True)
+                        # Geometry
+                        x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                                            'y',
+                                                                                            'width',
+                                                                                            'height']]
+                        self.calendar_widget.setWindowTitle(f'{self.time_mode.title()} Date')
+                        self.calendar_widget.setGeometry(int(x + 1.5 * w),
+                                                         int(y + h / 2),
+                                                         self.calendar_widget.width(),
+                                                         self.calendar_widget.height())
+
+                        def callback():
+                            from datetime import date as dt
+                            # Get the extreme start and end dates among all tasks of the planner
+                            first_start_date, last_end_date = [], []
+                            for task in self.planner.tasks:
+                                first_start_date += [min([t.start_date for t in [task] + list(task.descendants)])]
+                                last_end_date += [max([t.end_date for t in [task] + list(task.descendants)])]
+                            first_start_date = min(first_start_date)
+                            last_end_date = max(last_end_date)
+                            # Get date from calendar
+                            date = self.calendar_widget.selectedDate()
+                            date = dt(year=date.year(), month=date.month(), day=1)
+                            if self.time_mode == 'start':
+                                if date > self.calendar_timelines_widget.end_date:
+                                    warning(f'CalendarWidget: start date {date.strftime("%d/%m/%y")} '
+                                            f'is greater than end date '
+                                            f'{self.calendar_timelines_widget.end_date.strftime("%d/%m/%y")}')
+                                    date = dt.today()
+                                    date = dt(date.year, date.month, 1)
+                                    self.calendar_timelines_widget.end_date = date + relativedelta(months=6)
+                            else:
+                                if date < self.calendar_timelines_widget.start_date:
+                                    warning(f'CalendarWidget: end date {date.strftime("%d/%m/%y")} '
+                                            f'is smaller than end date '
+                                            f'{self.calendar_timelines_widget.start_date.strftime("%d/%m/%y")}')
+                                    date = self.calendar_timelines_widget.start_date + relativedelta(months=6)
+                                    date = dt(date.year, date.month, 1)
+
+                            if self.time_mode == 'start' and date <= first_start_date\
+                                or self.time_mode == 'end' and date >= last_end_date:
+                                # Set date to calendar
+                                setattr(self.calendar_timelines_widget, f'{self.time_mode}_date', date)
+
+                            self.update_label()
+                            # Hide calendar
+                            self.calendar_widget.hide()
+
+                        self.calendar_widget.clicked.connect(callback)
+
+                    # User interactions
+                    def update_label(self):
+                        # Get the extreme start and end dates among all tasks of the planner
+                        from datetime import date as dt
+                        first_start_date, last_end_date = [], []
+                        for task in self.planner.tasks:
+                            first_start_date += [min([t.start_date for t in [task] + list(task.descendants)])]
+                            last_end_date += [max([t.end_date for t in [task] + list(task.descendants)])]
+                        first_start_date = min(first_start_date)
+                        last_end_date = max(last_end_date)
+
+                        date = first_start_date if self.time_mode == 'start' else last_end_date
+                        date = dt(date.year, date.month, 1)
+                        if date < self.calendar_timelines_widget.start_date \
+                            or date > self.calendar_timelines_widget.end_date:
+                            setattr(self.calendar_timelines_widget, f'{self.time_mode}_date', date)
+                        self.pushbutton.setText(f'{date.day}/{date.month}/{date.year}')
+
+                self.new_task_settings_layout.addSpacing(int(self.width() * 0.1))
+                self.start_date_widget = DateWidget(planner=self.planner,
+                                                    calendar_timelines_widget=self.calendar_widget,
+                                                    parent=self,
+                                                    time_mode='start')
+                self.new_task_settings_layout.addWidget(self.start_date_widget)
+
+                self.new_task_settings_layout.addSpacing(int(self.width() * 0.1))
+
+                self.end_date_widget = DateWidget(planner=self.planner,
+                                                    calendar_timelines_widget=self.calendar_widget,
+                                                    parent=self,
+                                                    time_mode='end')
+                self.new_task_settings_layout.addWidget(self.end_date_widget)
+
 
         self.planner_tab = PlannerTab(planner=self.planner,
                                       parent=self,
@@ -441,7 +602,7 @@ class CalendarWidget(QWidget):
                  parent: QWidget = None,
                  view_type: str = 'daily',
                  start_date: date = date.today(),
-                 n_months: int = 3,
+                 end_date: date = date.today() + relativedelta(months=6),
                  style: PlannerWidgetStyle = None):
         """
 
@@ -458,19 +619,24 @@ class CalendarWidget(QWidget):
                 - monthly
         :param start_date: :py:class:'datetime.date', optional
             The displayed timelines begin at the start of the month of the inserted date.
-        :param n_months: int, optional
-            The number of months to be displayed in the timeline
+        :param end_date: :py:class:'datetime.date', optional
+            The displayed timelines end at the end of the month of the inserted date.
         :param style: :py:class:'taskplanner.gui.styles.PlannerWidgetStyle', optional
             The style of this widget.
         """
         self.planner = planner
         self.task_list_widget = task_list_widget
-        self.start_date = start_date
+        self._start_date = start_date
+        self._end_date = end_date
+        self.dates_changed = Signal()
+        self.n_months = 12 \
+                        * (self.end_date.year - self.start_date.year) \
+                        + (self.end_date.month - self.start_date.month) \
+                        + 1
         self._style = style
         self.month_widgets = []
         self.timeline_widgets = []
         self._view_type = view_type
-        self.n_months = n_months
         self.view_type_changed = Signal()
         self.timelines_updated = Signal()
         super().__init__(parent=parent)
@@ -524,7 +690,35 @@ class CalendarWidget(QWidget):
                              f' Valid view types are {TIMELINE_VIEW_TYPES}')
         self._view_type = value
         self.view_type_changed.emit()
-        self.make_month_widgets()
+        self.update_all()
+
+    @property
+    def start_date(self):
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, value):
+        self._start_date = value
+        self.n_months = 12 \
+                        * (self.end_date.year - self.start_date.year) \
+                        + (self.end_date.month - self.start_date.month) \
+                        + 1
+        self.update_all()
+        self.dates_changed.emit()
+
+    @property
+    def end_date(self):
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, value):
+        self._end_date = value
+        self.n_months = 12 \
+                        * (self.end_date.year - self.start_date.year) \
+                        + (self.end_date.month - self.start_date.month) \
+                        + 1
+        self.update_all()
+        self.dates_changed.emit()
 
     def update_all(self):
         self.make_month_widgets()
@@ -880,7 +1074,7 @@ class CalendarWidget(QWidget):
                 if view_type == 'daily':
                     day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
                     n_days = (self.task.end_date - self.task.start_date).days + 1
-                    self.label.setFixedWidth(day_width*n_days)
+                    self.label.setFixedWidth(max([0, day_width*n_days]))
                 elif view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
                     month_widgets = [m for m in self.calendar_widget.month_widgets
@@ -891,7 +1085,7 @@ class CalendarWidget(QWidget):
                                         if w.date > self.task.start_date and w.date <= self.task.end_date]
                         n_weeks += len(week_widgets)
                     n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.start_date.weekday() + 1) / 7
-                    self.label.setFixedWidth(int(week_width * n_weeks))
+                    self.label.setFixedWidth(max([0, int(week_width * n_weeks)]))
                 elif view_type == 'monthly':
                     month_width = self.calendar_widget.month_widgets[0].width()
 
@@ -899,7 +1093,7 @@ class CalendarWidget(QWidget):
                                      if m.date > self.task.start_date and m.date <= self.task.end_date]
                     n_months = len(month_widgets)
                     n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
-                    self.label.setFixedWidth(int(n_months * month_width))
+                    self.label.setFixedWidth(max([0, int(n_months * month_width)]))
 
             def set_geometry(self):
                 self.set_start_position()

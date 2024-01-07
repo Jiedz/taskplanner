@@ -134,7 +134,7 @@ class Task(Node):
                 if value > self.end_date:
                     raise ValueError(f'Start date ({value}) is greater than end date ({self.end_date})')
             self._start_date = value
-            self.start_date_changed.emit()
+        self.start_date_changed.emit()
 
     @property
     def end_date(self):
@@ -143,7 +143,7 @@ class Task(Node):
     @end_date.setter
     def end_date(self, value):
         if value is None:
-            self._end_date = date.today()
+            self._end_date = self.start_date
         else:
             if 'datetime.date' not in str(type(value)):
                 raise TypeError(f'Invalid end date type {type(value)}. Accepted types are ("datetime.date")')
@@ -151,7 +151,7 @@ class Task(Node):
                 if value < self.start_date:
                     raise ValueError(f'end date ({value}) is smaller than start date ({self.start_date})')
             self._end_date = value
-            self.end_date_changed.emit()
+        self.end_date_changed.emit()
 
     @property
     def priority(self):
@@ -428,7 +428,6 @@ class Task(Node):
                       'start date',
                       'end date',
                       'color']
-        #print(lines)
         # Set description
         index = [i for i in range(len(lines)) if 'description: ' in lines[i]][0]
         description = lines[index].replace('description: ', '')
@@ -443,17 +442,19 @@ class Task(Node):
                 lines.remove(line)
         task.description = description
         # Set name, category, priority, assignee, color
-        for i in [0, 1, 3, 4, -1]:
+        for i in [0, 1, 3, 4, 7]:
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             if value == 'None':
                 value = None
             setattr(task, attr_name, value)
         # Set start and end date
-        for i in [-2, -3]:
+        task._end_date = None
+        for i in [5, 6]:
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             day, month, year = [int(v) for v in value.split('/')]
+            print(f'Setting attribute {attr_name} to task {task.name}')
             setattr(task, attr_name, date(year, month, day))
         # Set subtasks
         task_strings = task_strings[1:]
