@@ -364,8 +364,14 @@ class PlannerWidget(QTabWidget):
                             for task in self.planner.tasks:
                                 first_start_date += [min([t.start_date for t in [task] + list(task.descendants)])]
                                 last_end_date += [max([t.end_date for t in [task] + list(task.descendants)])]
-                            first_start_date = min(first_start_date)
-                            last_end_date = max(last_end_date)
+                            if first_start_date:
+                                first_start_date = min(first_start_date)
+                            else:
+                                first_start_date = dt.today()
+                            if last_end_date:
+                                last_end_date = max(last_end_date)
+                            else:
+                                last_end_date = first_start_date + relativedelta(months=6)
                             # Get date from calendar
                             date = self.calendar_widget.selectedDate()
                             date = dt(year=date.year(), month=date.month(), day=1)
@@ -404,8 +410,14 @@ class PlannerWidget(QTabWidget):
                         for task in self.planner.tasks:
                             first_start_date += [min([t.start_date for t in [task] + list(task.descendants)])]
                             last_end_date += [max([t.end_date for t in [task] + list(task.descendants)])]
-                        first_start_date = min(first_start_date)
-                        last_end_date = max(last_end_date)
+                        if first_start_date:
+                            first_start_date = min(first_start_date)
+                        else:
+                            first_start_date = dt.today()
+                        if last_end_date:
+                            last_end_date = max(last_end_date)
+                        else:
+                            last_end_date = first_start_date + relativedelta(months=6)
 
                         date = first_start_date if self.time_mode == 'start' else last_end_date
                         date = dt(date.year, date.month, 1)
