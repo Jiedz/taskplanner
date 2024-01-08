@@ -454,7 +454,6 @@ class Task(Node):
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             day, month, year = [int(v) for v in value.split('/')]
-            print(f'Setting attribute {attr_name} to task {task.name}')
             setattr(task, attr_name, date(year, month, day))
         # Set subtasks
         task_strings = task_strings[1:]

@@ -76,7 +76,7 @@ class PlannerWidget(QTabWidget):
         # Set style
         if self._style is not None:
             set_style(widget=self,
-                      stylesheets=self._style.stylesheets)
+                      stylesheets=self._style.stylesheets['main'])
         self.planner.tasks_changed.connect(lambda **kwargs: self.to_file())
 
     def closeEvent(self, a0):
@@ -168,7 +168,16 @@ class PlannerWidget(QTabWidget):
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
-                              ['planner_tab'])
+                              ['planner_tab']['main'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']['task_list_scrollarea'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']['calendar_scrollarea'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']['new_task_textedit'])
 
                 # Lock the vertical scrollbars of the timelines and the task list
                 self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
@@ -293,7 +302,8 @@ class PlannerWidget(QTabWidget):
                                  planner: Planner,
                                  calendar_timelines_widget: CalendarWidget,
                                  parent: QWidget = None,
-                                 time_mode: str = 'start'):
+                                 time_mode: str = 'start',
+                                 style: PlannerWidgetStyle = None):
                         """
                         :param task: :py:class:'taskplanner.tasks.Task'
                             The task associated to this widget
@@ -309,6 +319,7 @@ class PlannerWidget(QTabWidget):
                         self.planner = planner
                         self.calendar_timelines_widget = calendar_timelines_widget
                         self.time_mode = time_mode
+                        self._style = style
                         super().__init__(parent=parent)
                         # Layout
                         self.layout = QVBoxLayout()
@@ -320,11 +331,16 @@ class PlannerWidget(QTabWidget):
                         self.make_pushbutton()
                         # Calendar widget
                         self.make_calendar_widget()
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['planner_tab']
+                                      [f'{self.time_mode}_date_widget'])
 
                     def make_label(self):
                         self.label = QLabel(f'{self.time_mode.title()} Date')
                         self.layout.addWidget(self.label)
-                        self.label.setAlignment(Qt.AlignLeft)
+                        self.label.setAlignment(Qt.AlignCenter)
 
                     def make_pushbutton(self):
                         self.pushbutton = QPushButton()
@@ -340,6 +356,12 @@ class PlannerWidget(QTabWidget):
 
                         def clicked():
                             self.calendar_widget.show()
+                            self.calendar_widget.blockSignals(True)
+                            current_date = getattr(self.calendar_timelines_widget, f'{self.time_mode}_date')
+                            self.calendar_widget.setSelectedDate(QDate(current_date.year,
+                                                                       current_date.month,
+                                                                       current_date.day))
+                            self.calendar_widget.blockSignals(False)
 
                         self.pushbutton.clicked.connect(clicked)
 
@@ -424,13 +446,20 @@ class PlannerWidget(QTabWidget):
                         if date < self.calendar_timelines_widget.start_date \
                             or date > self.calendar_timelines_widget.end_date:
                             setattr(self.calendar_timelines_widget, f'{self.time_mode}_date', date)
+                        else:
+                            date = getattr(self.calendar_timelines_widget, f'{self.time_mode}_date')
+                            date = dt(date.year, date.month, 1)
+                        # Handle the definition of end date in the calendar widget, which includes the whole month
+                        if self.time_mode == 'end':
+                            date += relativedelta(months=1)
                         self.pushbutton.setText(f'{date.day}/{date.month}/{date.year}')
 
                 self.new_task_settings_layout.addSpacing(int(self.width() * 0.1))
                 self.start_date_widget = DateWidget(planner=self.planner,
                                                     calendar_timelines_widget=self.calendar_widget,
                                                     parent=self,
-                                                    time_mode='start')
+                                                    time_mode='start',
+                                                    style=self._style)
                 self.new_task_settings_layout.addWidget(self.start_date_widget)
 
                 self.new_task_settings_layout.addSpacing(int(self.width() * 0.1))
@@ -438,7 +467,8 @@ class PlannerWidget(QTabWidget):
                 self.end_date_widget = DateWidget(planner=self.planner,
                                                     calendar_timelines_widget=self.calendar_widget,
                                                     parent=self,
-                                                    time_mode='end')
+                                                    time_mode='end',
+                                                    style=self._style)
                 self.new_task_settings_layout.addWidget(self.end_date_widget)
 
 
@@ -688,7 +718,7 @@ class CalendarWidget(QWidget):
             set_style(widget=self,
                       stylesheets=self._style.stylesheets
                       ['planner_tab']
-                      ['calendar_widget'])
+                      ['calendar_widget']['main'])
         self.layout.addStretch()
 
     @property
@@ -701,8 +731,8 @@ class CalendarWidget(QWidget):
             raise ValueError(f'Invalid  timeline view type {value}.'
                              f' Valid view types are {TIMELINE_VIEW_TYPES}')
         self._view_type = value
-        self.view_type_changed.emit()
         self.update_all()
+        self.view_type_changed.emit()
 
     @property
     def start_date(self):
@@ -776,17 +806,43 @@ class CalendarWidget(QWidget):
                 # Week widgets
                 if calendar_widget.view_type in ['weekly',
                                                  'daily']:
+                    if self._style is not None:
+                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
+                        stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
+                        stylesheet['label'] = stylesheet['label'].replace(
+                            'background-color:None',
+                            f'background-color:{self._style.color_palette["background 2"]}')
+                        self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
+                        set_style(widget=self,
+                                  stylesheets=self._style.stylesheets
+                                  ['planner_tab']
+                                  ['calendar_widget']
+                                  ['month_widget'])
+                        self.layout.setAlignment(Qt.AlignLeft)
                     self.layout.setContentsMargins(0, 0, 0, 0)
                     self.week_widgets_layout.setSpacing(0)
                     self.make_week_widgets()
                     self.layout.insertStretch(1)
                 else:
+                    if self._style is not None:
+                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
+                        stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
+                        stylesheet['label'] = stylesheet['label'].replace(f'background-color:{self._style.color_palette["background 2"]}',
+                                                                          'background-color:None')
+                        self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
+                        set_style(widget=self,
+                                  stylesheets=self._style.stylesheets
+                                  ['planner_tab']
+                                  ['calendar_widget']
+                                  ['month_widget'])
+                        self.layout.setAlignment(Qt.AlignCenter)
                     self.setFixedWidth(int(SCREEN_WIDTH*0.13))
                 # Set style
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']
+                              ['calendar_widget']
                               ['month_widget'])
 
             def make_label(self):
@@ -832,16 +888,38 @@ class CalendarWidget(QWidget):
                         self.layout.addLayout(self.day_widgets_layout)
                         # Day widgets
                         if calendar_widget.view_type == 'daily':
+                            if self._style is not None:
+                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
+                                stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
+                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
+                                set_style(widget=self,
+                                          stylesheets=self._style.stylesheets
+                                          ['planner_tab']
+                                          ['calendar_widget']
+                                          ['week_widget'])
+                                self.layout.setAlignment(Qt.AlignLeft)
                             self.layout.setContentsMargins(0, 0, 0, 0)
                             self.day_widgets_layout.setSpacing(0)
                             self.make_day_widgets()
                         else:
                             self.setFixedWidth(int(SCREEN_WIDTH*0.05))
+                            if self._style is not None:
+                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
+                                stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
+                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
+                                set_style(widget=self,
+                                          stylesheets=self._style.stylesheets
+                                          ['planner_tab']
+                                          ['calendar_widget']
+                                          ['week_widget'])
+                                self.layout.setAlignment(Qt.AlignCenter)
+
                         # Set style
                         if self._style is not None:
                             set_style(widget=self,
                                       stylesheets=self._style.stylesheets
                                       ['planner_tab']
+                                      ['calendar_widget']
                                       ['week_widget'])
 
                     def make_label(self):
@@ -881,6 +959,7 @@ class CalendarWidget(QWidget):
                                     set_style(widget=self,
                                               stylesheets=self._style.stylesheets
                                               ['planner_tab']
+                                              ['calendar_widget']
                                               ['day_widget'])
 
                             def make_label(self):
@@ -943,8 +1022,6 @@ class CalendarWidget(QWidget):
                             is_day_of_week = False
                             is_day_of_month = False
 
-
-
         # Delete old month widgets
         for widget in self.month_widgets:
             widget.hide()
@@ -963,6 +1040,10 @@ class CalendarWidget(QWidget):
                                                date=self.dates[-1],
                                                parent=self,
                                                style=self._style)]
+            # If the month widgets don't fill in all the available space in 'monthly' view, the timeline geometry
+            # calculations are wrong.
+            if self.n_months <= 4 and self.view_type == 'monthly':
+                self.month_widgets[-1].setFixedWidth(int(self.month_widgets[-1].width()*1.5))
             self.month_widgets_layout.addWidget(self.month_widgets[-1])
         self.month_widgets_updated.emit()
 
@@ -1016,6 +1097,12 @@ class CalendarWidget(QWidget):
                 for slot in slots:
                     self.task.children_changed.disconnect(slot)
                 self.task.children_changed.connect(lambda **kwargs: self.make_sub_timelines())
+                if self._style is not None:
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']
+                              ['calendar_widget']
+                              ['timeline']['main'])
 
             def make_label(self):
                 self.label = QLabel()
@@ -1042,11 +1129,13 @@ class CalendarWidget(QWidget):
                 QLabel
                 {
                     background-color:%s;
-                    border:1px solid %s;
+                    border:0px solid %s;
+                    font-size:%s;
                 }
                 ''' % (self.task.color,
-                       self.task.color)
-                self.setStyleSheet(style_sheet)
+                       self.task.color,
+                       self._style.font['size - text - small'])
+                self.label.setStyleSheet(style_sheet)
 
             def set_height(self):
                 #self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))

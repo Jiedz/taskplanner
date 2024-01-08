@@ -14,7 +14,7 @@ COLOR_PALETTES = {
             'background 2': '#3a3c3f',
             'text': '#ededecff',
             'text - light': '#bcbec4',
-            'text - highlight': '#4273bc',
+            'text - highlight': '#bcbec4', #'#4273bc',
             'border': '#3a3c3f',
         },
 }
@@ -449,8 +449,15 @@ class TaskWidgetStyle:
                                 {
                                     border:None;   
                                 }
+                                ''',
+                            'new_textedit':
                                 '''
-                        }
+                                QTextEdit
+                                {
+                                    font-size:%s;
+                                }
+                                ''' % (self.font['size - text - small'])
+                        },
                 },
             'simple view':
                 {
@@ -528,17 +535,76 @@ class TaskWidgetStyle:
                                 }
                                 ''' % (ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
-                            'end_date_label':
-                                '''
-                                QLabel
+                            'start_date_widget':
+                            {
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text']),
+                                'pushbutton':
+                                    '''
+                                    QPushButton
+                                    {
+                                        color:%s;
+                                        font-size:%s;
+                                        border:0px solid %s;
+                                    }
+                                    QPushButton:hover
+                                    {
+                                        text-decoration:underline;
+                                    }
+                                    ''' % (self.color_palette['text - highlight'],
+                                       self.font['size - text'],
+                                       self.color_palette['border']),
+                                'calendar_widget':
+                                    '''
+                                    QCalendarWidget QWidget
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.color_palette['background 2']),
+                            },
+                            'end_date_widget':
                                 {
-                                    border:1px solid %s;
-                                    color:%s;
-                                    font-size:%s;
-                                }
-                                ''' % (self.color_palette['border'],
-                                       self.color_palette['text - light'],
-                                       self.font['size - text']),
+                                    'label':
+                                        '''
+                                        QLabel
+                                        {
+                                            border:None;
+                                            color:%s;
+                                            font-size:%s;
+                                        }
+                                        ''' % (self.color_palette['text - light'],
+                                               self.font['size - text']),
+                                    'pushbutton':
+                                        '''
+                                        QPushButton
+                                        {
+                                            color:%s;
+                                            font-size:%s;
+                                            border:0px solid %s;
+                                        }
+                                        QPushButton:hover
+                                        {
+                                            text-decoration:underline;
+                                        }
+                                        ''' % (self.color_palette['text - highlight'],
+                                               self.font['size - text'],
+                                               self.color_palette['border']),
+                                    'calendar_widget':
+                                        '''
+                                        QCalendarWidget QWidget
+                                        {
+                                            background-color:%s;
+                                        }
+                                        ''' % (self.color_palette['background 2']),
+                                },
                         }
                 }
         }
@@ -605,6 +671,12 @@ class PlannerWidgetStyle:
                            self.color_palette['text']),
                 'planner_tab':
                     {
+                        'main':
+                            '''
+                            QWidget
+                            {
+                            }
+                            ''',
                         'task_list_scrollarea':
                             '''
                             QScrollArea
@@ -665,7 +737,7 @@ class PlannerWidgetStyle:
                            self.color_palette['background 1'],
                            self.color_palette['border'],
                            ),
-                        'timelines_scrollarea':
+                        'calendar_scrollarea':
                             '''
                                 QWidget
                                 {
@@ -681,74 +753,93 @@ class PlannerWidgetStyle:
                                     {
                                         border:None;
                                     }
-                                    '''
-                            },
-                        'month_widget':
-                            {
-                                'main':
-                                    '''
-                                    QFrame
+                                    ''',
+                                'month_widget':
                                     {
-                                        border:0px solid %s;
-                                        padding:0px;
-                                    }
-                                    ''' % (self.color_palette['border']),
-                                'label':
-                                    '''
-                                    QLabel
-                                    {   
-                                        border:1px solid %s;
-                                        color:%s;
-                                        font-size:%s;
-                                        background-color:%s
-                                    }
-                                    ''' % (self.color_palette['border'],
-                                           self.color_palette['text - light'],
-                                           self.font['size - title 2'],
-                                           self.color_palette['background 2']),
-                            },
-                        'week_widget':
-                            {
-                                'main':
-                                    '''
-                                    QWidget
+                                        'main':
+                                            '''
+                                            QFrame
+                                            {
+                                                border:0px solid %s;
+                                                padding:0px;
+                                            }
+                                            ''' % (self.color_palette['border']),
+                                        'label':
+                                            '''
+                                            QLabel
+                                            {   
+                                                border:None;
+                                                color:%s;
+                                                font-size:%s;
+                                                background-color:%s;
+                                            }
+                                            ''' % (
+                                                   self.color_palette['text - light'],
+                                                   self.font['size - title 2'],
+                                                   self.color_palette['background 2']),
+                                    },
+                                'week_widget':
                                     {
-                                        border:0px solid %s;
-                                        padding:0px;
-                                    }
-                                    ''' % (self.color_palette['border']),
-                                'label':
-                                    '''
-                                    QLabel
-                                    {   
-                                        border:0px solid %s;
-                                        color:%s;
-                                        font-size:%s;
-                                    }
-                                    ''' % (self.color_palette['border'],
-                                           self.color_palette['text - light'],
-                                           self.font['size - text']),
-                            },
-                        'day_widget':
-                            {
-                                'main':
-                                    '''
-                                    QWidget
+                                        'main':
+                                            '''
+                                            QWidget
+                                            {
+                                                border:0px solid %s;
+                                                padding:0px;
+                                            }
+                                            ''' % (self.color_palette['border']),
+                                        'label':
+                                            '''
+                                            QLabel
+                                            {   
+                                                border:0px solid %s;
+                                                color:%s;
+                                                font-size:%s;
+                                            }
+                                            ''' % (self.color_palette['border'],
+                                                   self.color_palette['text - light'],
+                                                   self.font['size - text']),
+                                    },
+                                'day_widget':
                                     {
-                                        border:0.5px solid %s;
+                                        'main':
+                                            '''
+                                            QWidget
+                                            {
+                                                border:0.5px solid %s;
+                                            }
+                                            ''' % (self.color_palette['border']),
+                                        'label':
+                                            '''
+                                            QLabel
+                                            {   
+                                                border:None;
+                                                color:%s;
+                                                font-size:%s;
+                                            }
+                                            ''' % (self.color_palette['text - light'],
+                                                   self.font['size - text - small']),
+                                    },
+                                'timeline':
+                                    {
+                                        'main':
+                                            '''
+                                            QWidget
+                                            {
+                                                border:0.5px solid %s;
+                                            }
+                                            ''' % (self.color_palette['border']),
                                     }
-                                    ''' % (self.color_palette['border']),
-                                'label':
-                                    '''
-                                    QLabel
-                                    {   
-                                        border:None;
-                                        color:%s;
-                                        font-size:%s;
-                                    }
-                                    ''' % (self.color_palette['text - light'],
-                                           self.font['size - text - small']),
                             },
+                        'new_task_textedit':
+                            '''
+                            QTextEdit
+                            {
+                                font-size:%s;
+                                border:2px solid %s;
+                            }
+                            ''' % (self.font['size - text'],
+                                   self.color_palette['border']),
                         'view_selector':
                             {
                                 'main':
@@ -787,24 +878,76 @@ class PlannerWidgetStyle:
                                            ICON_SIZES['small'].width(),
                                            self.color_palette['background 2']),
                             },
-                        'timeline':
+                        'start_date_widget':
                             {
-                                'main':
-                                    '''
-                                    QWidget
-                                    {
-                                        margin-left:0px;
-                                        padding:0px;
-                                    }
-                                    ''',
                                 'label':
                                     '''
                                     QLabel
                                     {
+                                        border:None;
+                                        color:%s;
                                         font-size:%s;
                                     }
-                                    ''' % (self.font['size - text'])
-                            }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text']),
+                                'pushbutton':
+                                    '''
+                                    QPushButton
+                                    {
+                                        color:%s;
+                                        font-size:%s;
+                                        border:1px solid %s;
+                                    }
+                                    QPushButton:hover
+                                    {
+                                        text-decoration:underline;
+                                    }
+                                    ''' % (self.color_palette['text - highlight'],
+                                           self.font['size - text'],
+                                           self.color_palette['border']),
+                                'calendar_widget':
+                                    '''
+                                    QCalendarWidget QWidget
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.color_palette['background 2']),
+                            },
+                        'end_date_widget':
+                            {
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
+                                        border:None;
+                                        color:%s;
+                                        font-size:%s;
+                                    }
+                                    ''' % (self.color_palette['text - light'],
+                                           self.font['size - text']),
+                                'pushbutton':
+                                    '''
+                                    QPushButton
+                                    {
+                                        color:%s;
+                                        font-size:%s;
+                                        border:1px solid %s;
+                                    }
+                                    QPushButton:hover
+                                    {
+                                        text-decoration:underline;
+                                    }
+                                    ''' % (self.color_palette['text - highlight'],
+                                           self.font['size - text'],
+                                           self.color_palette['border']),
+                                'calendar_widget':
+                                    '''
+                                    QCalendarWidget QWidget
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.color_palette['background 2']),
+                            },
                     }
             }
 

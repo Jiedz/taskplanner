@@ -808,6 +808,7 @@ class TaskWidget(QWidget):
             self.task.description = self.description_textedit.toPlainText()
 
         def inv_callback():
+            cursor = self.description_textedit.textCursor()
             # Update widget
             """
             This function is only called when the task's property is
@@ -815,25 +816,25 @@ class TaskWidget(QWidget):
             at the time of updating the widget, an infinite recursion is triggered
             between task update and widget update.
             """
+            cursor_position = cursor.position()
             self.description_textedit.blockSignals(True)
             self.description_textedit.setText(self.task.description)
             self.description_textedit.blockSignals(False)
             """
             For some reason, the cursor is normally reset to the start of the 
-            widget. One then needs to move the cursor to the end and then reset the cursor
+            widget. One then needs to move the cursor to the position of the cursor before this happens
             """
             # Move cursor to the end
-            cursor = self.description_textedit.textCursor()
-            cursor.movePosition(cursor.Right,
-                                cursor.MoveAnchor,
-                                len(self.task.description))
+            cursor.setPosition(cursor_position)
             """
             For some other reason, all text is also automatically selected, so one needs to
             clear the selection.
             """
             cursor.clearSelection()
             # Reset cursor
-            self.description_textedit.setTextCursor(cursor)# Connect task and widget
+            self.description_textedit.setTextCursor(cursor)
+
+        # Connect task and widget
         self.description_textedit.textChanged.connect(lambda: callback())
         self.task.description_changed.connect(lambda **kwargs: inv_callback())
         # Set initial value
@@ -1290,6 +1291,12 @@ class DateWidget(QWidget):
 
         def clicked():
             self.calendar_widget.show()
+            self.calendar_widget.blockSignals(True)
+            current_date = getattr(self.task, f'{self.time_mode}_date')
+            self.calendar_widget.setSelectedDate(QDate(current_date.year,
+                                                       current_date.month,
+                                                       current_date.day))
+            self.calendar_widget.blockSignals(False)
 
         self.pushbutton.clicked.connect(clicked)
 
