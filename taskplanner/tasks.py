@@ -134,6 +134,10 @@ class Task(Node):
                 if value > self.end_date:
                     raise ValueError(f'Start date ({value}) is greater than end date ({self.end_date})')
             self._start_date = value
+
+        if not self.is_top_level:
+            if self.start_date < self.parent.start_date:
+                self.parent.start_date = self.start_date
         self.start_date_changed.emit()
 
     @property
@@ -151,6 +155,10 @@ class Task(Node):
                 if value < self.start_date:
                     raise ValueError(f'end date ({value}) is smaller than start date ({self.start_date})')
             self._end_date = value
+
+        if not self.is_top_level:
+            if self.end_date > self.parent.end_date:
+                self.parent.end_date = self.start_date
         self.end_date_changed.emit()
 
     @property
@@ -162,7 +170,10 @@ class Task(Node):
         if value not in PRIORITY_LEVELS:
             raise ValueError(f'Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}')
         self._priority = value
+        for subtask in self.children:
+            subtask.priority = self.priority
         self.priority_changed.emit()
+
 
     @property
     def progress(self):
