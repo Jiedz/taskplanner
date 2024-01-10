@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import \
     QColorDialog,
     QTabWidget,
     QFrame,
-    QGridLayout
+    QGridLayout,
     )
 
 from signalslot import Signal
@@ -642,7 +642,7 @@ class CalendarWidget(QWidget):
                  planner: Planner,
                  task_list_widget: TaskListWidget,
                  parent: QWidget = None,
-                 view_type: str = 'daily',
+                 view_type: str = 'weekly',
                  start_date: date = date.today(),
                  end_date: date = date.today() + relativedelta(months=6),
                  style: PlannerWidgetStyle = None):
@@ -1071,6 +1071,7 @@ class CalendarWidget(QWidget):
                          style: PlannerWidgetStyle = None,
                          add_to_timelines_layout: bool = False):
                 self.task_widget = task_widget
+                self.planner = self.task_widget.planner
                 self.task = self.task_widget.task
                 self.calendar_widget = calendar_widget
                 self._style = style
@@ -1088,7 +1089,7 @@ class CalendarWidget(QWidget):
                 # Insert first spacing
                 self.label_layout.insertSpacing(0, 0)
                 # Label
-                self.make_label()
+                self.make_label_pushbutton()
                 # Sub-timelines
                 self.sub_timelines = []
                 self.make_sub_timelines()
@@ -1104,14 +1105,27 @@ class CalendarWidget(QWidget):
                               ['calendar_widget']
                               ['timeline']['main'])
 
-            def make_label(self):
-                self.label = QLabel()
+            def make_label_pushbutton(self):
+                self.label_pushbutton = QPushButton()
                 # Layout
-                self.label_layout.addWidget(self.label)
+                self.label_layout.addWidget(self.label_pushbutton)
                 self.set_height()
-                # Set text
-                self.label.setText(self.task.name)
-                self.task.name_changed.connect(lambda **kwargs: self.label.setText(self.task.name))
+
+                def clicked():
+                    task_widget = TaskWidget(task=self.task,
+                                             planner=self.planner,
+                                             style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
+                                                                   font=self._style.font_name))
+                    task_widget.show()
+
+                def update_label():
+                    self.label_pushbutton.setText(f'({len(self.task.ancestors)}) {self.task.name}')
+
+                # Connect task and widget
+                self.label_pushbutton.clicked.connect(clicked)
+                # Set initial text
+                update_label()
+                self.task.name_changed.connect(lambda **kwargs: update_label())
                 # Set background color, border
                 self.set_color()
                 self.task.color_changed.connect(lambda **kwargs: self.set_color())
@@ -1126,20 +1140,26 @@ class CalendarWidget(QWidget):
 
             def set_color(self):
                 style_sheet = '''
-                QLabel
+                QPushButton
                 {
                     background-color:%s;
                     border:0px solid %s;
                     font-size:%s;
+                    text-align:left;
+                    padding-left:10px;
+                }
+                QPushButton:hover
+                {
+                    text-decoration:underline;
                 }
                 ''' % (self.task.color,
                        self.task.color,
                        self._style.font['size - text - small'])
-                self.label.setStyleSheet(style_sheet)
+                self.label_pushbutton.setStyleSheet(style_sheet)
 
             def set_height(self):
                 #self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))
-                self.label.setFixedHeight(self.task_widget.task_line_widget.height())
+                self.label_pushbutton.setFixedHeight(self.task_widget.task_line_widget.height())
 
             def set_start_position(self):
                 delta_date = self.task.start_date - self.calendar_widget.month_widgets[0].date
@@ -1175,7 +1195,7 @@ class CalendarWidget(QWidget):
                 if view_type == 'daily':
                     day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
                     n_days = (self.task.end_date - self.task.start_date).days + 1
-                    self.label.setFixedWidth(max([0, day_width*n_days]))
+                    self.label_pushbutton.setFixedWidth(max([0, day_width*n_days]))
                 elif view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
                     month_widgets = [m for m in self.calendar_widget.month_widgets
@@ -1186,7 +1206,7 @@ class CalendarWidget(QWidget):
                                         if w.date > self.task.start_date and w.date <= self.task.end_date]
                         n_weeks += len(week_widgets)
                     n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.start_date.weekday() + 1) / 7
-                    self.label.setFixedWidth(max([0, int(week_width * n_weeks)]))
+                    self.label_pushbutton.setFixedWidth(max([0, int(week_width * n_weeks)]))
                 elif view_type == 'monthly':
                     month_width = self.calendar_widget.month_widgets[0].width()
 
@@ -1194,7 +1214,7 @@ class CalendarWidget(QWidget):
                                      if m.date > self.task.start_date and m.date <= self.task.end_date]
                     n_months = len(month_widgets)
                     n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
-                    self.label.setFixedWidth(max([0, int(n_months * month_width)]))
+                    self.label_pushbutton.setFixedWidth(max([0, int(n_months * month_width)]))
 
             def set_geometry(self):
                 self.set_start_position()

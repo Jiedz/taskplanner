@@ -22,7 +22,7 @@ COLOR_PALETTES = {
 FONTS = {'light':
     {
         'family': 'Sans Serif',
-        'size - title 1': '22pt',
+        'size - title 1': '20pt',
         'size - title 2': '18pt',
         'size - text': '12pt',
         'size - text - small': '10pt'
@@ -69,7 +69,7 @@ class TaskWidgetStyle:
                             border:2px solid %s;
                             border-radius:10px;
                             font-family:%s;
-                            color:%s
+                            color:%s;
                         }
                         ''' % (self.color_palette['background 1'],
                                self.color_palette['border'],
@@ -522,6 +522,26 @@ class TaskWidgetStyle:
                                 }
                                 ''' % (ICON_SIZES['small'].width(),
                                        self.color_palette['background 2']),
+                            'remove_dialog':
+                                '''
+                                QWidget
+                                {
+                                    background-color:%s;
+                                    font-size:%s;
+                                    font-family:%s;
+                                    color:%s;
+                                }
+                                QPushButton
+                                {
+                                    background-color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['background 1'],
+                                       self.font['size - text'],
+                                       self.font['family'],
+                                       self.color_palette['text - light'],
+                                       self.color_palette['background 2'],
+                                       self.font['size - text']),
                             'expand_pushbutton':
                                 '''
                                 QPushButton

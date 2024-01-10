@@ -158,7 +158,7 @@ class Task(Node):
 
         if not self.is_top_level:
             if self.end_date > self.parent.end_date:
-                self.parent.end_date = self.start_date
+                self.parent.end_date = self.end_date
         self.end_date_changed.emit()
 
     @property
@@ -184,6 +184,12 @@ class Task(Node):
         if value not in PROGRESS_LEVELS:
             raise ValueError(f"Invalid progress level '{value}'. Accepted values are {PROGRESS_LEVELS}")
         self._progress = value
+        '''
+        # If all tasks of the same level are completed, consider the parent task as completed
+        if not self.is_top_level:
+            if all([self.progress == 'completed'] + [task.progress == 'completed' for task in self.siblings]):
+                self.parent.progress = 'completed'
+        '''
         self.progress_changed.emit()
 
     @property

@@ -1,7 +1,7 @@
 """
 This module defines a task widget.
 """
-import logging
+from logging import warning
 import os
 from datetime import date as dt
 
@@ -20,7 +20,8 @@ from PyQt5.QtWidgets import \
     QScrollArea,
     QCalendarWidget,
     QColorDialog,
-    QFrame
+    QFrame,
+    QMessageBox
     )
 from signalslot import Signal
 from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
@@ -88,7 +89,7 @@ class TaskWidget(QWidget):
         self.title_widget.setFixedHeight(int(self.height()*0.08))
         # Color widget
         self.make_color_widget()
-        self.title_color_dates_layout.addSpacing(10)
+        self.title_color_dates_layout.addSpacing(15)
         ## Color pushbutton
         # Start and end date widgets
         self.make_date_widgets()
@@ -147,7 +148,7 @@ class TaskWidget(QWidget):
                                                          int(self.height()*0.05))
         ## New textedit
         self.subtask_list_widget.new_textedit.setFixedWidth(int(self.width()*0.5))
-        self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()))
+        self.subtask_list_widget.new_textedit.setFixedHeight(int(self.category_widget.new_textedit.height()*1.5))
         self.layout.addStretch()
         # Set style
         if self._style is not None:
@@ -871,6 +872,7 @@ class TaskWidget(QWidget):
                 self.make_icon_label()
                 # New Textedit
                 self.make_new_textedit()
+                self.layout.addSpacing(15)
                 # Subtasks
                 self.subtask_widgets = []
                 self.make_subtask_widgets()
@@ -1086,6 +1088,9 @@ class TaskLineWidget(QFrame):
         self.make_date_widgets()
         # Remove pushbutton
         self.make_remove_pushbutton()
+        # Remove dialog
+        self.removing_task = False
+        self.make_remove_dialog()
         # Expand pushbutton
         self.expanded = False
         self.make_expand_pushbutton()
@@ -1100,7 +1105,7 @@ class TaskLineWidget(QFrame):
                 = '''
                   QWidget
                   {
-                    border:2px solid %s;
+                    border:4px solid %s;
                   }
                   ''' % self.task.color
             set_style(widget=self,
@@ -1213,6 +1218,15 @@ class TaskLineWidget(QFrame):
         if self.task.is_bottom_level:
             self.expand_pushbutton.hide()
 
+    def make_remove_dialog(self):
+        # A dialog window that pops up when the 'remove' button is clicked
+        self.remove_dialog = QMessageBox()
+        self.remove_dialog.setText(f'Do you want to remove task "{self.task.name}"')
+        #self.remove_dialog.setDefaultButton()
+
+
+        self.remove_dialog.accepted.connect(lambda: setattr(self, 'removing_task', True))
+
     def make_remove_pushbutton(self):
         self.remove_pushbutton = QPushButton()
         self.layout.addWidget(self.remove_pushbutton)
@@ -1225,11 +1239,14 @@ class TaskLineWidget(QFrame):
 
         # Callback
         def callback():
-            if not self.task.is_top_level:
-                self.task.parent.remove_children_tasks(self.task)
-            elif self.planner is not None:
-                self.planner.remove_tasks(self.task)
-                self.hide()
+            self.remove_dialog.exec()
+            if self.removing_task:
+                if not self.task.is_top_level:
+                    self.task.parent.remove_children_tasks(self.task)
+                elif self.planner is not None:
+                    self.planner.remove_tasks(self.task)
+                    self.hide()
+                self.removing_task = False
 
         self.remove_pushbutton.clicked.connect(callback)
 
