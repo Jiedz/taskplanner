@@ -28,6 +28,7 @@ from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
 from taskplanner.planner import Planner
+from taskplanner.gui.utilities import select_directory
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -87,6 +88,8 @@ class TaskWidget(QWidget):
         # Title widget
         self.make_title_widget()
         self.title_widget.setFixedHeight(int(self.height()*0.08))
+        # Download pushbutton
+        self.make_download_pushbutton()
         # Color widget
         self.make_color_widget()
         self.title_color_dates_layout.addSpacing(15)
@@ -164,7 +167,6 @@ class TaskWidget(QWidget):
     def hide(self):
         super().hide()
         self.scrollarea.hide()
-
 
     def make_path_widget(self):
         class PathWidget(QWidget):
@@ -334,6 +336,24 @@ class TaskWidget(QWidget):
         self.title_widget = TitleWidget(task=self.task,
                                         parent=self)
         self.title_color_dates_layout.addWidget(self.title_widget)
+
+    def make_download_pushbutton(self):
+        self.download_pushbutton = QPushButton()
+        self.title_color_dates_layout.addWidget(self.download_pushbutton)
+        # Icon
+        icon_path = self._style.icon_path
+        icon_filename = os.path.join(icon_path, 'download.png')
+        self.download_pushbutton.setIcon(QIcon(icon_filename))
+
+        # User interactions
+        def callback():
+            # Show the new textedit
+            filename = os.path.join(os.path.abspath(
+                select_directory(title=f'Select the Location where Task {self.task.name} will Be Saved')),
+                f'{self.task.name.replace(" ", "_")}')
+            self.task.to_file(filename=filename)
+
+        self.download_pushbutton.clicked.connect(lambda: callback())
 
     def make_color_widget(self):
         class ColorWidget(QWidget):
@@ -1350,5 +1370,3 @@ class DateWidget(QWidget):
             self.calendar_widget.hide()
 
         self.calendar_widget.clicked.connect(callback)
-
-

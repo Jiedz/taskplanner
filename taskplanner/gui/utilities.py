@@ -59,3 +59,20 @@ def select_file(start_directory=None, title="Select file"):
     #app.exec_()
 
     return file_path
+
+def select_directory(start_directory=None, title="Select Directory"):
+    """
+    INPUTS
+    -----------
+    start_directory : str
+        the absolute path of the starting directory.
+    """
+    if start_directory is None:
+        start_directory = os.getcwd()
+    #Let the user choose a different data path, if needed.
+    #--------------------------------
+    #app = QApplication(sys.argv)
+    directory_path = QFileDialog.getExistingDirectory(caption=title, directory=start_directory)
+    #app.exec_()
+
+    return directory_path
