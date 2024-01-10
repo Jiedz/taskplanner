@@ -28,7 +28,7 @@ from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
 from taskplanner.gui.utilities import set_style, get_primary_screen
 from taskplanner.tasks import Task, PROGRESS_LEVELS, PRIORITY_LEVELS
 from taskplanner.planner import Planner
-from taskplanner.gui.utilities import select_directory
+from taskplanner.gui.utilities import select_directory, select_file
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -66,7 +66,7 @@ class TaskWidget(QWidget):
         self.setLayout(self.layout)
         # Geometry
         # Get screen size
-        width, height = int(SCREEN_WIDTH * 0.37), int(SCREEN_HEIGHT * 0.65)
+        width, height = int(SCREEN_WIDTH * 0.4), int(SCREEN_HEIGHT * 0.65)
         self.setGeometry(int(SCREEN_WIDTH / 2) - int(width / 2),
                          int(SCREEN_HEIGHT / 2) - int(height / 2),
                          width,  # width
@@ -90,6 +90,8 @@ class TaskWidget(QWidget):
         self.title_widget.setFixedHeight(int(self.height()*0.08))
         # Download pushbutton
         self.make_download_pushbutton()
+        # Upload pushbutton
+        self.make_upload_pushbutton()
         # Color widget
         self.make_color_widget()
         self.title_color_dates_layout.addSpacing(15)
@@ -351,9 +353,31 @@ class TaskWidget(QWidget):
             filename = os.path.join(os.path.abspath(
                 select_directory(title=f'Select the Location where Task {self.task.name} will Be Saved')),
                 f'{self.task.name.replace(" ", "_")}')
-            self.task.to_file(filename=filename)
+            try:
+                self.task.to_file(filename=filename)
+            except Exception as e:
+                print(e)
 
         self.download_pushbutton.clicked.connect(lambda: callback())
+
+    def make_upload_pushbutton(self):
+        self.upload_pushbutton = QPushButton()
+        self.title_color_dates_layout.addWidget(self.upload_pushbutton)
+        # Icon
+        icon_path = self._style.icon_path
+        icon_filename = os.path.join(icon_path, 'upload.png')
+        self.upload_pushbutton.setIcon(QIcon(icon_filename))
+
+        # User interactions
+        def callback():
+            # Show the new textedit
+            filename = select_file(title=f'Select the File Containing the Task to Be Uploaded')
+            try:
+                self.task.add_children_tasks(Task.from_file(filename=filename))
+            except Exception as e:
+                print(e)
+
+        self.upload_pushbutton.clicked.connect(lambda: callback())
 
     def make_color_widget(self):
         class ColorWidget(QWidget):
@@ -1241,10 +1265,7 @@ class TaskLineWidget(QFrame):
     def make_remove_dialog(self):
         # A dialog window that pops up when the 'remove' button is clicked
         self.remove_dialog = QMessageBox()
-        self.remove_dialog.setText(f'Do you want to remove task "{self.task.name}"')
-        #self.remove_dialog.setDefaultButton()
-
-
+        self.remove_dialog.setText(f'Do you want to remove task "{self.task.name}"?')
         self.remove_dialog.accepted.connect(lambda: setattr(self, 'removing_task', True))
 
     def make_remove_pushbutton(self):

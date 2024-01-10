@@ -175,6 +175,38 @@ class TaskWidgetStyle:
                                    self.color_palette['text'],
                                    self.font['size - title 1'])
                         },
+                    'download_pushbutton':
+                        '''
+                        QPushButton
+                        {
+                            border-radius:%spx;
+                            border:2px solid %s;
+                            icon-size:%spx;
+                        }
+                        QPushButton:hover
+                        {
+                            background-color:%s;
+                        }
+                        ''' % (int(screen_size.width / 220),
+                               self.color_palette['border'],
+                               ICON_SIZES['regular'].width(),
+                               self.color_palette['border']),
+                    'upload_pushbutton':
+                        '''
+                        QPushButton
+                        {
+                            border-radius:%spx;
+                            border:2px solid %s;
+                            icon-size:%spx;
+                        }
+                        QPushButton:hover
+                        {
+                            background-color:%s;
+                        }
+                        ''' % (int(screen_size.width / 220),
+                               self.color_palette['border'],
+                               ICON_SIZES['regular'].width(),
+                               self.color_palette['border']),
                     'color_widget':
                         {
                             'label':
@@ -265,20 +297,20 @@ class TaskWidgetStyle:
                                        self.color_palette['background 2']),
                             'add_pushbutton':
                                 '''
-                                                QPushButton
-                                                {
-                                                    border-radius:%spx;
-                                                    border:2px solid %s;
-                                                    icon-size:%spx;
-                                                }
-                                                QPushButton:hover
-                                                {
-                                                    background-color:%s;
-                                                }
-                                                ''' % (int(screen_size.width / 220),
-                                                       self.color_palette['border'],
-                                                       ICON_SIZES['small'].width(),
-                                                       self.color_palette['border']),
+                                QPushButton
+                                {
+                                    border-radius:%spx;
+                                    border:2px solid %s;
+                                    icon-size:%spx;
+                                }
+                                QPushButton:hover
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (int(screen_size.width / 220),
+                                       self.color_palette['border'],
+                                       ICON_SIZES['small'].width(),
+                                       self.color_palette['border']),
                         },
                     'assignee_widget':
                         {
