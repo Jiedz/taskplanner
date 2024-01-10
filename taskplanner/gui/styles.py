@@ -149,7 +149,7 @@ class TaskWidgetStyle:
                                 text-decoration:underline;
                             }
                             ''' % (self.color_palette['text - highlight'],
-                                   self.font['size - text'],
+                                   self.font['size - text - small'],
                                    self.color_palette['border']),
                             'icon_label':
                                 '''

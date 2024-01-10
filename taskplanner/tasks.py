@@ -138,6 +138,9 @@ class Task(Node):
         if not self.is_top_level:
             if self.start_date < self.parent.start_date:
                 self.parent.start_date = self.start_date
+            elif all([task.start_date > self.parent.start_date for task in [self] + list(self.siblings)]):
+                self.parent.start_date = min([task.start_date for task in [self] + list(self.siblings)])
+
         self.start_date_changed.emit()
 
     @property
@@ -159,6 +162,9 @@ class Task(Node):
         if not self.is_top_level:
             if self.end_date > self.parent.end_date:
                 self.parent.end_date = self.end_date
+            elif all([task.end_date < self.parent.end_date for task in [self] + list(self.siblings)]):
+                self.parent.start_date = max([task.end_date for task in [self] + list(self.siblings)])
+
         self.end_date_changed.emit()
 
     @property
