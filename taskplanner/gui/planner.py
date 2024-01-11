@@ -1,7 +1,8 @@
 """
 This module defines a planner widget and related widgets.
 """
-from PyQt5.QtCore import Qt, QPoint, QDate
+from PyQt5.QtCore import Qt, QPoint, QDate, QEvent
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -29,7 +30,7 @@ from taskplanner.tasks import Task
 from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
 from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES
-from taskplanner.gui.utilities import set_style, get_primary_screen
+from taskplanner.gui.utilities import set_style, get_primary_screen, select_file, select_directory
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -116,8 +117,12 @@ class PlannerWidget(QTabWidget):
                 self.make_new_task_textedit()
                 self.new_task_textedit.setFixedSize(int(self.width() * 0.15),
                                                     int(self.height() * 0.035))
+                # Upload task pushbutton
+                self.make_upload_task_pushbutton()
+                self.upload_task_pushbutton.setFixedSize(self.upload_task_pushbutton.iconSize())
                 self.new_task_settings_layout.addSpacing(int(SCREEN_WIDTH * 0.25)
-                                                         - self.new_task_textedit.width())
+                                                         - self.new_task_textedit.width()
+                                                         - self.upload_task_pushbutton.width())
                 # Vertical layout for task list widget
                 self.task_list_layout = QVBoxLayout()
                 self.task_list_layout.setAlignment(Qt.AlignTop)
@@ -214,6 +219,31 @@ class PlannerWidget(QTabWidget):
 
                 self.new_task_textedit.textChanged.connect(lambda: callback())
                 self.new_task_textedit.setPlaceholderText("+ New Task")
+
+            def make_upload_task_pushbutton(self):
+                self.upload_task_pushbutton = QPushButton()
+                self.new_task_settings_layout.addWidget(self.upload_task_pushbutton)
+                # Icon
+                icon_path = self._style.icon_path
+                icon_filename = os.path.join(icon_path, 'upload.png')
+                self.upload_task_pushbutton.setIcon(QIcon(icon_filename))
+
+                # User interactions
+                def callback():
+                    # Show the new textedit
+                    filename = select_file(title=f'Select the File Containing the Task to Be Uploaded')
+                    try:
+                        self.planner.add_tasks(Task.from_file(filename=filename))
+                    except Exception as e:
+                        print(e)
+
+                self.upload_task_pushbutton.clicked.connect(lambda: callback())
+                # Set style
+                if self._style is not None:
+                    set_style(widget=self.upload_task_pushbutton,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']
+                              ['upload_task_pushbutton'])
 
             def make_view_selector(self):
                 class ViewSelector(QFrame):
@@ -1088,7 +1118,7 @@ class CalendarWidget(QWidget):
                 self.layout.addLayout(self.label_layout)
                 # Insert first spacing
                 self.label_layout.insertSpacing(0, 0)
-                # Label
+                # Label pushbutton
                 self.make_label_pushbutton()
                 # Sub-timelines
                 self.sub_timelines = []
@@ -1122,7 +1152,7 @@ class CalendarWidget(QWidget):
                     self.label_pushbutton.setText(f'({len(self.task.ancestors)}) {self.task.name}')
 
                 # Connect task and widget
-                self.label_pushbutton.clicked.connect(clicked)
+                self.label_pushbutton.installEventFilter(self)
                 # Set initial text
                 update_label()
                 self.task.name_changed.connect(lambda **kwargs: update_label())
@@ -1137,6 +1167,7 @@ class CalendarWidget(QWidget):
                 # Set visibility
                 self.set_visibility()
                 self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
+
 
             def set_color(self):
                 style_sheet = '''
@@ -1219,6 +1250,30 @@ class CalendarWidget(QWidget):
             def set_geometry(self):
                 self.set_start_position()
                 self.set_length()
+
+            def eventFilter(self, obj, event):
+                """
+                This function allows to handle all kinds of events for all subwidgets in this widget.
+                :param obj:
+                :param event:
+                :return:
+                """
+                if obj == self.label_pushbutton:
+                    if event.type() == QEvent.MouseButtonDblClick:
+                        task_widget = TaskWidget(task=self.task,
+                                                 planner=self.planner,
+                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
+                                                                       font=self._style.font_name))
+
+                        task_widget.show()
+                    elif event.type() == QEvent.MouseButtonPress:
+                        self.label_pushbutton.setMouseTracking(True)
+                    elif event.type() == QEvent.MouseMove and self.label_pushbutton.hasMouseTracking():
+                        print(f'Moving to position {event.pos()}')
+                    elif event.type() == QEvent.MouseButtonRelease:
+                        print(f'Mouse released at position {event.pos()}')
+                        self.label_pushbutton.setMouseTracking(False)
+                return super().eventFilter(obj, event)
 
             def set_visibility(self):
                 self.setVisible(self.task_widget.isVisible())

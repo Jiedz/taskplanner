@@ -191,22 +191,6 @@ class TaskWidgetStyle:
                                self.color_palette['border'],
                                ICON_SIZES['regular'].width(),
                                self.color_palette['border']),
-                    'upload_pushbutton':
-                        '''
-                        QPushButton
-                        {
-                            border-radius:%spx;
-                            border:2px solid %s;
-                            icon-size:%spx;
-                        }
-                        QPushButton:hover
-                        {
-                            background-color:%s;
-                        }
-                        ''' % (int(screen_size.width / 220),
-                               self.color_palette['border'],
-                               ICON_SIZES['regular'].width(),
-                               self.color_palette['border']),
                     'color_widget':
                         {
                             'label':
@@ -488,7 +472,23 @@ class TaskWidgetStyle:
                                 {
                                     font-size:%s;
                                 }
-                                ''' % (self.font['size - text - small'])
+                                ''' % (self.font['size - text - small']),
+                            'upload_pushbutton':
+                                '''
+                                QPushButton
+                                {
+                                    border-radius:%spx;
+                                    border:2px solid %s;
+                                    icon-size:%spx;
+                                }
+                                QPushButton:hover
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (int(screen_size.width / 220),
+                                       self.color_palette['border'],
+                                       ICON_SIZES['regular'].width(),
+                                       self.color_palette['border']),
                         },
                 },
             'simple view':
@@ -891,6 +891,22 @@ class PlannerWidgetStyle:
                                 border:2px solid %s;
                             }
                             ''' % (self.font['size - text'],
+                                   self.color_palette['border']),
+                        'upload_task_pushbutton':
+                            '''
+                            QPushButton
+                            {
+                                border-radius:%spx;
+                                border:2px solid %s;
+                                icon-size:%spx;
+                            }
+                            QPushButton:hover
+                            {
+                                background-color:%s;
+                            }
+                            ''' % (int(screen_size.width / 220),
+                                   self.color_palette['border'],
+                                   ICON_SIZES['regular'].width(),
                                    self.color_palette['border']),
                         'view_selector':
                             {

@@ -90,8 +90,6 @@ class TaskWidget(QWidget):
         self.title_widget.setFixedHeight(int(self.height()*0.08))
         # Download pushbutton
         self.make_download_pushbutton()
-        # Upload pushbutton
-        self.make_upload_pushbutton()
         # Color widget
         self.make_color_widget()
         self.title_color_dates_layout.addSpacing(15)
@@ -364,25 +362,6 @@ class TaskWidget(QWidget):
                 print(e)
 
         self.download_pushbutton.clicked.connect(lambda: callback())
-
-    def make_upload_pushbutton(self):
-        self.upload_pushbutton = QPushButton()
-        self.title_color_dates_layout.addWidget(self.upload_pushbutton)
-        # Icon
-        icon_path = self._style.icon_path
-        icon_filename = os.path.join(icon_path, 'upload.png')
-        self.upload_pushbutton.setIcon(QIcon(icon_filename))
-
-        # User interactions
-        def callback():
-            # Show the new textedit
-            filename = select_file(title=f'Select the File Containing the Task to Be Uploaded')
-            try:
-                self.task.add_children_tasks(Task.from_file(filename=filename))
-            except Exception as e:
-                print(e)
-
-        self.upload_pushbutton.clicked.connect(lambda: callback())
 
     def make_color_widget(self):
         class ColorWidget(QWidget):
@@ -903,7 +882,8 @@ class TaskWidget(QWidget):
             def __init__(self,
                          task: Task,
                          planner: Planner = None,
-                         parent: QWidget = None):
+                         parent: QWidget = None,
+                         style: TaskWidgetStyle = None):
                 """
                 :param task: :py:class:'taskplanner.tasks.Task'
                     The task associated to this widget
@@ -914,14 +894,22 @@ class TaskWidget(QWidget):
                 """
                 super().__init__(parent=parent)
                 self.task, self.planner = task, planner
+                self._style = style
                 # Layout
                 self.layout = QVBoxLayout()
                 self.setLayout(self.layout)
                 # Icon
                 self.make_icon_label()
+                # Horizontal layout for (new task, upload task)
+                self.new_upload_task_layout = QHBoxLayout()
+                self.layout.addLayout(self.new_upload_task_layout)
+                self.new_upload_task_layout.setAlignment(Qt.AlignLeft)
                 # New Textedit
                 self.make_new_textedit()
                 self.layout.addSpacing(15)
+                # Upload task pushbutton
+                self.make_upload_pushbutton()
+                self.new_upload_task_layout.addStretch()
                 # Subtasks
                 self.subtask_widgets = []
                 self.make_subtask_widgets()
@@ -944,7 +932,7 @@ class TaskWidget(QWidget):
             def make_new_textedit(self):
                 self.new_textedit = QTextEdit()
                 # Layout
-                self.layout.addWidget(self.new_textedit)
+                self.new_upload_task_layout.addWidget(self.new_textedit)
                 # Geometry
 
                 def callback():
@@ -973,6 +961,25 @@ class TaskWidget(QWidget):
                 self.new_textedit.textChanged.connect(lambda: callback())
                 self.new_textedit.setPlaceholderText("+ New Subtask")
 
+            def make_upload_pushbutton(self):
+                self.upload_pushbutton = QPushButton()
+                self.new_upload_task_layout.addWidget(self.upload_pushbutton)
+                # Icon
+                icon_path = self._style.icon_path
+                icon_filename = os.path.join(icon_path, 'upload.png')
+                self.upload_pushbutton.setIcon(QIcon(icon_filename))
+
+                # User interactions
+                def callback():
+                    # Show the new textedit
+                    filename = select_file(title=f'Select the File Containing the Task to Be Uploaded')
+                    try:
+                        self.task.add_children_tasks(Task.from_file(filename=filename))
+                    except Exception as e:
+                        print(e)
+
+                self.upload_pushbutton.clicked.connect(lambda: callback())
+
             def make_subtask_widgets(self):
                 for subtask in self.task.children:
                     if subtask not in [widget.task for widget in self.subtask_widgets]:
@@ -991,7 +998,8 @@ class TaskWidget(QWidget):
 
         self.subtask_list_widget = SubtaskListWidget(task=self.task,
                                                      planner=self.planner,
-                                                     parent=self)
+                                                     parent=self,
+                                                     style=self._style)
         self.layout.addWidget(self.subtask_list_widget)
 
 
