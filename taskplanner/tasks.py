@@ -163,7 +163,7 @@ class Task(Node):
             if self.end_date > self.parent.end_date:
                 self.parent.end_date = self.end_date
             elif all([task.end_date < self.parent.end_date for task in [self] + list(self.siblings)]):
-                self.parent.start_date = max([task.end_date for task in [self] + list(self.siblings)])
+                self.parent.end_date = max([task.end_date for task in [self] + list(self.siblings)])
 
         self.end_date_changed.emit()
 
