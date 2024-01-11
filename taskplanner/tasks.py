@@ -14,8 +14,8 @@ from signalslot import Signal
 from PyQt5.Qt import QColor
 
 # %% Task
-PRIORITY_LEVELS = ["low", "high", "urgent"]
-PROGRESS_LEVELS = ['not started', 'in progress', 'completed']
+PRIORITY_LEVELS = {"low": 0, "high": 1, "urgent": 2}
+PROGRESS_LEVELS = {'not started': 0, 'in progress': 1, 'completed': 2}
 
 class Task(Node):
     '''
@@ -173,11 +173,18 @@ class Task(Node):
 
     @priority.setter
     def priority(self, value):
-        if value not in PRIORITY_LEVELS:
-            raise ValueError(f'Invalid priority level {value}. Accepted values are {PRIORITY_LEVELS}')
+        if value not in list(PRIORITY_LEVELS.keys()):
+            raise ValueError(f'Invalid priority level {value}. Accepted values are {list(PRIORITY_LEVELS.keys())}')
         self._priority = value
-        for subtask in self.children:
-            subtask.priority = self.priority
+        if not self.is_top_level:
+            if (any([PRIORITY_LEVELS[task.priority] > PRIORITY_LEVELS[self.parent.priority]
+                    for task in [self] + list(self.siblings)])
+            or
+                all([PRIORITY_LEVELS[task.priority] < PRIORITY_LEVELS[self.parent.priority]
+                    for task in [self] + list(self.siblings)])):
+                max_priority = max([PRIORITY_LEVELS[task.priority] for task in [self] + list(self.siblings)])
+                self.parent.priority = [p for p in PRIORITY_LEVELS.keys() if PRIORITY_LEVELS[p] == max_priority][0]
+
         self.priority_changed.emit()
 
 
@@ -187,15 +194,15 @@ class Task(Node):
 
     @progress.setter
     def progress(self, value):
-        if value not in PROGRESS_LEVELS:
-            raise ValueError(f"Invalid progress level '{value}'. Accepted values are {PROGRESS_LEVELS}")
+        if value not in list(PROGRESS_LEVELS.keys()):
+            raise ValueError(f"Invalid progress level '{value}'. Accepted values are {list(PROGRESS_LEVELS.keys())}")
         self._progress = value
-        '''
-        # If all tasks of the same level are completed, consider the parent task as completed
         if not self.is_top_level:
-            if all([self.progress == 'completed'] + [task.progress == 'completed' for task in self.siblings]):
-                self.parent.progress = 'completed'
-        '''
+            max_progress = max([PROGRESS_LEVELS[task.progress] for task in [self] + list(self.siblings)])
+            min_progress = min([PROGRESS_LEVELS[task.progress] for task in [self] + list(self.siblings)])
+            if min_progress != max_progress:
+                max_progress = 1
+            self.parent.progress = [p for p in PROGRESS_LEVELS.keys() if PROGRESS_LEVELS[p] == max_progress][0]
         self.progress_changed.emit()
 
     @property
@@ -406,6 +413,8 @@ class Task(Node):
         string += f'description: {self.description}\n'
         # priority
         string += f'priority: {self.priority}\n'
+        # progress
+        string += f'progress: {self.progress}\n'
         # assignee
         string += f'assignee: {self.assignee}\n'
         # start date
@@ -447,6 +456,7 @@ class Task(Node):
                       'category',
                       'description',
                       'priority',
+                      'progress',
                       'assignee',
                       'start date',
                       'end date',
@@ -465,15 +475,18 @@ class Task(Node):
                 lines.remove(line)
         task.description = description
         # Set name, category, priority, assignee, color
-        for i in [0, 1, 3, 4, 7]:
+        for i in [0, 1, 3, 4, 5, 8]:
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             if value == 'None':
-                value = None
+                if attr_name != 'progress':
+                    value = None
+                else:
+                    value = 'not started'
             setattr(task, attr_name, value)
         # Set start and end date
         task._end_date = None
-        for i in [5, 6]:
+        for i in [6, 7]:
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             day, month, year = [int(v) for v in value.split('/')]

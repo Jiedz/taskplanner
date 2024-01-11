@@ -308,24 +308,29 @@ class TaskWidget(QWidget):
                     at the time of updating the widget, an infinite recursion is triggered
                     between task update and widget update.
                     """
+                    cursor = self.textedit.textCursor()
+                    # Update widget
+                    """
+                    This function is only called when the task's property is
+                    changed outside this widget. If widget signals are not blocked
+                    at the time of updating the widget, an infinite recursion is triggered
+                    between task update and widget update.
+                    """
+                    cursor_position = cursor.position()
                     self.textedit.blockSignals(True)
                     self.textedit.setText(self.task.name)
                     self.textedit.blockSignals(False)
                     """
                     For some reason, the cursor is normally reset to the start of the 
-                    widget. One then needs to move the cursor to the end and then reset the cursor
+                    widget. One then needs to move the cursor to the position of the cursor before this happens
                     """
                     # Move cursor to the end
-                    cursor = self.textedit.textCursor()
-                    cursor.movePosition(cursor.Right,
-                                        cursor.MoveAnchor,
-                                        len(self.task.name))
+                    cursor.setPosition(cursor_position)
                     """
                     For some other reason, all text is also automatically selected, so one needs to
                     clear the selection.
                     """
                     cursor.clearSelection()
-                    # Reset cursor
                     self.textedit.setTextCursor(cursor)
 
                 # Connect task and widget
@@ -525,8 +530,8 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.combobox)
                 # Add items
-                for i in range(len(PROGRESS_LEVELS)):
-                    level = PROGRESS_LEVELS[i]
+                for i in range(len(PROGRESS_LEVELS.keys())):
+                    level = list(PROGRESS_LEVELS.keys())[i]
                     icon_path = self.parent()._style.icon_path
                     icon_filename = os.path.join(icon_path, f'progress_{level.replace(" ", "-")}.png')
                     self.combobox.addItem(level)
@@ -822,8 +827,8 @@ class TaskWidget(QWidget):
                 # Layout
                 self.layout.addWidget(self.combobox)
                 # Add items
-                for i in range(len(PRIORITY_LEVELS)):
-                    level = PRIORITY_LEVELS[len(PRIORITY_LEVELS)-i-1]
+                for i in range(len(PRIORITY_LEVELS.keys())):
+                    level = list(PRIORITY_LEVELS.keys())[len(PRIORITY_LEVELS)-i-1]
                     icon_path = self.parent()._style.icon_path
                     icon_filename = os.path.join(icon_path, f'priority_{level.replace(" ", "-")}.png')
                     self.combobox.addItem(level)
