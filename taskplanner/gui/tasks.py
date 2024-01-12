@@ -352,11 +352,10 @@ class TaskWidget(QWidget):
 
         # User interactions
         def callback():
-            # Show the new textedit
-            filename = os.path.join(os.path.abspath(
+            try:
+                filename = os.path.join(os.path.abspath(
                 select_directory(title=f'Select the Location where Task {self.task.name} will Be Saved')),
                 f'{self.task.name.replace(" ", "_")}')
-            try:
                 self.task.to_file(filename=filename)
             except Exception as e:
                 print(e)

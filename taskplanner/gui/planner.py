@@ -120,7 +120,7 @@ class PlannerWidget(QTabWidget):
                 # Upload task pushbutton
                 self.make_upload_task_pushbutton()
                 self.upload_task_pushbutton.setFixedSize(self.upload_task_pushbutton.iconSize())
-                self.new_task_settings_layout.addSpacing(int(SCREEN_WIDTH * 0.25)
+                self.new_task_settings_layout.addSpacing(int(SCREEN_WIDTH * 0.35)
                                                          - self.new_task_textedit.width()
                                                          - self.upload_task_pushbutton.width())
                 # Vertical layout for task list widget
@@ -142,7 +142,7 @@ class PlannerWidget(QTabWidget):
                 self.task_list_scrollarea.setWidgetResizable(True)
                 self.task_list_scrollarea.setWidget(self.task_list_widget)
                 self.task_list_layout.addWidget(self.task_list_scrollarea)
-                self.task_list_scrollarea.setFixedWidth(int(SCREEN_WIDTH * 0.25))
+                self.task_list_scrollarea.setFixedWidth(int(SCREEN_WIDTH * 0.35))
                 # Calendar widget
                 self.make_calendar_widget()
                 ## Scroll area

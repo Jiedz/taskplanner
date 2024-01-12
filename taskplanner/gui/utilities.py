@@ -55,10 +55,12 @@ def select_file(start_directory=None, title="Select file"):
     #Let the user choose a different data path, if needed.
     #--------------------------------
     #app = QApplication(sys.argv)
-    file_path = QFileDialog.getOpenFileName(caption=title, directory=start_directory)[0]
-    #app.exec_()
-
-    return file_path
+    file_dialog = QFileDialog()
+    file_path = file_dialog.getOpenFileName(caption=title, directory=start_directory)[0]
+    if file_path == '':
+        return
+    else:
+        return file_path
 
 def select_directory(start_directory=None, title="Select Directory"):
     """
@@ -72,7 +74,10 @@ def select_directory(start_directory=None, title="Select Directory"):
     #Let the user choose a different data path, if needed.
     #--------------------------------
     #app = QApplication(sys.argv)
-    directory_path = QFileDialog.getExistingDirectory(caption=title, directory=start_directory)
-    #app.exec_()
-
-    return directory_path
+    file_dialog = QFileDialog()
+    file_dialog.rejected.connect(lambda: None)
+    directory_path = file_dialog.getOpenFileName(caption=title, directory=start_directory)[0]
+    if directory_path == '':
+            return
+    else:
+        return directory_path
