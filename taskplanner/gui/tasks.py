@@ -389,6 +389,8 @@ class TaskWidget(QWidget):
                 self.layout = QVBoxLayout(self)
                 # Label
                 self.make_label()
+                # Dialog that asks whether the color should be changed to all subtasks
+                self.make_color_change_dialog()
                 # Color button
                 self.make_color_button()
                 # Color picking dialog
@@ -408,7 +410,7 @@ class TaskWidget(QWidget):
                     if not self.color_dialog.isVisible():
                         self.color_dialog.show()
 
-                def update_color():
+                def update_color(ask: bool = False):
                     if self.task.color is None:
                         self.task.color = self.parent()._style.color_palette['background 2']
                     stylesheet = '''
@@ -426,12 +428,21 @@ class TaskWidget(QWidget):
                                        self.parent()._style.color_palette['text - highlight'])
                     self.parent()._style.stylesheets['standard view']['color_widget']['color_pushbutton'] = stylesheet
                     self.color_pushbutton.setStyleSheet(stylesheet)
+
                 # Connect task and widget
                 self.color_pushbutton.clicked.connect(clicked)
                 # Keep connecting
                 self.task.color_changed.connect(lambda **kwargs: update_color())
                 # Set initial value
                 update_color()
+
+            def make_color_change_dialog(self):
+                self.color_change_dialog = QMessageBox()
+                self.color_change_dialog.setText(f'Do you want to set this color to all subtasks of "{self.task.name}"?')
+                def set_colors():
+                    for subtask in self.task.descendants:
+                        subtask.color = self.task.color
+                self.color_change_dialog.accepted.connect(lambda: set_colors())
 
 
 
@@ -450,6 +461,7 @@ class TaskWidget(QWidget):
                 # User interactions
                 def accepted():
                     self.task.color = self.color_dialog.selectedColor().name()
+                    self.color_change_dialog.exec()
 
                 self.color_dialog.accepted.connect(accepted)
 

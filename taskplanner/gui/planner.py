@@ -1107,6 +1107,7 @@ class CalendarWidget(QWidget):
                 self._style = style
                 self.start_position_changed = Signal()
                 self.length_changed = Signal()
+                self.dragging_mode = None # 'start' or 'end'
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
@@ -1313,14 +1314,24 @@ class CalendarWidget(QWidget):
 
                         task_widget.show()
                     elif event.type() == QEvent.MouseButtonPress:
+                        if event.pos().x() < self.label_pushbutton.width() / 2:
+                            self.dragging_mode = 'start'
+                        else:
+                            self.dragging_mode = 'end'
                         self.label_pushbutton.setMouseTracking(True)
                     elif event.type() == QEvent.MouseMove and self.label_pushbutton.hasMouseTracking():
-                        if event.pos().x() <= self.label_pushbutton.width()/2:
+                        if self.dragging_mode == 'start':
                             start_date = self.get_start_date(self.label_pushbutton.x() + event.pos().x())
-                            self.task.start_date = start_date
+                            try:
+                                self.task.start_date = start_date
+                            except ValueError:
+                                pass
                         else:
                             end_date = self.get_end_date(self.label_pushbutton.x() + event.pos().x())
-                            self.task.end_date = end_date
+                            try:
+                                self.task.end_date = end_date
+                            except ValueError:
+                                pass
                     elif event.type() == QEvent.MouseButtonRelease:
                         self.label_pushbutton.setMouseTracking(False)
                 return super().eventFilter(obj, event)

@@ -76,7 +76,7 @@ def select_directory(start_directory=None, title="Select Directory"):
     #app = QApplication(sys.argv)
     file_dialog = QFileDialog()
     file_dialog.rejected.connect(lambda: None)
-    directory_path = file_dialog.getOpenFileName(caption=title, directory=start_directory)[0]
+    directory_path = file_dialog.getExistingDirectory(caption=title, directory=start_directory)
     if directory_path == '':
             return
     else:

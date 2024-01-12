@@ -215,9 +215,28 @@ class TaskWidgetStyle:
                                 {
                                     
                                 }
+                                ''',
+                                'color_change_dialog':
                                 '''
-                        }
-                    ,
+                                QWidget
+                                {
+                                    background-color:%s;
+                                    font-size:%s;
+                                    font-family:%s;
+                                    color:%s;
+                                }
+                                QPushButton
+                                {
+                                    background-color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['background 1'],
+                                       self.font['size - text'],
+                                       self.font['family'],
+                                       self.color_palette['text - light'],
+                                       self.color_palette['background 2'],
+                                       self.font['size - text']),
+                        },
                     'progress_widget':
                         {
                             'label':
