@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="15.351982mm"
-   height="12.04479mm"
-   viewBox="0 0 15.35198 12.044791"
+   width="30.465mm"
+   height="30.465mm"
+   viewBox="0 0 30.464996 30.465002"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
@@ -30,10 +30,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.4915752"
-     inkscape:cx="0.33521609"
-     inkscape:cy="-303.37056"
-     inkscape:window-width="1850"
+     inkscape:zoom="0.7457876"
+     inkscape:cx="199.11835"
+     inkscape:cy="-14.079076"
+     inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
      inkscape:window-y="0"
@@ -42,37 +42,37 @@
     <inkscape:grid
        type="xygrid"
        id="grid4221"
-       originx="-304.05608"
-       originy="-487.47277" />
+       originx="-291.74419"
+       originy="-383.57054" />
   </sodipodi:namedview>
   <defs
      id="defs2">
     <marker
        style="overflow:visible"
        id="Arrow2Mstart"
-       refX="0.0"
-       refY="0.0"
+       refX="0"
+       refY="0"
        orient="auto"
        inkscape:stockid="Arrow2Mstart"
        inkscape:isstock="true">
       <path
-         transform="scale(0.6) translate(0,0)"
-         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
-         style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round"
+         transform="scale(0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:0.625;stroke-linejoin:round"
          id="path10550" />
     </marker>
     <marker
-       style="overflow:visible;"
+       style="overflow:visible"
        id="Arrow1Lend"
-       refX="0.0"
-       refY="0.0"
+       refX="0"
+       refY="0"
        orient="auto"
        inkscape:stockid="Arrow1Lend"
        inkscape:isstock="true">
       <path
-         transform="scale(0.8) rotate(180) translate(12.5,0)"
-         style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
          id="path10529" />
     </marker>
     <rect
@@ -334,12 +334,12 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Background"
-     transform="translate(-3.664653,-202.95531)" />
+     transform="translate(8.6471365,-99.053061)" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-304.05744,-487.47285)">
+     transform="translate(-291.74565,-383.5706)">
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,306.82912,37.392987)"
@@ -347,7 +347,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-35);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan19363">Dark Material</tspan></text>
+         id="tspan19667">Dark Material</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,303.49947,54.952067)"
@@ -355,7 +355,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan19365">Normal</tspan></text>
+         id="tspan19669">Normal</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,197.89613,55.068191)"
@@ -363,7 +363,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan19367">Description</tspan></text>
+         id="tspan19671">Description</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.19698,79.141419)"
@@ -371,7 +371,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19369">add</tspan></text>
+         id="tspan19673">add</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.44235,118.53791)"
@@ -379,7 +379,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19371">progress - completed</tspan></text>
+         id="tspan19675">progress - completed</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,380.66643,53.671827)"
@@ -387,7 +387,7 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-7-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-126.08594"
-         id="tspan19373">Hover</tspan></text>
+         id="tspan19677">Hover</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.932262;stroke:#b52c00;stroke-width:1.82273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.933333"
        id="rect11925-3"
@@ -710,7 +710,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19375">progress - in progress</tspan></text>
+         id="tspan19679">progress - in progress</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,107.56306 -5.31455,10.83186"
@@ -738,7 +738,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19377">progress - not started</tspan></text>
+         id="tspan19681">progress - not started</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,193.36846,210.28156)"
@@ -746,7 +746,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19379">priority - low</tspan></text>
+         id="tspan19683">priority - low</tspan></text>
     <path
        style="fill:#00003d;fill-opacity:0.980392;stroke:#00003d;stroke-width:2.465;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.980392"
        d="m 389.43674,139.31306 -5.31455,10.83186"
@@ -778,7 +778,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19381">priority - high</tspan></text>
+         id="tspan19685">priority - high</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 179.91753,211.66685 H 399.5215 394.64142"
@@ -790,7 +790,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19383">priority - urgent</tspan></text>
+         id="tspan19687">priority - urgent</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.359331px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 179.91753,240.77102 H 399.5215 394.64142"
@@ -939,7 +939,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-3);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19385">supertask</tspan></text>
+         id="tspan19689">supertask</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.36695,397.78756)"
@@ -947,7 +947,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-0);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19387">remove</tspan></text>
+         id="tspan19691">remove</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,196.23785,315.53156)"
@@ -955,7 +955,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-6);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19389">subtask</tspan></text>
+         id="tspan19693">subtask</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.41593,339.70228)"
@@ -963,7 +963,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19391">subtask not expanded</tspan></text>
+         id="tspan19695">subtask not expanded</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,194.76867,368.55065)"
@@ -971,7 +971,7 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-2);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19393">subtask expanded</tspan></text>
+         id="tspan19697">subtask expanded</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,197.06378,433.33775)"
@@ -979,17 +979,20 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-0-36);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19395">download</tspan></text>
+         id="tspan19699">download</tspan></text>
     <path
        style="fill:none;stroke:#ededec;stroke-width:2.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 306.98418,388.09093 v 13.22916"
        id="path7907"
-       sodipodi:nodetypes="cc" />
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/download.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <g
        id="g1020-5"
        transform="matrix(0.81,0,0,0.81,-9.277884,-40.628673)"
        style="stroke:#ededec;stroke-width:3.04321;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/subtask-widget_expanded.png"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/download.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
       <g
@@ -1015,7 +1018,7 @@
        id="path71165-4-5-5-2"
        cx="306.97815"
        cy="398.8031"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/remove.png"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/download.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        r="14" />
@@ -1023,7 +1026,10 @@
        style="fill:none;stroke:#ededec;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 299.11281,402.16675 v 3.96875 l 15.54427,-0.1852 v -3.96875"
        id="path11172"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/download.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,191.70596,479.16357)"
@@ -1031,17 +1037,20 @@
        style="font-style:normal;font-weight:normal;font-size:29.3333px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2697-3-6-3-7-0-2-9-6-5-6-9-0-36-7);fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="-55.119141"
          y="-135.52347"
-         id="tspan19397">upload</tspan></text>
+         id="tspan19701">upload</tspan></text>
     <path
        style="fill:none;stroke:#ededec;stroke-width:2.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 301.62636,450.36277 V 437.13361"
        id="path7907-9"
-       sodipodi:nodetypes="cc" />
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/upload.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <g
        id="g1020-5-3"
        transform="matrix(0.81,0,0,-0.81,-14.635708,879.08238)"
        style="stroke:#ededec;stroke-width:3.04321;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/subtask-widget_expanded.png"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/upload.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
       <g
@@ -1067,7 +1076,7 @@
        id="path71165-4-5-5-2-6"
        cx="301.62033"
        cy="444.62894"
-       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/remove.png"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/upload.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96"
        r="14" />
@@ -1075,6 +1084,9 @@
        style="fill:none;stroke:#ededec;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 293.75499,447.99257 v 3.96875 l 15.54427,-0.1852 v -3.96875"
        id="path11172-1"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/jiedz/Jiedz/Software/Python/taskplanner/taskplanner/gui/styles/icons/dark-material/upload.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
 </svg>
