@@ -495,17 +495,6 @@ class TaskWidgetStyle:
                 {
                     'task_line_widget':
                         {
-                            'main':
-                                '''
-                                QWidget
-                                {
-                                    /* background-color:%s; */
-                                    border:1px solid %s;
-                                    margin:0px;
-                                    padding:0px;
-                                }
-                                ''' % (self.color_palette['background 2'],
-                                       self.color_palette['border']),
                             'name_pushbutton':
                                 '''
                                 QPushButton

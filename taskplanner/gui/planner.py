@@ -1105,6 +1105,8 @@ class CalendarWidget(QWidget):
                 self.task = self.task_widget.task
                 self.calendar_widget = calendar_widget
                 self._style = style
+                self.start_position_changed = Signal()
+                self.length_changed = Signal()
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
@@ -1189,7 +1191,6 @@ class CalendarWidget(QWidget):
                 self.label_pushbutton.setStyleSheet(style_sheet)
 
             def set_height(self):
-                #self.label.setFixedHeight(int(SCREEN_HEIGHT * 0.041))
                 self.label_pushbutton.setFixedHeight(self.task_widget.task_line_widget.height())
 
             def set_start_position(self):
@@ -1216,10 +1217,47 @@ class CalendarWidget(QWidget):
                     month_widgets = [m for m in self.calendar_widget.month_widgets
                                      if m.date <= self.task.start_date]
                     n_months = len(month_widgets) - 1
-                    n_months = n_months + self.task.start_date.day / 30
+                    month_date = self.calendar_widget.month_widgets[n_months].date
+                    n_days_in_month = (month_date + relativedelta(months=1, days=-1)).day
+                    n_months = n_months + (self.task.start_date.day - 1) / n_days_in_month
                     spacing = int(n_months * month_width)
                 # Add left spacing
                 self.label_layout.insertSpacing(0, spacing)
+                self.start_position_changed.emit()
+
+            def get_start_date(self,
+                               start_position: int = None):
+                start_position = start_position if start_position is not None else self.label_pushbutton.x()
+                return self.get_date(position=start_position)
+
+
+            def get_date(self,
+                         position: int):
+                if self.calendar_widget.view_type == 'daily':
+                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                    n_days = int(ceil(position / day_width)) - 1
+                    dt = self.calendar_widget.start_date + relativedelta(days=n_days)
+                elif self.calendar_widget.view_type == 'weekly':
+                    month_width = self.calendar_widget.month_widgets[0].width()
+                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                    month_index = int(position / month_width)
+                    month_widget = self.calendar_widget.month_widgets[month_index]
+                    week_index = int((position - month_index * month_width) / week_width)
+                    total_width = month_index * month_width + week_index * week_width
+                    week_fraction = (position - total_width) / week_width
+                    week = month_widget.week_widgets[week_index]
+                    week_date = week.date
+                    dt = week_date + relativedelta(days=int(7*week_fraction))
+                elif self.calendar_widget.view_type == 'monthly':
+                    month_width = self.calendar_widget.month_widgets[0].width()
+                    month_index = int(position / month_width)
+                    total_width = month_index * month_width
+                    month_fraction = (position - total_width) / month_width
+                    month_date = self.calendar_widget.month_widgets[month_index].date
+                    n_days_in_month = int(((month_date + relativedelta(months=1, days=-1)).day - 1) * month_fraction)
+                    dt = month_date + relativedelta(days=n_days_in_month)
+                return dt
+
 
             def set_length(self):
                 view_type = self.calendar_widget.view_type
@@ -1247,6 +1285,14 @@ class CalendarWidget(QWidget):
                     n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
                     self.label_pushbutton.setFixedWidth(max([0, int(n_months * month_width)]))
 
+                self.length_changed.emit()
+
+            def get_end_date(self,
+                             end_position: int = None):
+                end_position = end_position if end_position is not None \
+                    else (self.label_pushbutton.x() + self.label_pushbutton.width())
+                return self.get_date(position=end_position)
+
             def set_geometry(self):
                 self.set_start_position()
                 self.set_length()
@@ -1269,9 +1315,13 @@ class CalendarWidget(QWidget):
                     elif event.type() == QEvent.MouseButtonPress:
                         self.label_pushbutton.setMouseTracking(True)
                     elif event.type() == QEvent.MouseMove and self.label_pushbutton.hasMouseTracking():
-                        print(f'Moving to position {event.pos()}')
+                        if event.pos().x() <= self.label_pushbutton.width()/2:
+                            start_date = self.get_start_date(self.label_pushbutton.x() + event.pos().x())
+                            self.task.start_date = start_date
+                        else:
+                            end_date = self.get_end_date(self.label_pushbutton.x() + event.pos().x())
+                            self.task.end_date = end_date
                     elif event.type() == QEvent.MouseButtonRelease:
-                        print(f'Mouse released at position {event.pos()}')
                         self.label_pushbutton.setMouseTracking(False)
                 return super().eventFilter(obj, event)
 
@@ -1300,27 +1350,6 @@ class CalendarWidget(QWidget):
                         # sub_timeline.setFixedHeight(self.height())
                         self.sub_timelines += [sub_timeline]
                 # Remove non-existent sub-timelines
-                '''
-                for widget in self.sub_timelines:
-                    if widget.task not in self.task.children:
-                        index = l.indexOf(widget)
-                        w = widget
-                        while w == widget or (w is not None and widget.task in w.task.descendants):
-                            w.hide()
-                            try:  # It may be that the widget had been removed from the list, but not hidden
-                                self.calendar_widget.timeline_widgets.remove(w)
-                            except:
-                                pass
-                            l.removeWidget(w)
-                            if l.count() > 0:
-                                try:
-                                    w = l.itemAt(index).widget()
-                                except:
-                                    break
-                            else:
-                                break
-                '''
-
                 for widget in self.sub_timelines:
                     if widget.task not in self.task.children:
                         index = l.indexOf(widget)
