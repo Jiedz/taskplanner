@@ -1137,6 +1137,8 @@ class CalendarWidget(QWidget):
                               ['planner_tab']
                               ['calendar_widget']
                               ['timeline']['main'])
+                #from PyQt5.Qt import QGraphicsDropShadowEffect
+                #self.label_pushbutton.setGraphicsEffect(QGraphicsDropShadowEffect())
 
             def make_label_pushbutton(self):
                 self.label_pushbutton = QPushButton()
