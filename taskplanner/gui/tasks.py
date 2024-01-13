@@ -461,7 +461,8 @@ class TaskWidget(QWidget):
                 # User interactions
                 def accepted():
                     self.task.color = self.color_dialog.selectedColor().name()
-                    self.color_change_dialog.exec()
+                    if not self.task.is_bottom_level:
+                        self.color_change_dialog.exec()
 
                 self.color_dialog.accepted.connect(accepted)
 
