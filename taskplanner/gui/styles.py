@@ -173,7 +173,7 @@ class TaskWidgetStyle:
                             }
                             ''' % (self.color_palette['background 2'],
                                    self.color_palette['text'],
-                                   self.font['size - title 1'])
+                                   self.font['size - title 2'])
                         },
                     'download_pushbutton':
                         '''
@@ -723,12 +723,29 @@ class PlannerWidgetStyle:
                         border:2px solid %s;
                         border-radius:10px;
                         font-family:%s;
-                        color:%s
+                        color:%s;
+                    }
+                    QTabWidget:tab-bar
+                    {
+                        min-width:%spx;
+                        min-height:%spx;
+                    }
+                    QTabBar:tab
+                    {
+                        background-color:%s;
+                        color:%s;
+                        font-size:%s;
                     }
                     ''' % (self.color_palette['background 1'],
                            self.color_palette['border'],
                            self.font['family'],
-                           self.color_palette['text']),
+                           self.color_palette['text'],
+                           int(SCREEN_WIDTH*0.1),
+                           int(1.5*int(self.font['size - text'].split('p')[0])),
+                           self.color_palette['background 2'],
+                           self.color_palette['text'],
+                           self.font['size - text'],
+                           ),
                 'planner_tab':
                     {
                         'main':

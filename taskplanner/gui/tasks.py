@@ -1173,7 +1173,7 @@ class TaskLineWidget(QFrame):
                   '''
                   QWidget
                   {
-                      border:4px solid %s;
+                      border:3px solid %s;
                   }
                   ''' % (self.task.color)
             )
