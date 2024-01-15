@@ -840,6 +840,8 @@ class TaskWidget(QWidget):
 
     def make_description_textedit(self):
         self.description_textedit = QTextEdit()
+        self.description_textedit.acceptRichText()
+        self.description_textedit.setAutoFormatting(QTextEdit.AutoAll)
         # Layout
         self.layout.addWidget(self.description_textedit)
         # Geometry
@@ -860,6 +862,7 @@ class TaskWidget(QWidget):
             cursor_position = cursor.position()
             self.description_textedit.blockSignals(True)
             self.description_textedit.setText(self.task.description)
+            #self.description_textedit.setMarkdown(self.description_textedit.toPlainText())
             self.description_textedit.blockSignals(False)
             """
             For some reason, the cursor is normally reset to the start of the 
