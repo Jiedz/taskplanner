@@ -203,6 +203,8 @@ class Task(Node):
             if min_progress != max_progress:
                 max_progress = 1
             self.parent.progress = [p for p in PROGRESS_LEVELS.keys() if PROGRESS_LEVELS[p] == max_progress][0]
+        if self.progress == 'completed':
+            self.priority = 'low'
         self.progress_changed.emit()
 
     @property

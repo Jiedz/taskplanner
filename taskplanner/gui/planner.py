@@ -733,6 +733,7 @@ class CalendarWidget(QWidget):
         self.make_month_widgets()
         # Timelines
         self.timelines_layout = QVBoxLayout()
+        self.timelines_layout.setSpacing(self.task_list_widget.layout.spacing())
         self.timelines_layout.setAlignment(Qt.AlignTop)
         self.layout.addLayout(self.timelines_layout)
         #self.timelines_layout.addStretch()
@@ -1115,6 +1116,7 @@ class CalendarWidget(QWidget):
                 self.layout.setContentsMargins(0, 0, 0, 0)
                 if add_to_timelines_layout and hasattr(self.parent(), 'timelines_layout'):
                     self.parent().timelines_layout.addWidget(self)
+                self.setFixedHeight(self.task_widget.task_line_widget.height())
                 # Horizontal layout for label
                 self.label_layout = QHBoxLayout()
                 self.label_layout.setAlignment(Qt.AlignLeft)
@@ -1397,9 +1399,8 @@ class CalendarWidget(QWidget):
                                   parent=self,
                                   style=self._style,
                                   add_to_timelines_layout=True)
-                #self.timelines_layout.addWidget(widget)
                 self.timeline_widgets += [widget]
-                if not widget.isVisible():
+                if task_widget.task.is_top_level:
                     widget.show()
 
         for task in self.planner.tasks:

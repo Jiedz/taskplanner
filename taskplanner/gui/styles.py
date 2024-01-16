@@ -903,7 +903,7 @@ class PlannerWidgetStyle:
                                             '''
                                             QWidget
                                             {
-                                                border:0.5px solid %s;
+                                                border:2px solid %s;
                                             }
                                             ''' % (self.color_palette['border']),
                                     }
