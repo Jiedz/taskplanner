@@ -180,7 +180,7 @@ class TaskWidgetStyle:
                         QPushButton
                         {
                             border-radius:%spx;
-                            border:2px solid %s;
+                            border:0px solid %s;
                             icon-size:%spx;
                         }
                         QPushButton:hover
@@ -497,7 +497,7 @@ class TaskWidgetStyle:
                                 QPushButton
                                 {
                                     border-radius:%spx;
-                                    border:2px solid %s;
+                                    border:0px solid %s;
                                     icon-size:%spx;
                                 }
                                 QPushButton:hover
@@ -922,7 +922,7 @@ class PlannerWidgetStyle:
                             QPushButton
                             {
                                 border-radius:%spx;
-                                border:2px solid %s;
+                                border:0px solid %s;
                                 icon-size:%spx;
                             }
                             QPushButton:hover
