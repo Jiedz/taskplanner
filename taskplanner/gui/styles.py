@@ -463,19 +463,45 @@ class TaskWidgetStyle:
                                 }
                                 ''' % (self.color_palette['background 2']),
                         },
-                    'description_textedit':
-                        '''
-                                        QTextEdit
-                                        {
-                                            /* background-color:%s; */
-                                            font-size:%s;
-                                            border:2px solid %s;
-                                            border-radius:%s;
-                                        }
-                                        ''' % (self.color_palette['background 2'],
+                    'description_widget':
+                        {
+                            'main':
+                            '''
+                            QFrame
+                            {
+                                border:None;
+                            }
+                            ''',
+                            'combobox':
+                                '''
+                                QComboBox
+                                {
+                                    border:1px solid %s;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                QComboBox:item:selected
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['border'],
+                                       self.color_palette['text'],
+                                       self.font['size - text - small'],
+                                       self.color_palette['background 2']),
+                            'textedit':
+                                '''
+                                QTextEdit
+                                {
+                                    /* background-color:%s; */
+                                    font-size:%s;
+                                    border:2px solid %s;
+                                    border-radius:%s;
+                                }
+                                ''' % (self.color_palette['background 2'],
                                                self.font['size - text'],
                                                self.color_palette['border'],
-                                               int(screen_size.width / 220)),
+                                               int(SCREEN_WIDTH / 220)),
+                        },
                     'subtask_list_widget':
                         {
                             'icon_label':

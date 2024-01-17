@@ -12,7 +12,8 @@ requirements = ['numpy',
                 'pyqt5',
                 'screeninfo',
                 'signalslot',
-                'python-dateutil']
+                'python-dateutil',
+                'markdown']
 
 setup(name='taskplanner',
       version='1',

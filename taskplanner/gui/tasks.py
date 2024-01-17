@@ -4,10 +4,11 @@ This module defines a task widget.
 from logging import warning
 import os
 from datetime import date as dt
+import markdown
 
 # %% Imports
-from PyQt5.QtCore import Qt, QDate
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, QDate, QEvent
+from PyQt5.QtGui import QIcon, QTextDocument
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -140,9 +141,10 @@ class TaskWidget(QWidget):
         self.progress_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         self.priority_progress_layout.addStretch()
         # Task Description
-        self.make_description_textedit()
-        self.description_textedit.setMaximumWidth(int(self.width()*1))
-        self.description_textedit.setMinimumHeight(int(self.height() * 0.15))
+        self.make_description_widget()
+        self.description_widget.textedit.setMaximumWidth(int(self.width()*1))
+        self.description_widget.textedit.setMinimumHeight(int(self.height() * 0.15))
+        self.description_widget.combobox.setFixedWidth(int(self.width() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
         self.subtask_list_widget.setMaximumWidth(int(self.width()*2))
@@ -286,7 +288,6 @@ class TaskWidget(QWidget):
                 # Textedit
                 self.make_textedit()
                 self.layout.addStretch()
-
 
             def make_textedit(self):
                 self.textedit = QTextEdit()
@@ -838,51 +839,151 @@ class TaskWidget(QWidget):
                                               parent=self)
         self.priority_progress_layout.addWidget(self.priority_widget)
 
-    def make_description_textedit(self):
-        self.description_textedit = QTextEdit()
-        self.description_textedit.acceptRichText()
-        self.description_textedit.acceptDrops()
-        self.description_textedit.setAutoFormatting(QTextEdit.AutoAll)
-        # Layout
-        self.layout.addWidget(self.description_textedit)
+    def make_description_widget(self):
+        class DescriptionWidget(QFrame):
+            """
+            This widget contains:
 
-        def callback():
-            # Update taks
-            self.task.description = self.description_textedit.toPlainText()
+                - A combobox, indicating the type of rendering for the task description
+                (plain text, Markdown, HTML, LateX)
+                - A textedit, allowing the user to modify the task's description
+            """
 
-        def inv_callback():
-            cursor = self.description_textedit.textCursor()
-            # Update widget
-            """
-            This function is only called when the task's property is
-            changed outside this widget. If widget signals are not blocked
-            at the time of updating the widget, an infinite recursion is triggered
-            between task update and widget update.
-            """
-            cursor_position = cursor.position()
-            self.description_textedit.blockSignals(True)
-            self.description_textedit.setText(self.task.description)
-            self.description_textedit.blockSignals(False)
-            """
-            For some reason, the cursor is normally reset to the start of the 
-            widget. One then needs to move the cursor to the position of the cursor before this happens
-            """
-            # Move cursor to the end
-            cursor.setPosition(cursor_position)
-            """
-            For some other reason, all text is also automatically selected, so one needs to
-            clear the selection.
-            """
-            cursor.clearSelection()
-            # Reset cursor
-            self.description_textedit.setTextCursor(cursor)
+            def __init__(self,
+                         task: Task,
+                         render_type: str = 'plain text',
+                         planner: Planner = None,
+                         parent: QWidget = None):
+                """
 
-        # Connect task and widget
-        self.description_textedit.textChanged.connect(lambda: callback())
-        self.task.description_changed.connect(lambda **kwargs: inv_callback())
-        # Set initial value
-        inv_callback()
-        self.description_textedit.setPlaceholderText("Task description")
+                :param task:
+                :param render_type:
+                :param planner:
+                :param parent:
+                """
+                self.task, self.planner = task, planner
+                self.RENDER_TYPES = ['Plain Text', 'HTML', 'Markdown', 'LateX']
+                if render_type not in self.RENDER_TYPES:
+                    raise ValueError(f'Invalid render type "{render_type}". '
+                                     f'Valid render types are {tuple(self.RENDER_TYPES)}')
+                else:
+                    self.render_type = render_type
+                self.is_rendering = False
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignTop)
+                self.layout.setContentsMargins(0, 0, 0, 0)
+                # Combobox
+                self.make_combobox()
+                # Textedit
+                self.make_textedit()
+
+            def eventFilter(self, obj, event):
+                """
+                This function allows to handle all kinds of events for all subwidgets in this widget.
+                :param obj:
+                :param event:
+                :return:
+                """
+                if obj == self.textedit:
+                    if (event.type() == QEvent.KeyPress
+                        and event.modifiers() == Qt.ControlModifier
+                        and event.key() == Qt.Key_Return):
+                        if self.is_rendering:
+                            self.textedit.setReadOnly(False)
+                            self.render_description(render_type='Plain Text')
+                        else:
+                            self.render_description()
+                            self.textedit.setReadOnly(True)
+                        self.is_rendering = not self.is_rendering
+                return super().eventFilter(obj, event)
+
+            def render_description(self,
+                                   render_type: str = None):
+                if render_type is None:
+                    render_type = self.render_type
+                else:
+                    if render_type not in self.RENDER_TYPES:
+                        raise ValueError(f'Invalid render type "{render_type}". '
+                                         f'Valid render types are {tuple(self.RENDER_TYPES)}')
+                self.textedit.blockSignals(True)
+                if self.render_type == 'Plain Text':
+                    self.textedit.setPlainText(self.task.description)
+                elif self.render_type == 'HTML':
+                    self.textedit.setHtml(self.task.description)
+                elif self.render_type == 'Latex':
+                    document = QTextDocument()
+                    document.setHtml(self.task.description)
+                    self.textedit.setDocument(document)
+                elif self.render_type == 'Markdown':
+                    self.textedit.setMarkdown(self.task.description)
+                self.textedit.blockSignals(False)
+
+            def make_combobox(self):
+                self.combobox = QComboBox()
+                # Layout
+                self.layout.addWidget(self.combobox)
+                # Add items
+                self.combobox.addItems(self.RENDER_TYPES)
+                # User interactions
+                def clicked():
+                    self.render_type = self.combobox.currentText()
+
+                # Connect task and widget
+                self.combobox.currentIndexChanged.connect(clicked)
+                # Set initial value
+                self.combobox.setCurrentText(self.render_type)
+
+            def make_textedit(self):
+                self.textedit = QTextEdit()
+                # Layout
+                self.layout.addWidget(self.textedit)
+
+                def callback():
+                    # Update taks
+                    self.task.description = self.textedit.toPlainText()
+
+                def inv_callback():
+                    cursor = self.textedit.textCursor()
+                    # Update widget
+                    """
+                    This function is only called when the task's property is
+                    changed outside this widget. If widget signals are not blocked
+                    at the time of updating the widget, an infinite recursion is triggered
+                    between task update and widget update.
+                    """
+                    cursor_position = cursor.position()
+                    self.textedit.blockSignals(True)
+                    self.textedit.setText(self.task.description)
+                    self.textedit.blockSignals(False)
+                    """
+                    For some reason, the cursor is normally reset to the start of the 
+                    widget. One then needs to move the cursor to the position of the cursor before this happens
+                    """
+                    # Move cursor to the end
+                    cursor.setPosition(cursor_position)
+                    """
+                    For some other reason, all text is also automatically selected, so one needs to
+                    clear the selection.
+                    """
+                    cursor.clearSelection()
+                    # Reset cursor
+                    self.textedit.setTextCursor(cursor)
+
+                # Connect task and widget
+                self.textedit.textChanged.connect(lambda: callback())
+                self.task.description_changed.connect(lambda **kwargs: inv_callback())
+                # Set initial value
+                inv_callback()
+                self.textedit.setPlaceholderText("Task description")
+                self.textedit.installEventFilter(self)
+
+        self.description_widget = DescriptionWidget(task=self.task,
+                                                    render_type='Plain Text',
+                                                    planner=self.planner,
+                                                    parent=self)
+        self.layout.addWidget(self.description_widget)
 
     def make_subtask_list_widget(self):
         class SubtaskListWidget(QWidget):
