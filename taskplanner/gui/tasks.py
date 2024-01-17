@@ -909,15 +909,33 @@ class TaskWidget(QWidget):
                                          f'Valid render types are {tuple(self.RENDER_TYPES)}')
                 self.textedit.blockSignals(True)
                 if self.render_type == 'Plain Text':
-                    self.textedit.setPlainText(self.task.description)
+                    self.textedit.setPlainText(self.textedit.toPlainText())
                 elif self.render_type == 'HTML':
-                    self.textedit.setHtml(self.task.description)
-                elif self.render_type == 'Latex':
+                    self.textedit.setHtml(self.textedit.toPlainText())
+                elif self.render_type == 'LateX':
+                    from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
+                    from PyQt5.QtSvg import QSvgRenderer
+                    from PyQt5.QtGui import QTextDocument, QPainter, QPaintDevice
                     document = QTextDocument()
-                    document.setHtml(self.task.description)
+                    svg_data = QByteArray()
+                    buffer = QBuffer(svg_data)
+                    buffer.open(QIODevice.WriteOnly)
+                    document.setHtml(self.textedit.toPlainText())
+                    document.drawContents(QPainter(buffer))
+                    buffer.close()
+                    # Create a QSvgRenderer object
+                    renderer = QSvgRenderer(svg_data)
+                    # Set the renderer to the QTextEdit widget
+                    self.textedit.setHtml(f'<img src="{svg_data}" />')
+                    '''
+                    document = QTextDocument()
+                    document.setHtml(self.textedit.toPlainText())
                     self.textedit.setDocument(document)
+                    '''
                 elif self.render_type == 'Markdown':
-                    self.textedit.setMarkdown(self.task.description)
+                    document = QTextDocument()
+                    document.setMarkdown(self.textedit.toPlainText())
+                    self.textedit.setDocument(document)
                 self.textedit.blockSignals(False)
 
             def make_combobox(self):
