@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication
 import sys
 # Make a task planner
 planner = Planner()
-# Build application2
+# Build application
 app = QApplication(sys.argv)
 # Task widget - standard view
 try:

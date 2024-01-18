@@ -7,8 +7,9 @@ from datetime import date as dt
 import markdown
 
 # %% Imports
+from PyQt5.Qt import QDesktopServices, QUrl, QApplication, QColor, Qt
 from PyQt5.QtCore import Qt, QDate, QEvent
-from PyQt5.QtGui import QIcon, QTextDocument
+from PyQt5.QtGui import QIcon, QTextDocument, QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import \
     (
     QHBoxLayout,
@@ -22,7 +23,8 @@ from PyQt5.QtWidgets import \
     QCalendarWidget,
     QColorDialog,
     QFrame,
-    QMessageBox
+    QMessageBox,
+    QTextBrowser
     )
 from signalslot import Signal
 from taskplanner.gui.styles import TaskWidgetStyle, ICON_SIZES
@@ -127,6 +129,7 @@ class TaskWidget(QWidget):
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
         self.category_assignee_layout.addStretch()
         # Horizontal layout for (priority, progress)
+        self.layout.addSpacing(-int(self.height() * 0.1))
         self.priority_progress_layout = QHBoxLayout()
         self.layout.addLayout(self.priority_progress_layout)
         self.priority_progress_layout.setContentsMargins(0, 0, 0, 0)
@@ -141,9 +144,10 @@ class TaskWidget(QWidget):
         self.progress_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
         self.priority_progress_layout.addStretch()
         # Task Description
+        self.layout.addSpacing(int(self.height() * 0.05))
         self.make_description_widget()
-        self.description_widget.textedit.setMaximumWidth(int(self.width()*1))
-        self.description_widget.textedit.setMinimumHeight(int(self.height() * 0.15))
+        self.description_widget.textbrowser.setMaximumWidth(int(self.width()*1))
+        self.description_widget.textbrowser.setMinimumHeight(int(self.height() * 0.15))
         self.description_widget.combobox.setFixedWidth(int(self.width() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
@@ -853,7 +857,8 @@ class TaskWidget(QWidget):
                          task: Task,
                          render_type: str = 'plain text',
                          planner: Planner = None,
-                         parent: QWidget = None):
+                         parent: QWidget = None,
+                         style: TaskWidgetStyle = None):
                 """
 
                 :param task:
@@ -862,22 +867,43 @@ class TaskWidget(QWidget):
                 :param parent:
                 """
                 self.task, self.planner = task, planner
-                self.RENDER_TYPES = ['Plain Text', 'HTML', 'Markdown', 'LateX']
+                self._style = style
+                self.RENDER_TYPES = ['Plain Text', 'HTML', 'Markdown']
                 if render_type not in self.RENDER_TYPES:
                     raise ValueError(f'Invalid render type "{render_type}". '
                                      f'Valid render types are {tuple(self.RENDER_TYPES)}')
                 else:
                     self.render_type = render_type
-                self.is_rendering = False
+                self._is_rendering = False
                 super().__init__(parent=parent)
+                self.setMouseTracking(True)
                 # Layout
                 self.layout = QVBoxLayout(self)
                 self.layout.setAlignment(Qt.AlignTop)
                 self.layout.setContentsMargins(0, 0, 0, 0)
+                # Horizontal layout for combobox and label
+                self.combobox_label_layout = QHBoxLayout()
+                self.layout.addLayout(self.combobox_label_layout)
+                self.combobox_label_layout.setContentsMargins(0, 0, 0, 0)
+                self.combobox_label_layout.setAlignment(Qt.AlignLeft)
+                self.combobox_label_layout.setSpacing(150)
                 # Combobox
                 self.make_combobox()
+                # Label
+                self.make_label()
                 # Textedit
-                self.make_textedit()
+                self.make_textbrowser()
+
+            @property
+            def is_rendering(self):
+                return self._is_rendering
+
+            @is_rendering.setter
+            def is_rendering(self, value: bool):
+                self._is_rendering = value
+                text = (f'{"Rendering" if self.is_rendering else "Editing"}'
+                        f' (press CTRL+Enter to {"edit" if self.is_rendering else "render"})')
+                self.label.setText(text)
 
             def eventFilter(self, obj, event):
                 """
@@ -886,17 +912,18 @@ class TaskWidget(QWidget):
                 :param event:
                 :return:
                 """
-                if obj == self.textedit:
+                if obj == self.textbrowser:
                     if (event.type() == QEvent.KeyPress
                         and event.modifiers() == Qt.ControlModifier
                         and event.key() == Qt.Key_Return):
                         if self.is_rendering:
-                            self.textedit.setReadOnly(False)
+                            self.textbrowser.setReadOnly(False)
                             self.render_description(render_type='Plain Text')
                         else:
                             self.render_description()
-                            self.textedit.setReadOnly(True)
+                            self.textbrowser.setReadOnly(True)
                         self.is_rendering = not self.is_rendering
+
                 return super().eventFilter(obj, event)
 
             def render_description(self,
@@ -907,41 +934,18 @@ class TaskWidget(QWidget):
                     if render_type not in self.RENDER_TYPES:
                         raise ValueError(f'Invalid render type "{render_type}". '
                                          f'Valid render types are {tuple(self.RENDER_TYPES)}')
-                self.textedit.blockSignals(True)
-                if self.render_type == 'Plain Text':
-                    self.textedit.setPlainText(self.textedit.toPlainText())
-                elif self.render_type == 'HTML':
-                    self.textedit.setHtml(self.textedit.toPlainText())
-                elif self.render_type == 'LateX':
-                    from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
-                    from PyQt5.QtSvg import QSvgRenderer
-                    from PyQt5.QtGui import QTextDocument, QPainter, QPaintDevice
-                    document = QTextDocument()
-                    svg_data = QByteArray()
-                    buffer = QBuffer(svg_data)
-                    buffer.open(QIODevice.WriteOnly)
-                    document.setHtml(self.textedit.toPlainText())
-                    document.drawContents(QPainter(buffer))
-                    buffer.close()
-                    # Create a QSvgRenderer object
-                    renderer = QSvgRenderer(svg_data)
-                    # Set the renderer to the QTextEdit widget
-                    self.textedit.setHtml(f'<img src="{svg_data}" />')
-                    '''
-                    document = QTextDocument()
-                    document.setHtml(self.textedit.toPlainText())
-                    self.textedit.setDocument(document)
-                    '''
+                self.textbrowser.blockSignals(True)
+                if render_type == 'Plain Text':
+                    self.textbrowser.setText(self.task.description)
+                elif render_type == 'HTML':
+                    self.textbrowser.setHtml(self.task.description)
                 elif self.render_type == 'Markdown':
-                    document = QTextDocument()
-                    document.setMarkdown(self.textedit.toPlainText())
-                    self.textedit.setDocument(document)
-                self.textedit.blockSignals(False)
-
+                    self.textbrowser.setMarkdown(self.task.description)
+                self.textbrowser.blockSignals(False)
             def make_combobox(self):
                 self.combobox = QComboBox()
                 # Layout
-                self.layout.addWidget(self.combobox)
+                self.combobox_label_layout.addWidget(self.combobox)
                 # Add items
                 self.combobox.addItems(self.RENDER_TYPES)
                 # User interactions
@@ -953,17 +957,27 @@ class TaskWidget(QWidget):
                 # Set initial value
                 self.combobox.setCurrentText(self.render_type)
 
-            def make_textedit(self):
-                self.textedit = QTextEdit()
+            def make_label(self):
+                self.label = QLabel()
+                self.combobox_label_layout.addWidget(self.label)
+                self.label.setText('Editing (press CTRL+Enter to render)')
+
+            def make_textbrowser(self):
+                import sys
+                self.textbrowser = QTextBrowser()
+                self.textbrowser.setOpenLinks(True)
+                self.textbrowser.setOpenExternalLinks(True)
+                self.textbrowser.setAcceptDrops(True)
+                self.textbrowser.setAcceptRichText(True)
                 # Layout
-                self.layout.addWidget(self.textedit)
+                self.layout.addWidget(self.textbrowser)
 
                 def callback():
-                    # Update taks
-                    self.task.description = self.textedit.toPlainText()
+                    # Update task
+                    self.task.description = self.textbrowser.toPlainText()
 
                 def inv_callback():
-                    cursor = self.textedit.textCursor()
+                    cursor = self.textbrowser.textCursor()
                     # Update widget
                     """
                     This function is only called when the task's property is
@@ -972,9 +986,9 @@ class TaskWidget(QWidget):
                     between task update and widget update.
                     """
                     cursor_position = cursor.position()
-                    self.textedit.blockSignals(True)
-                    self.textedit.setText(self.task.description)
-                    self.textedit.blockSignals(False)
+                    self.textbrowser.blockSignals(True)
+                    self.textbrowser.setPlainText(self.task.description)
+                    self.textbrowser.blockSignals(False)
                     """
                     For some reason, the cursor is normally reset to the start of the 
                     widget. One then needs to move the cursor to the position of the cursor before this happens
@@ -987,20 +1001,22 @@ class TaskWidget(QWidget):
                     """
                     cursor.clearSelection()
                     # Reset cursor
-                    self.textedit.setTextCursor(cursor)
+                    self.textbrowser.setTextCursor(cursor)
 
                 # Connect task and widget
-                self.textedit.textChanged.connect(lambda: callback())
+                self.textbrowser.textChanged.connect(lambda: callback())
                 self.task.description_changed.connect(lambda **kwargs: inv_callback())
                 # Set initial value
                 inv_callback()
-                self.textedit.setPlaceholderText("Task description")
-                self.textedit.installEventFilter(self)
+                self.textbrowser.setPlaceholderText("Task description")
+                self.textbrowser.installEventFilter(self)
+                self.textbrowser.setReadOnly(False)
 
         self.description_widget = DescriptionWidget(task=self.task,
                                                     render_type='Plain Text',
                                                     planner=self.planner,
-                                                    parent=self)
+                                                    parent=self,
+                                                    style = self._style)
         self.layout.addWidget(self.description_widget)
 
     def make_subtask_list_widget(self):

@@ -488,9 +488,9 @@ class TaskWidgetStyle:
                                        self.color_palette['text'],
                                        self.font['size - text - small'],
                                        self.color_palette['background 2']),
-                            'textedit':
+                            'textbrowser':
                                 '''
-                                QTextEdit
+                                QTextBrowser
                                 {
                                     /* background-color:%s; */
                                     font-size:%s;
@@ -501,6 +501,16 @@ class TaskWidgetStyle:
                                                self.font['size - text'],
                                                self.color_palette['border'],
                                                int(SCREEN_WIDTH / 220)),
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    font-size:%s;
+                                    color:%s;
+                                }
+                                ''' % (self.font['size - text - small'],
+                                       self.color_palette['text - light'])
                         },
                     'subtask_list_widget':
                         {
