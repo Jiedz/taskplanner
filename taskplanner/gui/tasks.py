@@ -301,7 +301,7 @@ class TaskWidget(QWidget):
 
                 def callback():
                     # Update task
-                    self.task.name = self.textedit.toPlainText()
+                    self.task.name = self.textedit.toPlainText().replace('\n', ' ')
 
                 def inv_callback():
                     # Update widget
@@ -1449,7 +1449,6 @@ class TaskLineWidget(QFrame):
                     self.task.parent.remove_children_tasks(self.task)
                 elif self.planner is not None:
                     self.planner.remove_tasks(self.task)
-                    self.hide()
                 self.removing_task = False
 
         self.remove_pushbutton.clicked.connect(callback)

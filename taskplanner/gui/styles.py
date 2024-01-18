@@ -1077,6 +1077,13 @@ class PlannerWidgetStyle:
                                     }
                                     ''' % (self.color_palette['background 2']),
                             },
+                    },
+                'task_buckets_tab':
+                    {
+                        'task_bucket_widget':
+                            {
+
+                            }
                     }
             }
 

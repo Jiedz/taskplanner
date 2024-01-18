@@ -73,7 +73,8 @@ class PlannerWidget(QTabWidget):
                           height)
         # Planner tab
         self.make_planner_tab()
-        # Sorted tasks
+        # Task buckets tab
+        self.make_task_buckets_tab()
         # Set style
         if self._style is not None:
             set_style(widget=self,
@@ -506,6 +507,150 @@ class PlannerWidget(QTabWidget):
                                       parent=self,
                                       style=self._style)
         self.addTab(self.planner_tab, 'Planner')
+
+    def make_task_buckets_tab(self):
+        class TaskBucketsTab(QWidget):
+            """
+            This widget contains:
+                - On the left, a widget containing vertical list of :py:class:'taskplanner.gui.TaskWidgetSimple' of top-level tasks
+                - On the right, a widget containing timelines corresponding to each task and its related subtasks
+            """
+
+            def __init__(self,
+                         planner: Planner,
+                         parent: QWidget = None,
+                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
+                         ):
+                """
+                :param planner: :py:class:'taskplanner.planner.Planner'
+                    The planner associated to this widget
+                :param parent: :py:class:'QWidget', optional
+                    The parent widget
+                """
+                self.planner, self._style = planner, style
+                self.property_name = 'priority'
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignTop)
+                # Geometry
+                self.setGeometry(self.parent().geometry())
+                # Horizontal layout for settings
+                self.settings_layout = QHBoxLayout()
+                self.layout.addLayout(self.settings_layout)
+                self.settings_layout.setAlignment(Qt.AlignLeft)
+                # Horizontal layout for task buckets
+                self.buckets_layout = QHBoxLayout()
+                self.layout.addLayout(self.buckets_layout)
+                # Bucket list widget
+                self.make_bucket_list_widget()
+                # Scrollarea for bucket list widget
+                self.bucket_list_scrollarea = QScrollArea()
+                self.bucket_list_scrollarea.setWidgetResizable(True)
+                self.bucket_list_scrollarea.setWidget(self.bucket_list_widget)
+                self.layout.addWidget(self.bucket_list_scrollarea)
+
+            def make_bucket_list_widget(self):
+                class BucketListWidget(QFrame):
+                    """
+                    This widget contains a list of TaskBucketWidget. Each task bucket is labeled
+                    with the property value that is common among all tasks of the bucket
+                    """
+                    def __init__(self,
+                                 planner: Planner,
+                                 property_name: str = 'priority',
+                                 parent: QWidget = None,
+                                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE,
+                                 ):
+                        self.planner = planner
+                        self._style = style
+                        self.PROPERTY_NAMES = ['category',
+                                               'assignee',
+                                               'priority',
+                                               'progress']
+                        self.bucket_widgets = []
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QHBoxLayout(self)
+                        self.layout.setContentsMargins(0, 0, 0, 0)
+                        # Set property name and automatically make the task buckets
+                        self.property_name = property_name
+                        # Connect planner and bucket list
+                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_bucket_widgets())
+
+                    @property
+                    def property_name(self):
+                        if not hasattr(self, '_property_name'):
+                            self._property_name = 'priority'
+                        return self._property_name
+
+                    @property_name.setter
+                    def property_name(self, value):
+                        if value not in self.PROPERTY_NAMES:
+                            raise ValueError(f'Invalid property name "{value}". Valid property names are '
+                                             f'{tuple(self.PROPERTY_NAMES)}')
+                        if not hasattr(self, '_property_name'):
+                            self._property_name = 'priority'
+                        self._property_name = value
+                        # Connect each individual task's property change to the bucket list widget's reset
+                        all_tasks = []
+                        for task in self.planner.tasks:
+                            all_tasks += [task] + list(task.descendants)
+                        for task in all_tasks:
+                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
+                                     'BucketListWidget.' in str(slot)]
+                            if not slots:
+                                # Add new slot
+                                #getattr(task, f'{self.property_name}_changed')\
+                                #    .connect(lambda **kwargs: self.make_bucket_widgets())
+                                pass
+                        self.make_bucket_widgets()
+
+                    def make_bucket_widgets(self):
+                        # Remove all existing buckets
+                        for widget in self.bucket_widgets:
+                            widget.hide()
+                            self.layout.removeWidget(widget)
+                            self.bucket_widgets.remove(widget)
+                        # Add buckets
+                        all_tasks = []
+                        for task in self.planner.tasks:
+                            all_tasks += [task] + list(task.descendants)
+                        property_values = None
+                        # Identify the property values
+                        if self.property_name not in ['priority',
+                                                      'progress']:
+                            property_values = list(set([getattr(task,
+                                                                self.property_name)
+                                                        for task in all_tasks]))
+                        elif self.property_name == 'priority':
+                            from taskplanner.tasks import PRIORITY_LEVELS
+                            property_values = list(PRIORITY_LEVELS.keys())
+                        elif self.property_name == 'progress':
+                            from taskplanner.tasks import PROGRESS_LEVELS
+                            property_values = list(PROGRESS_LEVELS.keys())
+                        # Create and add task bucket widgets with common property values
+                        for value in property_values:
+                            widget = TaskBucketWidget(property_value=value,
+                                                      tasks=[task for task in all_tasks
+                                                             if getattr(task, self.property_name) == value],
+                                                      planner=self.planner,
+                                                      parent=self,
+                                                      style=self._style)
+                            self.layout.addWidget(widget)
+                            self.bucket_widgets += [widget]
+
+                self.bucket_list_widget = BucketListWidget(planner=self.planner,
+                                                          property_name=self.property_name,
+                                                          parent=self,
+                                                          style=self._style)
+
+        self.task_buckets_tab = TaskBucketsTab(planner=self.planner,
+                                               parent=self,
+                                               style=self._style)
+        self.addTab(self.task_buckets_tab, 'Task Buckets')
+
+
 
     def to_string(self):
         # Write all the data except subtasks first
@@ -1431,3 +1576,130 @@ class CalendarWidget(QWidget):
                     else:
                         break
         self.timelines_updated.emit()
+
+
+class TaskBucketWidget(QFrame):
+    """
+    This widget contains:
+
+        - A label indicating the main property of the task bucket
+        - A list of widgets sharing the bucket's property
+    """
+    def __init__(self,
+                 property_value: str,
+                 tasks: list[Task],
+                 planner: Planner,
+                 parent: QWidget = None,
+                 style: PlannerWidgetStyle = None):
+        """
+
+        :param property_value:
+        :param tasks:
+        :param parent:
+        :param style:
+        """
+        self.property_value = property_value
+        if tasks:
+            if not all(['Task' in str(type(t)) for t in tasks]):
+                raise ValueError(f'Invalid input tasks {tasks}. All input tasks must be of type taskplanner.Task')
+        self.tasks = tasks
+        self.planner = planner
+        self._style = style
+        super().__init__(parent=parent)
+        # Layout
+        self.layout = QVBoxLayout(self)
+        self.layout.setAlignment(Qt.AlignTop)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        # Label
+        self.make_label()
+        # Task List Widget
+        self.make_task_list()
+        # Scrollarea for task list
+        self.task_list_scrollarea = QScrollArea()
+        self.task_list_scrollarea.setWidgetResizable(True)
+        self.task_list_scrollarea.setWidget(self.task_list_widget)
+        self.layout.addWidget(self.task_list_scrollarea)
+        # Style
+        if self._style is not None:
+            set_style(self,
+                      self._style.stylesheets['task_buckets_tab']['task_bucket_widget'])
+
+    def make_label(self):
+        self.label = QLabel()
+        self.layout.addWidget(self.label)
+        self.label.setText(self.property_value)
+
+    def make_task_list(self):
+        class BucketTaskListWidget(QFrame):
+            """
+            This widget contains a list of widgets sharing the bucket's property
+            """
+            def __init__(self,
+                         tasks: list[Task],
+                         planner: Planner,
+                         parent: QWidget = None,
+                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
+                         ):
+                """
+
+                :param tasks:
+                :param parent:
+                :param style:
+                """
+                if tasks:
+                    if not all(['Task' in str(type(t)) for t in tasks]):
+                        raise ValueError(f'Invalid input tasks {tasks}. All input tasks must be of type taskplanner.Task')
+                self.tasks = tasks
+                self.planner = planner
+                self._style = style
+                self.task_widgets = []
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignTop)
+                self.layout.setContentsMargins(0, 0, 0, 0)
+                self.layout.setSpacing(20)
+                # Task widgets
+                slots = [slot for slot in self.planner.tasks_changed._slots if
+                         'BucketTaskListWidget.' in str(slot)]
+                for slot in slots:
+                    self.planner.tasks_changed.disconnect(slot)
+                self.planner.tasks_changed.connect(lambda **kwargs: self.make_task_widgets())
+                self.make_task_widgets()
+
+            def make_task_widgets(self):
+                for task in self.tasks:
+                    if task not in [widget.task for widget in self.task_widgets]:
+                        widget = TaskWidgetSimple(parent=self,
+                                                  task=task,
+                                                  planner=self.planner,
+                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
+                                                                        font=self._style.font_name)
+                                                  )
+                        widget.setContentsMargins(10,
+                                                  0,
+                                                  int(SCREEN_WIDTH * 0.003),
+                                                  0)
+                        widget.layout.setContentsMargins(10,
+                                                         0,
+                                                         int(SCREEN_WIDTH * 0.003),
+                                                         0)
+                        self.layout.addWidget(widget)
+                        self.task_widgets += [widget]
+                # Remove non-existent tasks
+                for widget in self.task_widgets:
+                    if widget.task not in self.tasks:
+                        widget.hide()
+                        self.task_widgets.remove(widget)
+                        self.layout.removeWidget(widget)
+
+                self.tasks = [w.task for w in self.task_widgets]
+
+
+        self.task_list_widget = BucketTaskListWidget(tasks=self.tasks,
+                                               planner=self.planner,
+                                               parent=self,
+                                               style=self._style)
+
+
+
