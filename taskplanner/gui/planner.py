@@ -574,9 +574,10 @@ class PlannerWidget(QTabWidget):
                         self.layout = QHBoxLayout(self)
                         self.layout.setContentsMargins(0, 0, 0, 0)
                         # Set property name and automatically make the task buckets
-                        self.property_name = property_name
+                        self._property_name = property_name
+                        self.make_bucket_widgets()
                         # Connect planner and bucket list
-                        self.planner.tasks_changed.connect(lambda **kwargs: self.make_bucket_widgets())
+                        self.planner.tasks_changed.connect(lambda **kwargs: self.redraw())
 
                     @property
                     def property_name(self):
@@ -592,19 +593,14 @@ class PlannerWidget(QTabWidget):
                         if not hasattr(self, '_property_name'):
                             self._property_name = 'priority'
                         self._property_name = value
-                        # Connect each individual task's property change to the bucket list widget's reset
-                        all_tasks = []
-                        for task in self.planner.tasks:
-                            all_tasks += [task] + list(task.descendants)
-                        for task in all_tasks:
-                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
-                                     'BucketListWidget.' in str(slot)]
-                            if not slots:
-                                # Add new slot
-                                #getattr(task, f'{self.property_name}_changed')\
-                                #    .connect(lambda **kwargs: self.make_bucket_widgets())
-                                pass
-                        self.make_bucket_widgets()
+                        self.redraw()
+
+                    def redraw(self):
+                        self.hide()
+                        self.__init__(planner=self.planner,
+                                      property_name=self.property_name,
+                                      parent=self.parent(),
+                                      style=self._style)
 
                     def make_bucket_widgets(self):
                         # Remove all existing buckets
@@ -639,6 +635,14 @@ class PlannerWidget(QTabWidget):
                                                       style=self._style)
                             self.layout.addWidget(widget)
                             self.bucket_widgets += [widget]
+                        for task in all_tasks:
+                            # Connect each individual task's property change to the bucket list widget's reset
+                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
+                                     'BucketListWidget.' in str(slot)]
+                            if not slots:
+                                # Add new slot
+                                getattr(task, f'{self.property_name}_changed')\
+                                   .connect(lambda **kwargs: self.make_bucket_widgets())
 
                 self.bucket_list_widget = BucketListWidget(planner=self.planner,
                                                           property_name=self.property_name,
