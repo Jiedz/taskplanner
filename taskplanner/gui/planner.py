@@ -74,7 +74,7 @@ class PlannerWidget(QTabWidget):
         # Planner tab
         self.make_planner_tab()
         # Task buckets tab
-        self.make_task_buckets_tab()
+        #self.make_task_buckets_tab()
         # Set style
         if self._style is not None:
             set_style(widget=self,

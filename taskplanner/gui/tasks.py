@@ -129,7 +129,7 @@ class TaskWidget(QWidget):
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
         self.category_assignee_layout.addStretch()
         # Horizontal layout for (priority, progress)
-        self.layout.addSpacing(-int(self.height() * 0.1))
+        #self.layout.addSpacing(-int(self.height() * 0.1))
         self.priority_progress_layout = QHBoxLayout()
         self.layout.addLayout(self.priority_progress_layout)
         self.priority_progress_layout.setContentsMargins(0, 0, 0, 0)
