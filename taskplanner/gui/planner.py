@@ -74,7 +74,7 @@ class PlannerWidget(QTabWidget):
         # Planner tab
         self.make_planner_tab()
         # Task buckets tab
-        #self.make_task_buckets_tab()
+        self.make_task_buckets_tab()
         # Set style
         if self._style is not None:
             set_style(widget=self,
@@ -528,7 +528,7 @@ class PlannerWidget(QTabWidget):
                     The parent widget
                 """
                 self.planner, self._style = planner, style
-                self.property_name = 'priority'
+                self.property_name = 'assignee'
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
@@ -574,10 +574,10 @@ class PlannerWidget(QTabWidget):
                         self.layout = QHBoxLayout(self)
                         self.layout.setContentsMargins(0, 0, 0, 0)
                         # Set property name and automatically make the task buckets
-                        self._property_name = property_name
-                        self.make_bucket_widgets()
+                        self.property_name = property_name
+                        #self.make_bucket_widgets()
                         # Connect planner and bucket list
-                        self.planner.tasks_changed.connect(lambda **kwargs: self.redraw())
+                        self.planner.tasks_changed.connect(self.make_bucket_widgets)
 
                     @property
                     def property_name(self):
@@ -591,29 +591,30 @@ class PlannerWidget(QTabWidget):
                             raise ValueError(f'Invalid property name "{value}". Valid property names are '
                                              f'{tuple(self.PROPERTY_NAMES)}')
                         if not hasattr(self, '_property_name'):
-                            self._property_name = 'priority'
+                            self._property_name = value
                         self._property_name = value
-                        self.redraw()
+                        all_tasks = self.planner.all_tasks
+                        for task in all_tasks:
+                            # Connect task and task list update
+                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
+                                     'BucketListWidget.' in str(slot)]
+                            # Connect with property value change
+                            for slot in slots:
+                                getattr(task, f'{self.property_name}_changed').disconnect(slot)
+                            getattr(task, f'{self.property_name}_changed') \
+                                .connect(self.make_bucket_widgets)
+                            # Connect with subtask changes
+                            slots = [slot for slot in task.children_changed._slots if 'BucketListWidget.' in str(slot)]
+                            for slot in slots:
+                                task.children_changed.disconnect(slot)
+                            task.children_changed.connect(self.make_bucket_widgets)
+                        self.make_bucket_widgets()
 
-                    def redraw(self):
-                        self.hide()
-                        self.__init__(planner=self.planner,
-                                      property_name=self.property_name,
-                                      parent=self.parent(),
-                                      style=self._style)
-
-                    def make_bucket_widgets(self):
-                        # Remove all existing buckets
-                        for widget in self.bucket_widgets:
-                            widget.hide()
-                            self.layout.removeWidget(widget)
-                            self.bucket_widgets.remove(widget)
-                        # Add buckets
-                        all_tasks = []
-                        for task in self.planner.tasks:
-                            all_tasks += [task] + list(task.descendants)
-                        property_values = None
+                    def make_bucket_widgets(self, **kwargs):
+                        print(f'Remaking buckets')
+                        all_tasks = self.planner.all_tasks
                         # Identify the property values
+                        property_values = []
                         if self.property_name not in ['priority',
                                                       'progress']:
                             property_values = list(set([getattr(task,
@@ -625,24 +626,31 @@ class PlannerWidget(QTabWidget):
                         elif self.property_name == 'progress':
                             from taskplanner.tasks import PROGRESS_LEVELS
                             property_values = list(PROGRESS_LEVELS.keys())
-                        # Create and add task bucket widgets with common property values
+                        # Add buckets
                         for value in property_values:
-                            widget = TaskBucketWidget(property_value=value,
-                                                      tasks=[task for task in all_tasks
-                                                             if getattr(task, self.property_name) == value],
-                                                      planner=self.planner,
-                                                      parent=self,
-                                                      style=self._style)
-                            self.layout.addWidget(widget)
-                            self.bucket_widgets += [widget]
-                        for task in all_tasks:
-                            # Connect each individual task's property change to the bucket list widget's reset
-                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
-                                     'BucketListWidget.' in str(slot)]
-                            if not slots:
-                                # Add new slot
-                                getattr(task, f'{self.property_name}_changed')\
-                                   .connect(lambda **kwargs: self.make_bucket_widgets())
+                            if value not in [w.property_value for w in self.bucket_widgets]:
+                                print(f'\tCreating bucket associated to value {value}')
+                                widget = TaskBucketWidget(property_name=self.property_name,
+                                                          property_value=value,
+                                                          planner=self.planner,
+                                                          parent=self,
+                                                          style=self._style)
+                                self.layout.addWidget(widget)
+                                self.bucket_widgets += [widget]
+                            else:
+                                print(f'\tUpdating bucket associated to value {value}')
+                                widget = [w for w in self.bucket_widgets
+                                          if w.property_value == value][0]
+                                widget.task_list_widget.make_task_widgets()
+
+                        # Remove buckets associated to non-existent values
+                        for widget in self.bucket_widgets:
+                            if widget.property_name != self.property_name \
+                                    or widget.property_value not in property_values:
+                                widget.hide()
+                                self.layout.removeWidget(widget)
+                                self.bucket_widgets.remove(widget)
+
 
                 self.bucket_list_widget = BucketListWidget(planner=self.planner,
                                                           property_name=self.property_name,
@@ -1590,23 +1598,23 @@ class TaskBucketWidget(QFrame):
         - A list of widgets sharing the bucket's property
     """
     def __init__(self,
+                 property_name: str,
                  property_value: str,
-                 tasks: list[Task],
                  planner: Planner,
                  parent: QWidget = None,
                  style: PlannerWidgetStyle = None):
         """
 
+        :param property_name:
         :param property_value:
-        :param tasks:
+        :param planner:
         :param parent:
         :param style:
         """
+        if not hasattr(Task(), property_name):
+            raise ValueError(f'Tasks have no such property as "{property_name}"')
+        self.property_name = property_name
         self.property_value = property_value
-        if tasks:
-            if not all(['Task' in str(type(t)) for t in tasks]):
-                raise ValueError(f'Invalid input tasks {tasks}. All input tasks must be of type taskplanner.Task')
-        self.tasks = tasks
         self.planner = planner
         self._style = style
         super().__init__(parent=parent)
@@ -1639,24 +1647,28 @@ class TaskBucketWidget(QFrame):
             This widget contains a list of widgets sharing the bucket's property
             """
             def __init__(self,
-                         tasks: list[Task],
+                         property_name: str,
+                         property_value: str,
                          planner: Planner,
                          parent: QWidget = None,
                          style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE
                          ):
                 """
 
-                :param tasks:
+                :param property_name:
+                :param property_value:
+                :param planner:
                 :param parent:
                 :param style:
                 """
-                if tasks:
-                    if not all(['Task' in str(type(t)) for t in tasks]):
-                        raise ValueError(f'Invalid input tasks {tasks}. All input tasks must be of type taskplanner.Task')
-                self.tasks = tasks
+                if not hasattr(Task(), property_name):
+                    raise ValueError(f'Tasks have no such property as "{property_name}"')
+                self.property_name = property_name
+                self.property_value = property_value
                 self.planner = planner
                 self._style = style
                 self.task_widgets = []
+                self.tasks = []
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
@@ -1665,15 +1677,20 @@ class TaskBucketWidget(QFrame):
                 self.layout.setSpacing(20)
                 # Task widgets
                 slots = [slot for slot in self.planner.tasks_changed._slots if
-                         'BucketTaskListWidget.' in str(slot)]
+                     'BucketTaskListWidget.' in str(slot)]
                 for slot in slots:
                     self.planner.tasks_changed.disconnect(slot)
-                self.planner.tasks_changed.connect(lambda **kwargs: self.make_task_widgets())
+                self.planner.tasks_changed.connect(self.make_task_widgets)
                 self.make_task_widgets()
+                self.destroyed.connect(self.disconnect_tasks)
 
-            def make_task_widgets(self):
-                for task in self.tasks:
-                    if task not in [widget.task for widget in self.task_widgets]:
+            def make_task_widgets(self, **kwargs):
+                all_tasks = self.planner.all_tasks
+
+                for task in all_tasks:
+                    if task not in self.tasks and getattr(task, self.property_name) == self.property_value:
+                        print(f'\t\tAdding task "{task.name}" to bucket {(self.property_name, self.property_value)}')
+                        # Create task widget
                         widget = TaskWidgetSimple(parent=self,
                                                   task=task,
                                                   planner=self.planner,
@@ -1688,22 +1705,33 @@ class TaskBucketWidget(QFrame):
                                                          0,
                                                          int(SCREEN_WIDTH * 0.003),
                                                          0)
+                        # Add task widget to layout
                         self.layout.addWidget(widget)
                         self.task_widgets += [widget]
+                        # Add new task
+                        self.tasks += [task]
+                        # Connect task and task list update
+                        getattr(task, f'{self.property_name}_changed') \
+                            .connect(self.make_task_widgets)
                 # Remove non-existent tasks
                 for widget in self.task_widgets:
-                    if widget.task not in self.tasks:
+                    if widget.task not in self.planner.all_tasks \
+                            or getattr(widget.task, self.property_name) != self.property_value:
                         widget.hide()
                         self.task_widgets.remove(widget)
                         self.layout.removeWidget(widget)
+                        self.tasks.remove(widget.task)
+                        getattr(widget.task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
 
-                self.tasks = [w.task for w in self.task_widgets]
+            def disconnect_tasks(self):
+                for task in self.tasks:
+                    getattr(task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
 
-
-        self.task_list_widget = BucketTaskListWidget(tasks=self.tasks,
-                                               planner=self.planner,
-                                               parent=self,
-                                               style=self._style)
+        self.task_list_widget = BucketTaskListWidget(property_name=self.property_name,
+                                                     property_value=self.property_value,
+                                                     planner=self.planner,
+                                                     parent=self,
+                                                     style=self._style)
 
 
 

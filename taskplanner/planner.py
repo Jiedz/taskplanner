@@ -45,6 +45,13 @@ class Planner:
     def assignees(self):
         return self._assignees
 
+    @property
+    def all_tasks(self):
+        all_tasks = []
+        for task in self.tasks:
+            all_tasks += [task] + list(task.descendants)
+        return all_tasks
+
     def add_tasks(self,
                   *tasks: Task):
         for task in tasks:
