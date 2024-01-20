@@ -38,6 +38,11 @@ SCREEN_HEIGHT = SCREEN.height
 
 DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette='dark material',
                                            font='light')
+BUCKET_PROPERTY_NAMES = ['category',
+                         'assignee',
+                         'priority',
+                         'progress']
+BUCKET_PROPERTY_NAMES.sort()
 
 TIMELINE_VIEW_TYPES = ['daily',
                        'weekly',
@@ -539,6 +544,10 @@ class PlannerWidget(QTabWidget):
                 self.settings_layout = QHBoxLayout()
                 self.layout.addLayout(self.settings_layout)
                 self.settings_layout.setAlignment(Qt.AlignLeft)
+                # Horizontal layout for settings
+                self.settings_layout = QHBoxLayout()
+                self.layout.addLayout(self.settings_layout)
+                self.settings_layout.setAlignment(Qt.AlignLeft)
                 # Horizontal layout for task buckets
                 self.buckets_layout = QHBoxLayout()
                 self.layout.addLayout(self.buckets_layout)
@@ -549,109 +558,72 @@ class PlannerWidget(QTabWidget):
                 self.bucket_list_scrollarea.setWidgetResizable(True)
                 self.bucket_list_scrollarea.setWidget(self.bucket_list_widget)
                 self.layout.addWidget(self.bucket_list_scrollarea)
+                # Property widget
+                self.make_property_widget()
+                self.property_widget.setFixedSize(int(SCREEN_WIDTH * 0.08),
+                                                  int(self.height() * 0.08))
 
-            def make_bucket_list_widget(self):
-                class BucketListWidget(QFrame):
+            def make_property_widget(self):
+                class PropertyWidget(QWidget):
                     """
-                    This widget contains a list of TaskBucketWidget. Each task bucket is labeled
-                    with the property value that is common among all tasks of the bucket
+                    This widget contains:
+                    - A label, indicating the purpose of selecting the task property
+                    - A combobox containing the properties that can be selected for bucket creation
                     """
+
                     def __init__(self,
                                  planner: Planner,
-                                 property_name: str = 'priority',
+                                 bucket_list_widget: BucketListWidget,
                                  parent: QWidget = None,
-                                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE,
-                                 ):
-                        self.planner = planner
-                        self._style = style
-                        self.PROPERTY_NAMES = ['category',
-                                               'assignee',
-                                               'priority',
-                                               'progress']
-                        self.bucket_widgets = []
+                                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                        """
+
+                        :param planner:
+                        :param parent:
+                        :param style:
+                        """
                         super().__init__(parent=parent)
+                        self.planner = planner
+                        self.bucket_list_widget = bucket_list_widget
                         # Layout
-                        self.layout = QHBoxLayout(self)
-                        self.layout.setContentsMargins(0, 0, 0, 0)
-                        # Set property name and automatically make the task buckets
-                        self.property_name = property_name
-                        #self.make_bucket_widgets()
-                        # Connect planner and bucket list
-                        self.planner.tasks_changed.connect(self.make_bucket_widgets)
+                        self.layout = QVBoxLayout()
+                        self.setLayout(self.layout)
+                        # Label
+                        self.make_label()
+                        # Combobox
+                        self.make_combobox()
 
-                    @property
-                    def property_name(self):
-                        if not hasattr(self, '_property_name'):
-                            self._property_name = 'priority'
-                        return self._property_name
+                    def make_label(self):
+                        self.label = QLabel('Sort By')
+                        self.layout.addWidget(self.label)
+                        self.label.setAlignment(Qt.AlignLeft)
+                        self.label.setAlignment(Qt.AlignBottom)
+                        self.label.setContentsMargins(0, 0, 0, 0)
 
-                    @property_name.setter
-                    def property_name(self, value):
-                        if value not in self.PROPERTY_NAMES:
-                            raise ValueError(f'Invalid property name "{value}". Valid property names are '
-                                             f'{tuple(self.PROPERTY_NAMES)}')
-                        if not hasattr(self, '_property_name'):
-                            self._property_name = value
-                        self._property_name = value
-                        all_tasks = self.planner.all_tasks
-                        for task in all_tasks:
-                            # Connect task and task list update
-                            slots = [slot for slot in getattr(task, f'{self.property_name}_changed')._slots if
-                                     'BucketListWidget.' in str(slot)]
-                            # Connect with property value change
-                            for slot in slots:
-                                getattr(task, f'{self.property_name}_changed').disconnect(slot)
-                            getattr(task, f'{self.property_name}_changed') \
-                                .connect(self.make_bucket_widgets)
-                            # Connect with subtask changes
-                            slots = [slot for slot in task.children_changed._slots if 'BucketListWidget.' in str(slot)]
-                            for slot in slots:
-                                task.children_changed.disconnect(slot)
-                            task.children_changed.connect(self.make_bucket_widgets)
-                        self.make_bucket_widgets()
+                    def make_combobox(self):
+                        self.combobox = QComboBox()
+                        # Layout
+                        self.layout.addWidget(self.combobox)
+                        # Add items
+                        self.combobox.addItems([n.title() for n in BUCKET_PROPERTY_NAMES])
+                        # User interactions
+                        def clicked():
+                            self.bucket_list_widget.property_name = self.combobox.currentText().lower()
 
-                    def make_bucket_widgets(self, **kwargs):
-                        print(f'Remaking buckets')
-                        all_tasks = self.planner.all_tasks
-                        # Identify the property values
-                        property_values = []
-                        if self.property_name not in ['priority',
-                                                      'progress']:
-                            property_values = list(set([getattr(task,
-                                                                self.property_name)
-                                                        for task in all_tasks]))
-                        elif self.property_name == 'priority':
-                            from taskplanner.tasks import PRIORITY_LEVELS
-                            property_values = list(PRIORITY_LEVELS.keys())
-                        elif self.property_name == 'progress':
-                            from taskplanner.tasks import PROGRESS_LEVELS
-                            property_values = list(PROGRESS_LEVELS.keys())
-                        # Add buckets
-                        for value in property_values:
-                            if value not in [w.property_value for w in self.bucket_widgets]:
-                                print(f'\tCreating bucket associated to value {value}')
-                                widget = TaskBucketWidget(property_name=self.property_name,
-                                                          property_value=value,
-                                                          planner=self.planner,
-                                                          parent=self,
-                                                          style=self._style)
-                                self.layout.addWidget(widget)
-                                self.bucket_widgets += [widget]
-                            else:
-                                print(f'\tUpdating bucket associated to value {value}')
-                                widget = [w for w in self.bucket_widgets
-                                          if w.property_value == value][0]
-                                widget.task_list_widget.make_task_widgets()
+                        # Connect task and widget
+                        self.combobox.currentIndexChanged.connect(clicked)
+                        self.bucket_list_widget.property_name_changed.connect(
+                            lambda **kwargs: self.combobox.setCurrentText(self.bucket_list_widget.property_name.title()))
+                        # Set initial value
+                        self.combobox.setCurrentText(self.bucket_list_widget.property_name)
 
-                        # Remove buckets associated to non-existent values
-                        for widget in self.bucket_widgets:
-                            if widget.property_name != self.property_name \
-                                    or widget.property_value not in property_values:
-                                widget.hide()
-                                self.layout.removeWidget(widget)
-                                self.bucket_widgets.remove(widget)
+                self.property_widget = PropertyWidget(planner=self.planner,
+                                                      bucket_list_widget=self.bucket_list_widget,
+                                                      parent=self,
+                                                      style=self._style)
+                self.settings_layout.addWidget(self.property_widget)
 
-
+            def make_bucket_list_widget(self):
                 self.bucket_list_widget = BucketListWidget(planner=self.planner,
                                                           property_name=self.property_name,
                                                           parent=self,
@@ -1639,7 +1611,11 @@ class TaskBucketWidget(QFrame):
     def make_label(self):
         self.label = QLabel()
         self.layout.addWidget(self.label)
-        self.label.setText(self.property_value)
+        if self.property_value is None:
+            text = f'No {self.property_name.title()}'
+        else:
+            text = self.property_value.title()
+        self.label.setText(text)
 
     def make_task_list(self):
         class BucketTaskListWidget(QFrame):
@@ -1676,10 +1652,12 @@ class TaskBucketWidget(QFrame):
                 self.layout.setContentsMargins(0, 0, 0, 0)
                 self.layout.setSpacing(20)
                 # Task widgets
+                '''
                 slots = [slot for slot in self.planner.tasks_changed._slots if
                      'BucketTaskListWidget.' in str(slot)]
                 for slot in slots:
                     self.planner.tasks_changed.disconnect(slot)
+                '''
                 self.planner.tasks_changed.connect(self.make_task_widgets)
                 self.make_task_widgets()
                 self.destroyed.connect(self.disconnect_tasks)
@@ -1689,7 +1667,6 @@ class TaskBucketWidget(QFrame):
 
                 for task in all_tasks:
                     if task not in self.tasks and getattr(task, self.property_name) == self.property_value:
-                        print(f'\t\tAdding task "{task.name}" to bucket {(self.property_name, self.property_value)}')
                         # Create task widget
                         widget = TaskWidgetSimple(parent=self,
                                                   task=task,
@@ -1717,11 +1694,15 @@ class TaskBucketWidget(QFrame):
                 for widget in self.task_widgets:
                     if widget.task not in self.planner.all_tasks \
                             or getattr(widget.task, self.property_name) != self.property_value:
+                        if widget.task in self.tasks:
+                            self.tasks.remove(widget.task)
+                        getattr(widget.task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
                         widget.hide()
                         self.task_widgets.remove(widget)
                         self.layout.removeWidget(widget)
-                        self.tasks.remove(widget.task)
-                        getattr(widget.task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
+                        if not self.tasks and self.property_name not in ['priority', 'progress']:
+                            self.hide()
+
 
             def disconnect_tasks(self):
                 for task in self.tasks:
@@ -1732,6 +1713,117 @@ class TaskBucketWidget(QFrame):
                                                      planner=self.planner,
                                                      parent=self,
                                                      style=self._style)
+
+
+class BucketListWidget(QFrame):
+    """
+    This widget contains a list of TaskBucketWidget. Each task bucket is labeled
+    with the property value that is common among all tasks of the bucket
+    """
+
+    def __init__(self,
+                 planner: Planner,
+                 property_name: str = 'priority',
+                 parent: QWidget = None,
+                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE,
+                 ):
+        self.planner = planner
+        self._style = style
+        self.bucket_widgets = []
+        self.property_name_changed = Signal()
+        super().__init__(parent=parent)
+        # Layout
+        self.layout = QHBoxLayout(self)
+        self.layout.setAlignment(Qt.AlignLeft)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        # Set property name and automatically make the task buckets
+        self.property_name = property_name
+
+    @property
+    def property_name(self):
+        if not hasattr(self, '_property_name'):
+            self._property_name = 'priority'
+        return self._property_name
+
+    @property_name.setter
+    def property_name(self, value):
+        if value not in BUCKET_PROPERTY_NAMES:
+            raise ValueError(f'Invalid property name "{value}". Valid property names are '
+                             f'{tuple(BUCKET_PROPERTY_NAMES)}')
+        if not hasattr(self, '_property_name'):
+            self._property_name = value
+        self._property_name = value
+        self.disconnect_buckets()
+        self.make_bucket_widgets()
+        self.property_name_changed.emit()
+
+    def disconnect_buckets(self):
+        for widget in self.bucket_widgets:
+            widget.hide()
+            widget.task_list_widget.disconnect_tasks()
+        self.bucket_widgets = []
+
+    def make_task_connections(self):
+        self.planner.tasks_changed.disconnect(self.make_bucket_widgets)
+        self.planner.tasks_changed.connect(self.make_bucket_widgets)
+        all_tasks = self.planner.all_tasks
+        for task in all_tasks:
+            # Connect task and task list update
+            getattr(task, f'{self.property_name}_changed').disconnect(self.make_bucket_widgets)
+            getattr(task, f'{self.property_name}_changed') \
+                .connect(self.make_bucket_widgets)
+            # Connect with subtask changes
+            task.children_changed.disconnect(self.make_bucket_widgets)
+            task.children_changed.connect(self.make_bucket_widgets)
+
+    def make_bucket_widgets(self, **kwargs):
+        all_tasks = self.planner.all_tasks
+        # Identify the property values
+        property_values = []
+        if self.property_name not in ['priority',
+                                      'progress']:
+            property_values = list(set([getattr(task,
+                                                self.property_name)
+                                        for task in all_tasks]))
+            if None in property_values:
+                property_values.remove(None)
+                property_values.sort()
+                property_values = [None] + property_values
+            else:
+                property_values.sort()
+        else:
+            from taskplanner.tasks import PRIORITY_LEVELS, PROGRESS_LEVELS
+            dictionary = PRIORITY_LEVELS if self.property_name == 'priority' else PROGRESS_LEVELS
+            property_values = list(dictionary.keys())
+            property_values.sort(key=lambda x: dictionary[x])
+
+        # Add buckets
+        for value in property_values:
+            if value not in [w.property_value for w in self.bucket_widgets]:
+                widget = TaskBucketWidget(property_name=self.property_name,
+                                          property_value=value,
+                                          planner=self.planner,
+                                          parent=self,
+                                          style=self._style)
+                widget.setFixedWidth(int(SCREEN_WIDTH * 0.3))
+                self.layout.addWidget(widget)
+                self.bucket_widgets += [widget]
+            else:
+                widget = [w for w in self.bucket_widgets
+                          if w.property_value == value][0]
+                widget.task_list_widget.make_task_widgets()
+
+        # Remove buckets associated to non-existent values
+        for widget in self.bucket_widgets:
+            if widget.property_name not in ['priority', 'progress']:
+                if widget.property_name != self.property_name \
+                        or widget.property_value not in property_values or not widget.task_list_widget.tasks:
+                    widget.task_list_widget.disconnect_tasks()
+                    widget.hide()
+                    # self.layout.removeWidget(widget)
+                    self.bucket_widgets.remove(widget)
+
+        self.make_task_connections()
 
 
 
