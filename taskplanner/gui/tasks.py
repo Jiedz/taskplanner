@@ -85,9 +85,9 @@ class TaskWidget(QWidget):
         self.make_path_widget()
         if self.task.is_top_level:
             self.path_widget.hide()
-        # Horizontal layout for (title, color, dates)
-        self.title_color_dates_layout = QHBoxLayout()
-        self.layout.addLayout(self.title_color_dates_layout)
+        # Horizontal layout for (title, color)
+        self.title_color_layout = QHBoxLayout()
+        self.layout.addLayout(self.title_color_layout)
         # Title widget
         self.make_title_widget()
         self.title_widget.setFixedHeight(int(self.height()*0.08))
@@ -95,11 +95,20 @@ class TaskWidget(QWidget):
         self.make_download_pushbutton()
         # Color widget
         self.make_color_widget()
-        self.title_color_dates_layout.addSpacing(15)
-        ## Color pushbutton
+        self.title_color_layout.addStretch()
+        # Horizontal layout for date widgets, link dates to subtasks
+        self.layout.addSpacing(int(self.height() * 0.015))
+        self.dates_layout = QHBoxLayout()
+        self.dates_layout.setAlignment(Qt.AlignLeft)
+        self.dates_layout.setSpacing(int(self.width() * 0.1))
+        self.layout.addLayout(self.dates_layout)
         # Start and end date widgets
+        self.dates_layout.addSpacing(int(self.width() * 0.015))
         self.make_date_widgets()
-        self.title_color_dates_layout.addStretch()
+        # Link dates to subtasks
+        self.make_link_dates_widget()
+        self.link_dates_widget.pushbutton.setFixedSize(int(self.width() * 0.032),
+                                                       int(self.width() * 0.032))
         ## Textedit
         self.title_widget.textedit.setFixedHeight(int(self.title_widget.height()))
         self.title_widget.textedit.setMinimumWidth(int(self.width() * 0.5))
@@ -345,11 +354,11 @@ class TaskWidget(QWidget):
 
         self.title_widget = TitleWidget(task=self.task,
                                         parent=self)
-        self.title_color_dates_layout.addWidget(self.title_widget)
+        self.title_color_layout.addWidget(self.title_widget)
 
     def make_download_pushbutton(self):
         self.download_pushbutton = QPushButton()
-        self.title_color_dates_layout.addWidget(self.download_pushbutton)
+        self.title_color_layout.addWidget(self.download_pushbutton)
         # Icon
         icon_path = self._style.icon_path
         icon_filename = os.path.join(icon_path, 'download.png')
@@ -474,20 +483,20 @@ class TaskWidget(QWidget):
         self.color_widget = ColorWidget(task=self.task,
                                         planner=self.planner,
                                         parent=self)
-        self.title_color_dates_layout.addWidget(self.color_widget)
+        self.title_color_layout.addWidget(self.color_widget)
 
     def make_date_widgets(self):
         self.start_date_widget = DateWidget(task=self.task,
                                             parent=self,
                                             time_mode='start')
-        self.title_color_dates_layout.addWidget(self.start_date_widget)
+        self.dates_layout.addWidget(self.start_date_widget)
 
-        self.title_color_dates_layout.addSpacing(20)
+        self.title_color_layout.addSpacing(20)
 
         self.end_date_widget = DateWidget(task=self.task,
                                           parent=self,
                                           time_mode='end')
-        self.title_color_dates_layout.addWidget(self.end_date_widget)
+        self.dates_layout.addWidget(self.end_date_widget)
 
     def make_progress_widget(self):
         class ProgressWidget(QWidget):
@@ -545,6 +554,78 @@ class TaskWidget(QWidget):
         self.progress_widget = ProgressWidget(task=self.task,
                                         parent=self)
         self.priority_progress_layout.addWidget(self.progress_widget)
+
+    def make_link_dates_widget(self):
+        class LinkDatesWidget(QFrame):
+            """
+            This widget contains:
+
+                - a label indicating the purpose of linking the dates of this task to the subtasks's dates
+                - a pushbutton that allows to link the dates
+            """
+            def __init__(self,
+                         task: Task,
+                         planner: Planner,
+                         parent: QWidget = None,
+                         style: TaskWidgetStyle = None):
+                """
+
+                :param task:
+                :param planner:
+                :param parent:
+                :param style:
+                """
+                self.task, self.planner = task, planner
+                self._style = style
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QVBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignHCenter)
+                # Label
+                self.make_label()
+                # Pushbutton
+                self.make_pushbutton()
+
+            def make_label(self):
+                self.label = QLabel('Link Dates to Subtasks')
+                self.layout.addWidget(self.label)
+
+            def make_pushbutton(self):
+                self.pushbutton = QPushButton()
+                # Layout
+                self.layout.addWidget(self.pushbutton)
+
+                # User interactions
+                def clicked():
+                    self.task.link_dates_to_subtasks = not self.task.link_dates_to_subtasks
+                    update()
+
+                def update():
+                    color_off = self.parent()._style.color_palette['background 1']
+                    color_on = self.parent()._style.color_palette['text - highlight']
+                    stylesheet = self.parent()._style.stylesheets['standard view']['link_dates_widget']['pushbutton']
+                    if self.task.link_dates_to_subtasks:
+                        stylesheet = stylesheet.replace(f'background-color:{color_off}',
+                                                        f'background-color:{color_on}')
+                    else:
+                        stylesheet = stylesheet.replace(f'background-color:{color_on}',
+                                                        f'background-color:{color_off}')
+
+                    self.parent()._style.stylesheets['standard view']['link_dates_widget']['pushbutton'] = stylesheet
+                    self.pushbutton.setStyleSheet(stylesheet)
+
+                # Connect task and widget
+                self.pushbutton.clicked.connect(clicked)
+                # Keep connecting
+                self.task.link_dates_to_subtasks_changed.connect(lambda **kwargs: update())
+                # Set initial value
+                update()
+
+        self.link_dates_widget = LinkDatesWidget(task=self.task,
+                                                planner=self.planner,
+                                                parent=self,
+                                                 style=self._style)
+        self.dates_layout.addWidget(self.link_dates_widget)
 
 
     def make_category_widget(self):

@@ -463,6 +463,42 @@ class TaskWidgetStyle:
                                 }
                                 ''' % (self.color_palette['background 2']),
                         },
+                    'link_dates_widget':
+                        {
+                            'main':
+                                '''
+                                QFrame
+                                {
+                                    border:None;
+                                }
+                                ''',
+                            'label':
+                                '''
+                                QLabel
+                                {
+                                    border:None;
+                                    color:%s;
+                                    font-size:%s;
+                                }
+                                ''' % (self.color_palette['text - light'],
+                                       self.font['size - text']),
+                            'pushbutton':
+                                '''
+                                QPushButton
+                                {
+                                    background-color:%s;
+                                    border:3px solid %s;
+                                    border-radius:%spx;
+                                }
+                                QPushButton:hover
+                                {
+                                    background-color:%s;
+                                }
+                                ''' % (self.color_palette['background 1'],
+                                       self.color_palette['text - highlight'],
+                                       15,
+                                       self.color_palette['background 2']),
+                        },
                     'description_widget':
                         {
                             'main':
@@ -1080,9 +1116,51 @@ class PlannerWidgetStyle:
                     },
                 'task_buckets_tab':
                     {
-                        'task_bucket_widget':
+                        'property_widget':
                             {
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
 
+                                    }
+                                    ''',
+                                'combobox':
+                                    '''
+
+                                    '''
+                            },
+                        'bucket_list_widget':
+                            {
+                                'bucket_widget':
+                                    {
+                                        'label':
+                                            '''
+                                            ''',
+                                        'task_list_widget':
+                                            '''
+                                            '''
+                                    }
+                            },
+                        'stats_widget':
+                            {
+                                'label':
+                                    '''
+                                    QLabel
+                                    {
+                                    
+                                    }
+                                    ''',
+                                'graph_widget':
+                                    {
+                                        'title_label':
+                                            '''
+                                            QLabel
+                                            {
+                                            
+                                            }
+                                            '''
+                                    }
                             }
                     }
             }

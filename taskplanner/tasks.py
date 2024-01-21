@@ -41,6 +41,7 @@ class Task(Node):
                  priority: object = "low",
                  start_date: date = date.today(),
                  end_date: date = None,
+                 link_dates_to_subtasks: bool = True,
                  assignee: object = None,
                  color: str = None) -> object:
         '''
@@ -136,10 +137,11 @@ class Task(Node):
             self._start_date = value
 
         if not self.is_top_level:
-            if self.start_date < self.parent.start_date:
-                self.parent.start_date = self.start_date
-            elif all([task.start_date > self.parent.start_date for task in [self] + list(self.siblings)]):
-                self.parent.start_date = min([task.start_date for task in [self] + list(self.siblings)])
+            if self.parent.link_dates_to_subtasks:
+                if self.start_date < self.parent.start_date:
+                    self.parent.start_date = self.start_date
+                elif all([task.start_date > self.parent.start_date for task in [self] + list(self.siblings)]):
+                    self.parent.start_date = min([task.start_date for task in [self] + list(self.siblings)])
 
         self.start_date_changed.emit()
 
@@ -158,14 +160,23 @@ class Task(Node):
                 if value < self.start_date:
                     raise ValueError(f'end date ({value}) is smaller than start date ({self.start_date})')
             self._end_date = value
-
         if not self.is_top_level:
-            if self.end_date > self.parent.end_date:
-                self.parent.end_date = self.end_date
-            elif all([task.end_date < self.parent.end_date for task in [self] + list(self.siblings)]):
-                self.parent.end_date = max([task.end_date for task in [self] + list(self.siblings)])
+            if self.parent.link_dates_to_subtasks:
+                if self.end_date > self.parent.end_date:
+                    self.parent.end_date = self.end_date
+                elif all([task.end_date < self.parent.end_date for task in [self] + list(self.siblings)]):
+                    self.parent.end_date = max([task.end_date for task in [self] + list(self.siblings)])
 
         self.end_date_changed.emit()
+
+    @property
+    def link_dates_to_subtasks(self):
+        return self._link_dates_to_subtasks
+
+    @link_dates_to_subtasks.setter
+    def link_dates_to_subtasks(self, value: bool):
+        self._link_dates_to_subtasks = value
+        self.link_dates_to_subtasks_changed.emit()
 
     @property
     def priority(self):
@@ -423,6 +434,8 @@ class Task(Node):
         string += f'start date: {self.start_date.day}/{self.start_date.month}/{self.start_date.year}\n'
         # end date
         string += f'end date: {self.end_date.day}/{self.end_date.month}/{self.end_date.year}\n'
+        # link dates to subtasks
+        string += f'link dates to subtasks: {self.link_dates_to_subtasks}\n'
         # color
         string += f'color: {self.color}'
         # Write all subtasks
@@ -462,6 +475,7 @@ class Task(Node):
                       'assignee',
                       'start date',
                       'end date',
+                      'link dates to subtasks',
                       'color']
         # Set description
         index = [i for i in range(len(lines)) if 'description: ' in lines[i]][0]
@@ -476,8 +490,8 @@ class Task(Node):
                 # Delete all the lines that were misleadingly created by the description
                 lines.remove(line)
         task.description = description
-        # Set name, category, priority, assignee, color
-        for i in [0, 1, 3, 4, 5, 8]:
+        # Set name, category, priority, assignee, link dates to subtasks, color
+        for i in [0, 1, 3, 4, 5, 8, 9]:
             attr_name = attributes[i].replace(' ', '_')
             value = lines[i].replace(attributes[i]+': ', '')
             if value == 'None':
@@ -485,6 +499,8 @@ class Task(Node):
                     value = None
                 else:
                     value = 'not started'
+            elif value in ['True', 'False']:
+                value = True if value == 'True' else False
             setattr(task, attr_name, value)
         # Set start and end date
         task._end_date = None

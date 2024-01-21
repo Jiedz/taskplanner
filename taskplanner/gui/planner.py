@@ -1764,11 +1764,12 @@ class TaskBucketWidget(QFrame):
         # Style
         if self._style is not None:
             set_style(self,
-                      self._style.stylesheets['task_buckets_tab']['task_bucket_widget'])
+                      self._style.stylesheets['task_buckets_tab']['bucket_list_widget'])
 
     def make_label(self):
         self.label = QLabel()
         self.layout.addWidget(self.label)
+        self.label.setAlignment(Qt.AlignCenter)
         if self.property_value is None:
             text = f'No {self.property_name.title()}'
         else:
