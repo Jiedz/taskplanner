@@ -763,12 +763,12 @@ class PlannerWidget(QTabWidget):
                                 label.set_fontsize('xx-large')
                                 label.set_color(self._style.color_palette['text'])
 
-                            # Connect bucket list changes to graph updates
-                            self.bucket_list_widget.property_name_changed.disconnect(self.update_graphs)
-                            self.bucket_list_widget.property_name_changed.connect(self.update_graphs)
+                        # Connect bucket list changes to graph updates
+                        self.bucket_list_widget.property_name_changed.disconnect(self.update_graphs)
+                        self.bucket_list_widget.property_name_changed.connect(self.update_graphs)
 
-                            self.bucket_list_widget.buckets_updated.disconnect(self.update_graphs)
-                            self.bucket_list_widget.buckets_updated.connect(self.update_graphs)
+                        self.bucket_list_widget.buckets_updated.disconnect(self.update_graphs)
+                        self.bucket_list_widget.buckets_updated.connect(self.update_graphs)
 
                         for widget in self.bucket_list_widget.bucket_widgets:
                             widget.task_list_widget.tasks_updated.disconnect(self.update_graphs)

@@ -8,6 +8,7 @@ import sys
 planner = Planner()
 # Build application
 app = QApplication(sys.argv)
+
 # Task widget - standard view
 try:
     planner_widget = PlannerWidget.from_file()
