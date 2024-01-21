@@ -13,7 +13,8 @@ requirements = ['numpy',
                 'screeninfo',
                 'signalslot',
                 'python-dateutil',
-                'markdown']
+                'markdown',
+                'matplotlib']
 
 setup(name='taskplanner',
       version='1',
