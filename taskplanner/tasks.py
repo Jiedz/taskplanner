@@ -226,7 +226,7 @@ class Task(Node):
     def color(self, value):
         if value is not None:
             if not QColor.isValidColor(value):
-                raise ValueError(f'Invalid color {value}.')
+                raise ValueError(f'Task "{self.name}": Invalid color "{value}".')
         self._color = value
         self.color_changed.emit()
 
@@ -301,7 +301,9 @@ class Task(Node):
                            'priority',
                            'start_date',
                            'end_date',
-                           'assignee']
+                           'assignee',
+                           'color',
+                           'link_dates_to_subtasks']
         attributes = {a: getattr(self, a) for a in attribute_names}
         for name in attribute_names:
             attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
@@ -342,7 +344,9 @@ class Task(Node):
                            'priority',
                            'start_date',
                            'end_date',
-                           'assignee']
+                           'assignee',
+                           'color',
+                           'link_dates_to_subtasks']
         attributes = {a: getattr(self, a) for a in attribute_names}
         for name in attribute_names:
             attributes[f'{name}_changed'] = getattr(self, f'{name}_changed')
