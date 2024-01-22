@@ -30,15 +30,15 @@ from dateutil.relativedelta import relativedelta
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
-from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES
+from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES, COLOR_PALETTES, FONTS
 from taskplanner.gui.utilities import set_style, get_primary_screen, select_file, select_directory
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
 SCREEN_HEIGHT = SCREEN.height
 
-DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette='dark material',
-                                           font='light')
+DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette=COLOR_PALETTES['dark material'],
+                                           font=FONTS['light'])
 BUCKET_PROPERTY_NAMES = ['category',
                          'assignee',
                          'priority',
@@ -81,6 +81,8 @@ class PlannerWidget(QTabWidget):
         self.make_planner_tab()
         # Task buckets tab
         self.make_task_buckets_tab()
+        # Settings tab
+        self.make_settings_tab()
         # Set style
         if self._style is not None:
             set_style(widget=self,
@@ -164,8 +166,9 @@ class PlannerWidget(QTabWidget):
                 # View selector
                 self.make_view_selector()
                 task_widget_example = TaskWidget(task=Task(),
-                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                       font=self._style.font_name))
+                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                       font=self._style.font,
+                                                                       style_name=self._style.style_name))
                 self.view_selector.combobox.setGeometry(task_widget_example.priority_widget.combobox.geometry())
                 self.view_selector.setFixedSize(int(SCREEN_WIDTH * 0.08),
                                                 int(self.height() * 0.08))
@@ -561,6 +564,8 @@ class PlannerWidget(QTabWidget):
                 self.bucket_list_scrollarea.setWidget(self.bucket_list_widget)
                 self.layout.addWidget(self.bucket_list_scrollarea)
                 self.bucket_list_scrollarea.setFixedHeight(int(self.height() * 0.4))
+                self.bucket_list_scrollarea.verticalScrollBar().setDisabled(True)
+                self.bucket_list_scrollarea.verticalScrollBar().hide()
                 # Property widget
                 self.make_property_widget()
                 self.property_widget.setFixedSize(int(SCREEN_WIDTH * 0.08),
@@ -792,6 +797,277 @@ class PlannerWidget(QTabWidget):
                                                style=self._style)
         self.addTab(self.task_buckets_tab, 'Task Buckets')
 
+    def make_settings_tab(self):
+        class SettingsTab(QFrame):
+            """
+            This tab contains the widget's settings, including:
+
+                - Style settings (colors, fonts)
+            """
+            def __init__(self,
+                         planner: Planner,
+                         planner_widget: PlannerWidget,
+                         parent: QWidget = None,
+                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                """
+
+                :param planner:
+                :param planner_widget:
+                :param parent:
+                :param style:
+                """
+                self.planner = planner
+                self.planner_widget = planner_widget
+                self._style = style
+                super().__init__(parent=parent)
+                # Layout
+                self.layout = QHBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignLeft)
+                # Graphics settings
+                self.make_graphics_settings()
+                # Scroll area for the graphics settings
+                self.graphics_scrollarea = QScrollArea()
+                self.graphics_scrollarea.setWidgetResizable(True)
+                self.graphics_scrollarea.setWidget(self.graphics_settings_widget)
+                self.layout.addWidget(self.graphics_scrollarea)
+                self.graphics_settings_widget.setFixedWidth(self.graphics_settings_widget.example_task_widget.width())
+
+
+            def make_graphics_settings(self):
+                class GraphicsSettingsWidget(QFrame):
+                    """
+                    This widget contains:
+
+                        - A set of color selection widgets that allow the user to select a color palette
+                        - A set of font size selector widgets to allow the user to select different font sizes
+                        - A font selection widget to allow the user to select a font family
+                        - An example TaskWidget that exemplifies, in real time, how the user's changes reflect onto the
+                        - widget
+                    """
+
+                    def __init__(self,
+                                 planner: Planner,
+                                 planner_widget: PlannerWidget,
+                                 parent: QWidget = None,
+                                 style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                        """
+
+                        :param planner:
+                        :param planner_widget:
+                        :param parent:
+                        :param style:
+                        """
+                        self.planner = planner
+                        self.planner_widget = planner_widget
+                        self._style = style
+                        self.chosen_style = self._style
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QVBoxLayout(self)
+                        self.layout.setAlignment(Qt.AlignTop)
+                        self.layout.setAlignment(Qt.AlignLeft)
+                        # Title
+                        self.make_title_label()
+                        # Color selection widget
+                        self.make_color_palette_selection_widget()
+                        # Font selection widget
+                        self.make_font_selection_widget()
+                        # Apply pushbutton
+                        # Example task widget
+                        self.example_task = Task(name='Example Task',
+                                                category='Example Category',
+                                                description='## Example Description\n- First point',
+                                                priority='urgent')
+                        self.make_example_task_widget()
+
+
+                    def make_title_label(self):
+                        self.title_label = QLabel()
+                        self.layout.addWidget(self.title_label)
+                        self.title_label.setText('Graphics')
+
+                    def make_color_palette_selection_widget(self):
+                        class ColorSelector(QFrame):
+                            """
+                                This task containt:
+                            - A label that indicates the task's color
+                            - A push button containing the color of the widget
+                            - A color picker widget, popping up at the click of the color push button,
+                             that allows the user to select a new color.
+                            """
+                            def __init__(self,
+                                         planner: Planner,
+                                         graphics_settings_widget: GraphicsSettingsWidget,
+                                         color_property: str,
+                                         parent: QWidget = None,
+                                         style :PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                """
+
+                                """
+                                self.planner = planner
+                                self.graphics_settings_widget = graphics_settings_widget
+                                self._style = style
+                                if color_property not in list(DEFAULT_PLANNER_STYLE.color_palette.keys()):
+                                    raise ValueError(f'Invalid color property "{color_property}". '
+                                          f'Valid color properties are {list(DEFAULT_PLANNER_STYLE.color_palette.keys())}')
+                                self.color_property = color_property
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QHBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignLeft)
+                                # Label
+                                self.make_label()
+                                # Color button
+                                self.make_color_button()
+                                # Color picking dialog
+                                self.make_color_dialog()
+
+                            def make_label(self):
+                                self.label = QLabel(self.color_property.title())
+                                self.layout.addWidget(self.label)
+                                self.label.setAlignment(Qt.AlignLeft)
+
+                            def make_color_button(self):
+                                self.color_pushbutton = QPushButton()
+                                # Layout
+                                self.layout.addWidget(self.color_pushbutton)
+                                # User interactions
+                                def clicked():
+                                    if not self.color_dialog.isVisible():
+                                        self.color_dialog.show()
+
+                                # Connect task and widget
+                                self.color_pushbutton.clicked.connect(clicked)
+
+                            def make_color_dialog(self):
+                                self.color_dialog = QColorDialog()
+                                # Geometry
+                                x, y, w, h = [getattr(self.parent().geometry(), f'{z}')() for z in ['x',
+                                                                                                    'y',
+                                                                                                    'width',
+                                                                                                    'height']]
+                                self.color_dialog.setWindowTitle(f'Widget Color')
+                                self.color_dialog.setGeometry(int(x + 1.5 * w),
+                                                                 int(y + h / 2),
+                                                                 self.color_dialog.width(),
+                                                                 self.color_dialog.height())
+                                # User interactions
+                                def update_color():
+                                    self.chosen_color = self.color_dialog.selectedColor().name()
+                                    self.parent()._style.color_palette['background 2']
+                                    stylesheet = '''
+                                                QPushButton
+                                                {
+                                                    background-color:%s;
+                                                    border-color:%s;
+                                                }
+                                                QPushButton:hover
+                                                {
+                                                    border:2px solid %s;
+                                                }
+                                                ''' % (self.chosen_color,
+                                                       self._style.color_palette['background 1'],
+                                                       self._style.color_palette['text - highlight'])
+
+                                    self.color_pushbutton.setStyleSheet(stylesheet)
+
+                                    self.graphics_settings_widget.chosen_style.\
+                                        color_palette[self.color_property] = self.color_dialog.selectedColor().name()
+                                    self.graphics_settings_widget.update_example_task()
+
+                                self.color_dialog.accepted.connect(update_color)
+                        class ColorPaletteSelectionWidget(QFrame):
+                            """
+                            This widget contains:
+
+                                - A title stating the purpose
+                                - A color selection widget for each section of a widget's color palette, as defined in
+                                  taskplanner.gui.styles module
+                            """
+                            def __init__(self,
+                                         planner: Planner,
+                                         graphics_settings_widget: GraphicsSettingsWidget,
+                                         parent: QWidget = None,
+                                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                self.planner = planner
+                                self.graphics_settings_widget = graphics_settings_widget
+                                self._style = style
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QVBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignTop)
+                                self.layout.setAlignment(Qt.AlignLeft)
+                                # Label
+                                self.make_title_label()
+                                # Make color selection widgets
+                                self.make_color_selectors()
+
+                            def make_title_label(self):
+                                self.title_label = QLabel()
+                                self.layout.addWidget(self.title_label)
+                                # Set text
+                                self.title_label.setText('Color Palette')
+
+                            def make_color_selectors(self):
+                                self.color_selectors = {}
+                                for color_property in self.graphics_settings_widget.chosen_style.color_palette.keys():
+                                    widget = ColorSelector(planner=self.planner,
+                                                           graphics_settings_widget=self.graphics_settings_widget,
+                                                           color_property=color_property,
+                                                           parent=self,
+                                                           style=self._style)
+                                    self.layout.addWidget(widget)
+                                    self.color_selectors[color_property] = widget
+
+                        self.color_palette_selection_widget = ColorPaletteSelectionWidget(planner=self.planner,
+                                                                                          graphics_settings_widget=self,
+                                                                                          parent=self,
+                                                                                          style=self._style)
+                        self.layout.addWidget(self.color_palette_selection_widget)
+
+
+
+
+
+
+                    def make_font_selection_widget(self):
+                        warning('To be implemented')
+
+                    def make_apply_pushbutton(self):
+                        warning('To be implemented')
+
+                    def make_example_task_widget(self):
+                        planner = Planner()
+                        planner.add_tasks(self.example_task)
+                        self.example_task_widget = TaskWidget(task=self.example_task,
+                                                              planner=planner,
+                                                              parent=self,
+                                                              style=TaskWidgetStyle(
+                                                                  color_palette=self.chosen_style.color_palette,
+                                                                  font=self.chosen_style.font,
+                                                                  style_name=self.chosen_style.style_name
+                                                              ))
+                        self.layout.addWidget(self.example_task_widget.scrollarea)
+                        self.example_task_widget.title_widget.textedit.setReadOnly(True)
+
+                    def update_example_task(self):
+                        self.example_task_widget.hide()
+                        self.layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
+                        self.make_example_task_widget()
+
+
+                self.graphics_settings_widget = GraphicsSettingsWidget(planner=self.planner,
+                                                                       planner_widget=self.planner_widget,
+                                                                       parent=self,
+                                                                       style=self._style)
+
+
+        self.settings_tab = SettingsTab(planner=self.planner,
+                                        planner_widget=self,
+                                        parent=self,
+                                        style=self._style)
+        self.addTab(self.settings_tab, 'Settings')
+
 
 
     def to_string(self):
@@ -931,8 +1207,9 @@ class TaskListWidget(QWidget):
                 widget = TaskWidgetSimple(parent=self,
                                           task=task,
                                           planner=self.planner,
-                                          style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                font=self._style.font_name)
+                                          style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                font=self._style.font,
+                                                                style_name=self._style.style_name)
                                           )
                 self.layout.addWidget(widget)
                 self.task_widgets += [widget]
@@ -1443,8 +1720,9 @@ class CalendarWidget(QWidget):
                 def clicked():
                     task_widget = TaskWidget(task=self.task,
                                              planner=self.planner,
-                                             style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                   font=self._style.font_name))
+                                             style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                   font=self._style.font,
+                                                                   style_name=self._style.style_name))
                     task_widget.show()
 
                 def update_label():
@@ -1605,8 +1883,9 @@ class CalendarWidget(QWidget):
                     if event.type() == QEvent.MouseButtonDblClick:
                         task_widget = TaskWidget(task=self.task,
                                                  planner=self.planner,
-                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                       font=self._style.font_name))
+                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                       font=self._style.font,
+                                                                       style_name=self._style.style_name))
 
                         task_widget.show()
                     elif event.type() == QEvent.MouseButtonPress:
@@ -1825,8 +2104,9 @@ class TaskBucketWidget(QFrame):
                         widget = TaskWidgetSimple(parent=self,
                                                   task=task,
                                                   planner=self.planner,
-                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette_name,
-                                                                        font=self._style.font_name)
+                                                  style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                        font=self._style.font,
+                                                                        style_name=self._style.style_name)
                                                   )
                         widget.setContentsMargins(10,
                                                   0,

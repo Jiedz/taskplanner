@@ -3,6 +3,7 @@ This module define the styles to be used by the task-related widgets.
 """
 import ast
 import os
+from signalslot import Signal
 
 from taskplanner.gui.utilities import get_primary_screen
 from PyQt5.Qt import QSize
@@ -39,22 +40,22 @@ ICON_SIZES = {'regular': QSize(int(SCREEN_WIDTH/70), int(SCREEN_WIDTH/70)),
 
 class TaskWidgetStyle:
     def __init__(self,
-                 color_palette: str = 'dark material',
-                 font='light'):
-        if font not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
-        self._font = FONTS[font]
-        self.font_name = font
-        if color_palette not in list(COLOR_PALETTES.keys()):
-            raise ValueError(
-                f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
-        self._color_palette = COLOR_PALETTES[color_palette]
-        self.color_palette_name = color_palette
+                 color_palette: dict = COLOR_PALETTES['dark material'],
+                 font: dict = FONTS['light'],
+                 style_name: str = 'dark material'):
+        self.style_name = style_name
+        self._font = font
+        self._color_palette = color_palette
+        self.font_changed = Signal()
+        self.color_palette_changed = Signal()
         # Locate icon path
         self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
         self.icon_path = os.path.join(self.icon_path,
                                       'styles/icons',
-                                      self.color_palette_name.replace(" ", "-"))
+                                      self.style_name.replace(" ", "-"))
+        if not os.path.exists(self.icon_path):
+            self.icon_path = os.path.join(self.icon_path,
+                                         'styles/icons/dark-material')
         # Get screen size
         screen_size = get_primary_screen()
         # Define style sheets
@@ -746,42 +747,43 @@ class TaskWidgetStyle:
         return self._font
 
     @font.setter
-    def font(self, name):
-        if name not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {name}. Accepted fonts are {FONTS}')
+    def font(self, value):
+        if set(value.keys()) != set(FONTS['light'].keys()):
+            raise ValueError(f'Invalid font {value}. A valid font must contain the keys {list(FONTS["light"].keys())}')
         self.__init__(color_palette=self.color_palette,
-                      font=FONTS[name])
+                      font=value)
 
     @property
     def color_palette(self):
         return self._color_palette
 
     @color_palette.setter
-    def color_palette(self, name):
-        if name not in list(COLOR_PALETTES.keys()):
-            raise ValueError(f'Invalid color_palette name. Accepted color_palettes are {COLOR_PALETTES}')
-        self.__init__(font=self.font,
-                      color_palette=COLOR_PALETTES[name])
+    def color_palette(self,value):
+        if set(value.keys()) != set(COLOR_PALETTES['light'].keys()):
+            raise ValueError(f'Invalid font {value}. A valid font must contain the keys '
+                             f'{list(COLOR_PALETTES["light"].keys())}')
+        self.__init__(color_palette=value,
+                      font=self.font)
 
 
 class PlannerWidgetStyle:
     def __init__(self,
-                 color_palette: str = 'dark material',
-                 font='light'):
-        if font not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {font}. Accepted font names are {tuple(FONTS.keys())}')
-        self._font = FONTS[font]
-        self.font_name = font
-        if color_palette not in list(COLOR_PALETTES.keys()):
-            raise ValueError(
-                f'Invalid font name {color_palette}. Accepted font names are {tuple(COLOR_PALETTES.keys())}')
-        self._color_palette = COLOR_PALETTES[color_palette]
-        self.color_palette_name = color_palette
+                 color_palette: dict = COLOR_PALETTES['dark material'],
+                 font: dict = FONTS['light'],
+                 style_name: str = 'dark material'):
+        self.style_name = style_name
+        self._font = font
+        self._color_palette = color_palette
+        self.font_changed = Signal()
+        self.color_palette_changed = Signal()
         # Locate icon path
         self.icon_path = os.path.join(*os.path.split(__file__)[:-1])
         self.icon_path = os.path.join(self.icon_path,
                                       'styles/icons',
-                                      self.color_palette_name.replace(" ", "-"))
+                                      self.style_name.replace(" ", "-"))
+        if not os.path.exists(self.icon_path):
+            self.icon_path = os.path.join(self.icon_path,
+                                      'styles/icons/dark-material')
         # Get screen size
         screen_size = get_primary_screen()
         # Define style sheets
@@ -1194,19 +1196,20 @@ class PlannerWidgetStyle:
         return self._font
 
     @font.setter
-    def font(self, name):
-        if name not in list(FONTS.keys()):
-            raise ValueError(f'Invalid font name {name}. Accepted fonts are {FONTS}')
+    def font(self, value):
+        if set(value.keys()) != set(FONTS['light'].keys()):
+            raise ValueError(f'Invalid font {value}. A valid font must contain the keys {list(FONTS["light"].keys())}')
         self.__init__(color_palette=self.color_palette,
-                      font=FONTS[name])
+                      font=value)
 
     @property
     def color_palette(self):
         return self._color_palette
 
     @color_palette.setter
-    def color_palette(self, name):
-        if name not in list(COLOR_PALETTES.keys()):
-            raise ValueError(f'Invalid color_palette name. Accepted color_palettes are {COLOR_PALETTES}')
-        self.__init__(font=self.font,
-                      color_palette=COLOR_PALETTES[name])
+    def color_palette(self, value):
+        if set(value.keys()) != set(COLOR_PALETTES['light'].keys()):
+            raise ValueError(f'Invalid font {value}. A valid font must contain the keys '
+                             f'{list(COLOR_PALETTES["light"].keys())}')
+        self.__init__(color_palette=value,
+                      font=self.font)

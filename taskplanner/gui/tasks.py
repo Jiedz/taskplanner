@@ -63,10 +63,9 @@ class TaskWidget(QWidget):
         self.task, self.planner = task, planner
         super().__init__(parent=parent)
         # Layout
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignHCenter)
         self.layout.setAlignment(Qt.AlignTop)
-        self.setLayout(self.layout)
         # Geometry
         # Get screen size
         width, height = int(SCREEN_WIDTH * 0.4), int(SCREEN_HEIGHT * 0.65)
