@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import \
     QTabWidget,
     QFrame,
     QGridLayout,
+    QSlider,
     )
 
 from signalslot import Signal
@@ -889,18 +890,18 @@ class PlannerWidget(QTabWidget):
                     def make_color_palette_selection_widget(self):
                         class ColorSelector(QFrame):
                             """
-                                This task containt:
-                            - A label that indicates the task's color
-                            - A push button containing the color of the widget
-                            - A color picker widget, popping up at the click of the color push button,
-                             that allows the user to select a new color.
+                            This widget contains:
+                                - A label that indicates the color's purpose
+                                - A push button containing the color
+                                - A color picker widget, popping up at the click of the color push button,
+                                 that allows the user to select a new color.
                             """
                             def __init__(self,
                                          planner: Planner,
                                          graphics_settings_widget: GraphicsSettingsWidget,
                                          color_property: str,
                                          parent: QWidget = None,
-                                         style :PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
                                 """
 
                                 """
@@ -918,6 +919,7 @@ class PlannerWidget(QTabWidget):
                                 # Label
                                 self.make_label()
                                 # Color button
+                                self.chosen_color = self.graphics_settings_widget.chosen_style.color_palette[color_property]
                                 self.make_color_button()
                                 # Color picking dialog
                                 self.make_color_dialog()
@@ -954,7 +956,6 @@ class PlannerWidget(QTabWidget):
                                 # User interactions
                                 def update_color():
                                     self.chosen_color = self.color_dialog.selectedColor().name()
-                                    self.parent()._style.color_palette['background 2']
                                     stylesheet = '''
                                                 QPushButton
                                                 {
@@ -976,6 +977,22 @@ class PlannerWidget(QTabWidget):
                                     self.graphics_settings_widget.update_example_task()
 
                                 self.color_dialog.accepted.connect(update_color)
+                                # Set the initial color
+                                stylesheet = '''
+                                            QPushButton
+                                            {
+                                                background-color:%s;
+                                                border-color:%s;
+                                            }
+                                            QPushButton:hover
+                                            {
+                                                border:2px solid %s;
+                                            }
+                                            ''' % (self.chosen_color,
+                                                   self._style.color_palette['background 1'],
+                                                   self._style.color_palette['text - highlight'])
+                                self.color_pushbutton.setStyleSheet(stylesheet)
+
                         class ColorPaletteSelectionWidget(QFrame):
                             """
                             This widget contains:
@@ -999,6 +1016,9 @@ class PlannerWidget(QTabWidget):
                                 self.layout.setAlignment(Qt.AlignLeft)
                                 # Label
                                 self.make_title_label()
+                                # Layout for color selection widgets
+                                self.color_selectors_layout = QGridLayout()
+                                self.layout.addLayout(self.color_selectors_layout)
                                 # Make color selection widgets
                                 self.make_color_selectors()
 
@@ -1010,13 +1030,21 @@ class PlannerWidget(QTabWidget):
 
                             def make_color_selectors(self):
                                 self.color_selectors = {}
-                                for color_property in self.graphics_settings_widget.chosen_style.color_palette.keys():
+                                color_properties = list(self.graphics_settings_widget.chosen_style.color_palette.keys())
+                                color_properties = [c for c in color_properties if 'text' not in c.lower()] \
+                                                 + [c for c in color_properties if 'text' in c.lower()]
+                                n_cols = 3
+                                n_rows = 2
+                                for i in range(len(color_properties)):
+                                    col = i % n_cols
+                                    row = int(i/n_cols)
+                                    color_property = color_properties[i]
                                     widget = ColorSelector(planner=self.planner,
                                                            graphics_settings_widget=self.graphics_settings_widget,
                                                            color_property=color_property,
                                                            parent=self,
                                                            style=self._style)
-                                    self.layout.addWidget(widget)
+                                    self.color_selectors_layout.addWidget(widget, row, col)
                                     self.color_selectors[color_property] = widget
 
                         self.color_palette_selection_widget = ColorPaletteSelectionWidget(planner=self.planner,
@@ -1031,7 +1059,126 @@ class PlannerWidget(QTabWidget):
 
 
                     def make_font_selection_widget(self):
-                        warning('To be implemented')
+                        class FontSizeSelector(QFrame):
+                            """
+                            This widget contains:
+                                - A label that indicates the font's purpose
+                                - A slider that allows the user to select the font size
+                            """
+
+                            def __init__(self,
+                                         planner: Planner,
+                                         graphics_settings_widget: GraphicsSettingsWidget,
+                                         font_property: str,
+                                         parent: QWidget = None,
+                                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                """
+
+                                :param planner:
+                                :param graphics_settings_widget:
+                                :param font_property:
+                                :param parent:
+                                :param style:
+                                """
+                                self.planner = planner
+                                self.graphics_settings_widget = graphics_settings_widget
+                                self._style = style
+                                if font_property not in list(DEFAULT_PLANNER_STYLE.font.keys()):
+                                    raise ValueError(f'Invalid font property "{font}". '
+                                                     f'Valid color properties are '
+                                                     f'{list(set(DEFAULT_PLANNER_STYLE.font.keys())) - set(["family"])}')
+                                self.font_property = font_property
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QHBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignLeft)
+                                # Label
+                                self.make_label()
+                                # Color button
+                                self.chosen_fontsize = int(self.graphics_settings_widget.chosen_style.font[self.font_property].replace('pt', ''))
+                                self.make_slider()
+
+                            def make_label(self):
+                                self.label = QLabel(self.font_property.title())
+                                self.layout.addWidget(self.label)
+                                self.label.setAlignment(Qt.AlignLeft)
+
+                            def make_slider(self):
+                                self.slider = QSlider()
+                                self.slider.setOrientation(Qt.Horizontal)
+                                self.slider.setRange(6, 30)
+                                self.slider.setValue(self.chosen_fontsize)
+                                # Layout
+                                self.layout.addWidget(self.slider)
+
+                                # User interactions
+                                def changed():
+                                    self.chosen_fontsize = self.slider.value()
+                                    self.graphics_settings_widget.chosen_style.font[self.font_property] = \
+                                    f'{self.chosen_fontsize}pt'
+                                    self.graphics_settings_widget.update_example_task()
+
+                                # Connect task and widget
+                                self.slider.valueChanged.connect(changed)
+
+                        class FontSelectionWidget(QFrame):
+                            """
+                            This widget contains:
+
+                                - A title stating the purpose
+                                - A font selector widget for each section of a widget's font, as defined in
+                                  taskplanner.gui.styles module
+                            """
+                            def __init__(self,
+                                         planner: Planner,
+                                         graphics_settings_widget: GraphicsSettingsWidget,
+                                         parent: QWidget = None,
+                                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                self.planner = planner
+                                self.graphics_settings_widget = graphics_settings_widget
+                                self._style = style
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QVBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignTop)
+                                self.layout.setAlignment(Qt.AlignLeft)
+                                # Label
+                                self.make_title_label()
+                                # Layout for font selection widgets
+                                self.font_selectors_layout = QGridLayout()
+                                self.layout.addLayout(self.font_selectors_layout)
+                                # Make font selection widgets
+                                self.make_font_selectors()
+
+                            def make_title_label(self):
+                                self.title_label = QLabel()
+                                self.layout.addWidget(self.title_label)
+                                # Set text
+                                self.title_label.setText('Font')
+
+                            def make_font_selectors(self):
+                                self.font_selectors = {}
+                                font_properties = list(self.graphics_settings_widget.chosen_style.font.keys())
+                                font_properties.remove('family')
+                                n_cols = 3
+                                n_rows = 2
+                                for i in range(len(font_properties)):
+                                    col = i % n_cols
+                                    row = int(i/n_cols)
+                                    font_property = font_properties[i]
+                                    widget = FontSizeSelector(planner=self.planner,
+                                                           graphics_settings_widget=self.graphics_settings_widget,
+                                                           font_property=font_property,
+                                                           parent=self,
+                                                           style=self._style)
+                                    self.font_selectors_layout.addWidget(widget, row, col)
+                                    self.font_selectors[font_property] = widget
+
+                        self.font_selection_widget = FontSelectionWidget(planner=self.planner,
+                                                                                          graphics_settings_widget=self,
+                                                                                          parent=self,
+                                                                                          style=self._style)
+                        self.layout.addWidget(self.font_selection_widget)
 
                     def make_apply_pushbutton(self):
                         warning('To be implemented')
