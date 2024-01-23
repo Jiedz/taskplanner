@@ -34,7 +34,6 @@ from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple, task_widget_widget_open
 from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES, COLOR_PALETTES, FONTS
 from taskplanner.gui.utilities import set_style, get_primary_screen, select_file, select_directory
-from matplotlib.animation import FuncAnimation
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -96,7 +95,7 @@ class PlannerWidget(QTabWidget):
             set_style(widget=self,
                       stylesheets=self._style.stylesheets['main'])
             self.planner_tab.set_style(self._style)
-            #self.task_buckets_tab.set_style(self._style)
+            self.task_buckets_tab.set_style(self._style)
             #self.settings_tab.set_style(self._style)
 
     def closeEvent(self, a0):
@@ -138,7 +137,8 @@ class PlannerWidget(QTabWidget):
                                                     int(self.height() * 0.035))
                 # Upload task pushbutton
                 self.make_upload_task_pushbutton()
-                self.upload_task_pushbutton.setFixedSize(self.upload_task_pushbutton.iconSize())
+                self.upload_task_pushbutton.setFixedSize(int(self.upload_task_pushbutton.iconSize().width()*2),
+                                                         int(self.upload_task_pushbutton.iconSize().height()*2))
                 self.new_task_settings_layout.addSpacing(int(SCREEN_WIDTH * 0.35)
                                                          - self.new_task_textedit.width()
                                                          - self.upload_task_pushbutton.width())
@@ -202,6 +202,9 @@ class PlannerWidget(QTabWidget):
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['task_list_scrollarea'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']['task_list_widget'])
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['calendar_scrollarea'])
@@ -598,6 +601,18 @@ class PlannerWidget(QTabWidget):
                                                   int(self.height() * 0.08))
                 # Stats widget
                 self.make_stats_widget()
+                # Style
+                self.set_style()
+
+
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
+                if self._style is not None:
+                    #set_style(widget=self,
+                    #          stylesheets=self._style.stylesheets
+                    #          ['task_buckets_tab']['main'])
+                    self.property_widget.set_style(self._style)
+                    self.bucket_list_widget.set_style(self._style)
 
             def make_property_widget(self):
                 class PropertyWidget(QWidget):
@@ -621,6 +636,7 @@ class PlannerWidget(QTabWidget):
                         super().__init__(parent=parent)
                         self.planner = planner
                         self.bucket_list_widget = bucket_list_widget
+                        self._style = style
                         # Layout
                         self.layout = QVBoxLayout()
                         self.setLayout(self.layout)
@@ -628,6 +644,16 @@ class PlannerWidget(QTabWidget):
                         self.make_label()
                         # Combobox
                         self.make_combobox()
+                        # Style
+                        self.set_style()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['task_buckets_tab']['property_widget'])
+
 
                     def make_label(self):
                         self.label = QLabel('Sort By')
@@ -724,13 +750,6 @@ class PlannerWidget(QTabWidget):
                         self.graph_number_of_tasks.figure.axes[0].grid(False)
                         self.graph_number_of_tasks.figure.axes[0].axis('equal')
                         self.graph_number_of_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
-                        '''
-                        self.graph_animation_number_of_tasks = FuncAnimation(self.graph_number_of_tasks.figure,
-                                                                             lambda i: self.update_graphs,
-                                                                             frames=100,
-                                                                             repeat=False,
-                                                                             blit=True)
-                        '''
                         # Fraction of time planned for tasks associated to a certain property value
                         self.graph_time_for_tasks = PyplotWidget()
                         self.graphs_layout.addWidget(self.graph_time_for_tasks)
@@ -741,23 +760,16 @@ class PlannerWidget(QTabWidget):
                         self.graph_time_for_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
                         self.graph_time_for_tasks.figure.axes[0].grid(False)
                         self.graph_time_for_tasks.figure.axes[0].axis('equal')
-                        '''
-                        self.graph_animation_time_for_tasks = FuncAnimation(self.graph_time_for_tasks.figure,
-                                                                             self.update_graphs,
-                                                                             frames=100,
-                                                                             repeat=False,
-                                                                             blit=True)
-                        '''
 
                         self.update_graphs()
 
-                    def update_graphs(self, **kwargs):
+                    def update_graph_number_of_tasks(self, **kwargs):
                         # Fraction of tasks associated to a certain property value
                         self.graph_number_of_tasks.set_title(f'Number of Tasks of Each '
                                                              f'{self.bucket_list_widget.property_name.title()}')
                         self.graph_number_of_tasks.figure.axes[0].cla()
                         if self.planner.all_tasks:
-                            _, outer_labels, inner_labels = self.graph_number_of_tasks.figure.axes[0].pie(
+                            patches, outer_labels, inner_labels = self.graph_number_of_tasks.figure.axes[0].pie(
                                 x=[len(bucket.task_list_widget.tasks)
                                    for bucket
                                    in self.bucket_list_widget.bucket_widgets],
@@ -777,6 +789,19 @@ class PlannerWidget(QTabWidget):
                                 label.set_fontfamily(self._style.font['family'])
                                 label.set_fontsize('large')
                                 label.set_color(self._style.color_palette['text'])
+                        # Connect bucket list changes to graph updates
+                        self.bucket_list_widget.property_name_changed.disconnect(self.update_graph_number_of_tasks)
+                        self.bucket_list_widget.property_name_changed.connect(self.update_graph_number_of_tasks)
+
+                        self.bucket_list_widget.buckets_updated.disconnect(self.update_graph_number_of_tasks)
+                        self.bucket_list_widget.buckets_updated.connect(self.update_graph_number_of_tasks)
+
+                        for widget in self.bucket_list_widget.bucket_widgets:
+                            widget.task_list_widget.tasks_updated.disconnect(self.update_graph_number_of_tasks)
+                            widget.task_list_widget.tasks_updated.connect(self.update_graph_number_of_tasks)
+
+
+                    def update_graph_time_for_tasks(self, **kwargs):
                         # Fraction of time planned for tasks associated to a certain property value
                         self.graph_time_for_tasks.set_title(
                             f'Time Planned for Each '
@@ -787,9 +812,9 @@ class PlannerWidget(QTabWidget):
                             n_days = []
                             for widget in self.bucket_list_widget.bucket_widgets:
                                 n_days += [sum([abs(relativedelta(t.end_date, t.start_date).days + 1)
-                                              for t in widget.task_list_widget.tasks])]
+                                                for t in widget.task_list_widget.tasks])]
 
-                            _, outer_labels, inner_labels = self.graph_time_for_tasks.figure.axes[0].pie(
+                            patches, outer_labels, inner_labels = self.graph_time_for_tasks.figure.axes[0].pie(
                                 x=n_days,
                                 # explode=True,
                                 labels=[bucket.label.text()
@@ -809,22 +834,26 @@ class PlannerWidget(QTabWidget):
                                 label.set_color(self._style.color_palette['text'])
 
                         # Connect bucket list changes to graph updates
-                        self.bucket_list_widget.property_name_changed.disconnect(self.update_graphs)
-                        self.bucket_list_widget.property_name_changed.connect(self.update_graphs)
+                        self.bucket_list_widget.property_name_changed.disconnect(self.update_graph_time_for_tasks)
+                        self.bucket_list_widget.property_name_changed.connect(self.update_graph_time_for_tasks)
 
-                        self.bucket_list_widget.buckets_updated.disconnect(self.update_graphs)
-                        self.bucket_list_widget.buckets_updated.connect(self.update_graphs)
+                        self.bucket_list_widget.buckets_updated.disconnect(self.update_graph_time_for_tasks)
+                        self.bucket_list_widget.buckets_updated.connect(self.update_graph_time_for_tasks)
 
                         for widget in self.bucket_list_widget.bucket_widgets:
-                            widget.task_list_widget.tasks_updated.disconnect(self.update_graphs)
-                            widget.task_list_widget.tasks_updated.connect(self.update_graphs)
+                            widget.task_list_widget.tasks_updated.disconnect(self.update_graph_time_for_tasks)
+                            widget.task_list_widget.tasks_updated.connect(self.update_graph_time_for_tasks)
                         # Connect task start and end dates to graph updates
                         for task in self.planner.all_tasks:
-                            task.start_date_changed.disconnect(self.update_graphs)
-                            task.start_date_changed.connect(self.update_graphs)
+                            task.start_date_changed.disconnect(self.update_graph_time_for_tasks)
+                            task.start_date_changed.connect(self.update_graph_time_for_tasks)
 
-                            task.end_date_changed.disconnect(self.update_graphs)
-                            task.end_date_changed.connect(self.update_graphs)
+                            task.end_date_changed.disconnect(self.update_graph_time_for_tasks)
+                            task.end_date_changed.connect(self.update_graph_time_for_tasks)
+
+                    def update_graphs(self, **kwargs):
+                        self.update_graph_number_of_tasks()
+                        self.update_graph_time_for_tasks()
 
                 self.stats_widget = StatsWidget(planner=self.planner,
                                                 bucket_list_widget=self.bucket_list_widget,
@@ -2398,9 +2427,14 @@ class TaskBucketWidget(QFrame):
         self.task_list_scrollarea.setWidget(self.task_list_widget)
         self.layout.addWidget(self.task_list_scrollarea)
         # Style
+        self.set_style()
+
+    def set_style(self, style: PlannerWidgetStyle = None):
+        self._style = style if style is not None else self._style
         if self._style is not None:
-            set_style(self,
-                      self._style.stylesheets['task_buckets_tab']['bucket_list_widget'])
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets
+                      ['task_buckets_tab']['bucket_list_widget']['bucket_widget'])
 
     def make_label(self):
         self.label = QLabel()
@@ -2533,6 +2567,17 @@ class BucketListWidget(QFrame):
         self.layout.setContentsMargins(0, 0, 0, 0)
         # Set property name and automatically make the task buckets
         self.property_name = property_name
+        # Style
+        self.set_style()
+
+    def set_style(self, style: PlannerWidgetStyle = None):
+        self._style = style if style is not None else self._style
+        if self._style is not None:
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets
+                      ['task_buckets_tab']['bucket_list_widget']['main'])
+            for widget in self.bucket_widgets:
+                widget.set_style(self._style)
 
     @property
     def property_name(self):

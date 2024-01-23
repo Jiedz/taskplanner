@@ -686,7 +686,7 @@ class TaskWidgetStyle:
                                     {
                                         color:%s;
                                         font-size:%s;
-                                        border:0px solid %s;
+                                        border:None;
                                     }
                                     QPushButton:hover
                                     {
@@ -694,7 +694,7 @@ class TaskWidgetStyle:
                                     }
                                     ''' % (self.color_palette['text - highlight'],
                                        self.font['size - text'],
-                                       self.color_palette['border']),
+                                       ),
                                 'calendar_widget':
                                     '''
                                     QCalendarWidget QWidget
@@ -721,7 +721,7 @@ class TaskWidgetStyle:
                                         {
                                             color:%s;
                                             font-size:%s;
-                                            border:0px solid %s;
+                                            border:None;
                                         }
                                         QPushButton:hover
                                         {
@@ -729,7 +729,7 @@ class TaskWidgetStyle:
                                         }
                                         ''' % (self.color_palette['text - highlight'],
                                                self.font['size - text'],
-                                               self.color_palette['border']),
+                                               ),
                                     'calendar_widget':
                                         '''
                                         QCalendarWidget QWidget
@@ -826,8 +826,21 @@ class PlannerWidgetStyle:
                             '''
                             QWidget
                             {
+                                border:
                             }
                             ''',
+                        'task_list_widget':
+                            {
+                                'main':
+                                    {
+                                        '''
+                                        QWidget
+                                        {
+                                            border:2px solid %s;
+                                        }
+                                        ''' % self.color_palette['border']
+                                    }
+                            },
                         'task_list_scrollarea':
                             '''
                             QScrollArea
@@ -1063,7 +1076,7 @@ class PlannerWidgetStyle:
                                     {
                                         color:%s;
                                         font-size:%s;
-                                        border:1px solid %s;
+                                        border:None;
                                     }
                                     QPushButton:hover
                                     {
@@ -1071,7 +1084,7 @@ class PlannerWidgetStyle:
                                     }
                                     ''' % (self.color_palette['text - highlight'],
                                            self.font['size - text'],
-                                           self.color_palette['border']),
+                                           ),
                                 'calendar_widget':
                                     '''
                                     QCalendarWidget QWidget
@@ -1098,7 +1111,7 @@ class PlannerWidgetStyle:
                                     {
                                         color:%s;
                                         font-size:%s;
-                                        border:1px solid %s;
+                                        border:None;
                                     }
                                     QPushButton:hover
                                     {
@@ -1106,7 +1119,7 @@ class PlannerWidgetStyle:
                                     }
                                     ''' % (self.color_palette['text - highlight'],
                                            self.font['size - text'],
-                                           self.color_palette['border']),
+                                           ),
                                 'calendar_widget':
                                     '''
                                     QCalendarWidget QWidget
@@ -1124,21 +1137,52 @@ class PlannerWidgetStyle:
                                     '''
                                     QLabel
                                     {
-
+                                        font-size:%s;
+                                        color:%s;
+                                        border:None;
                                     }
-                                    ''',
+                                    ''' % (self.font['size - text'],
+                                           self.color_palette['text - light']),
                                 'combobox':
                                     '''
-
-                                    '''
+                                    QComboBox
+                                    {
+                                        font-size:%s;
+                                        color:%s;
+                                        border:1px solid %s;
+                                    }
+                                    ''' % (self.font['size - text'],
+                                           self.color_palette['text'],
+                                           self.color_palette['border']),
                             },
                         'bucket_list_widget':
                             {
+                                'main':
+                                    '''
+                                    QFrame
+                                    {
+                                        border:None;
+                                    }
+                                    ''',
                                 'bucket_widget':
                                     {
+                                        'main':
+                                            '''
+                                            QFrame
+                                            {
+                                                border:4px solid %s;
+                                            }
+                                            ''' % self.color_palette['border'],
                                         'label':
                                             '''
-                                            ''',
+                                            QLabel
+                                            {
+                                                font-size:%s;
+                                                color:%s;
+                                                border:None;
+                                            }
+                                            ''' % (self.font['size - title 2'],
+                                                   self.color_palette['text - light']),
                                         'task_list_widget':
                                             '''
                                             '''
