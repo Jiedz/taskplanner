@@ -34,6 +34,7 @@ from taskplanner.planner import Planner
 from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple, task_widget_widget_open
 from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES, COLOR_PALETTES, FONTS
 from taskplanner.gui.utilities import set_style, get_primary_screen, select_file, select_directory
+from matplotlib.animation import FuncAnimation
 
 SCREEN = get_primary_screen()
 SCREEN_WIDTH = SCREEN.width
@@ -712,8 +713,8 @@ class PlannerWidget(QTabWidget):
 
                     def make_graph_widgets(self):
                         from taskplanner.gui.utilities import PyplotWidget
-                        width_inches, height_inches = screeninfo.get_monitors()[0].width_mm / 2.54 * 0.1, \
-                                                      screeninfo.get_monitors()[0].width_mm / 2.54 * 0.1
+                        width_inches, height_inches = screeninfo.get_monitors()[0].width_mm / 2.54 * 0.075, \
+                                                      screeninfo.get_monitors()[0].width_mm / 2.54 * 0.075
                         # Fraction of tasks associated to a certain property value
                         self.graph_number_of_tasks = PyplotWidget()
                         self.graphs_layout.addWidget(self.graph_number_of_tasks)
@@ -723,6 +724,13 @@ class PlannerWidget(QTabWidget):
                         self.graph_number_of_tasks.figure.axes[0].grid(False)
                         self.graph_number_of_tasks.figure.axes[0].axis('equal')
                         self.graph_number_of_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
+                        '''
+                        self.graph_animation_number_of_tasks = FuncAnimation(self.graph_number_of_tasks.figure,
+                                                                             lambda i: self.update_graphs,
+                                                                             frames=100,
+                                                                             repeat=False,
+                                                                             blit=True)
+                        '''
                         # Fraction of time planned for tasks associated to a certain property value
                         self.graph_time_for_tasks = PyplotWidget()
                         self.graphs_layout.addWidget(self.graph_time_for_tasks)
@@ -733,6 +741,13 @@ class PlannerWidget(QTabWidget):
                         self.graph_time_for_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
                         self.graph_time_for_tasks.figure.axes[0].grid(False)
                         self.graph_time_for_tasks.figure.axes[0].axis('equal')
+                        '''
+                        self.graph_animation_time_for_tasks = FuncAnimation(self.graph_time_for_tasks.figure,
+                                                                             self.update_graphs,
+                                                                             frames=100,
+                                                                             repeat=False,
+                                                                             blit=True)
+                        '''
 
                         self.update_graphs()
 
@@ -755,12 +770,12 @@ class PlannerWidget(QTabWidget):
                             )
                             for label in outer_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('xx-large')
+                                label.set_fontsize('large')
                                 label.set_color(self._style.color_palette['text'])
 
                             for label in inner_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('xx-large')
+                                label.set_fontsize('large')
                                 label.set_color(self._style.color_palette['text'])
                         # Fraction of time planned for tasks associated to a certain property value
                         self.graph_time_for_tasks.set_title(
@@ -785,12 +800,12 @@ class PlannerWidget(QTabWidget):
                             )
                             for label in outer_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('xx-large')
+                                label.set_fontsize('large')
                                 label.set_color(self._style.color_palette['text'])
 
                             for label in inner_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('xx-large')
+                                label.set_fontsize('large')
                                 label.set_color(self._style.color_palette['text'])
 
                         # Connect bucket list changes to graph updates
