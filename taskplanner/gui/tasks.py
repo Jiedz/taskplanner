@@ -172,13 +172,13 @@ class TaskWidget(QWidget):
             set_style(widget=self,
                       stylesheets=self._style.stylesheets['standard view'])
         task_widget_widget_open.emit()
-        task_widget_widget_open.connect(lambda **kwargs: self.hide())
+        task_widget_widget_open.connect(self.hide)
 
     def show(self):
         super().show()
         self.scrollarea.show()
 
-    def hide(self):
+    def hide(self, **kwargs):
         super().hide()
         self.scrollarea.hide()
 
@@ -1282,9 +1282,8 @@ class TaskWidgetSimple(QWidget):
         self.make_subtasks()
 
         # Set style
-        if self._style is not None:
-            set_style(widget=self,
-                      stylesheets=self._style.stylesheets['simple view'])
+        self.set_style()
+        # Set visibility
         if hide:
             self.hide()
         else:
@@ -1294,6 +1293,13 @@ class TaskWidgetSimple(QWidget):
         for slot in slots:
             self.task.children_changed.disconnect(slot)
         self.task.children_changed.connect(lambda **kwargs: self.update_widget())
+
+    def set_style(self, style: TaskWidgetStyle = None):
+        self._style = style if style is not None else self._style
+        if self._style is not None:
+            self.task_line_widget.set_style(self._style)
+            for widget in self.subtask_widgets:
+                widget.set_style(self._style)
 
     def update_widget(self):
         self.make_subtasks()
@@ -1308,7 +1314,7 @@ class TaskWidgetSimple(QWidget):
                 subtask_widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
                                                   planner=self.planner,
-                                                  hide=True,#not self.task_line_widget.expanded,
+                                                  hide=not self.task_line_widget.expanded,
                                                   style=self._style
                                                   )
                 self.layout.addWidget(subtask_widget)
@@ -1385,21 +1391,21 @@ class TaskLineWidget(QFrame):
         self.task.color_changed.connect(lambda **kwargs: self.set_style())
         self.set_style()
 
-    def set_style(self):
+    def set_style(self, style: TaskWidgetStyle = None):
+        self._style = style if style is not None else self._style
+        if self._style is not None:
             self.setStyleSheet(
-                  '''
-                  QWidget
-                  {
-                      border:2px solid %s;
-                  }
-                  ''' % (self.task.color)
+                '''
+                QWidget
+                {
+                    border:2px solid %s;
+                }
+                ''' % self.task.color
             )
-            if self._style is not None:
-                set_style(widget=self,
-                          stylesheets=self._style.stylesheets
-                          ['simple view']
-                          ['task_line_widget'])
-
+            set_style(widget=self,
+                      stylesheets=self._style.stylesheets
+                      ['simple view']
+                      ['task_line_widget'])
 
     def make_name_pushbutton(self):
         self.name_pushbutton = QPushButton()

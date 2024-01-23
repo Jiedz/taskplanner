@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import \
     QFrame,
     QGridLayout,
     QSlider,
+    QFontComboBox,
     )
 
 from signalslot import Signal
@@ -30,7 +31,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from taskplanner.tasks import Task
 from taskplanner.planner import Planner
-from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple
+from taskplanner.gui.tasks import TaskWidget, TaskWidgetSimple, task_widget_widget_open
 from taskplanner.gui.styles import TaskWidgetStyle, PlannerWidgetStyle, ICON_SIZES, COLOR_PALETTES, FONTS
 from taskplanner.gui.utilities import set_style, get_primary_screen, select_file, select_directory
 
@@ -85,10 +86,17 @@ class PlannerWidget(QTabWidget):
         # Settings tab
         self.make_settings_tab()
         # Set style
+        self.set_style()
+        self.planner.tasks_changed.connect(lambda **kwargs: self.to_file())
+
+    def set_style(self, style: PlannerWidgetStyle = None):
+        self._style = style if style is not None else self._style
         if self._style is not None:
             set_style(widget=self,
                       stylesheets=self._style.stylesheets['main'])
-        self.planner.tasks_changed.connect(lambda **kwargs: self.to_file())
+            self.planner_tab.set_style(self._style)
+            #self.task_buckets_tab.set_style(self._style)
+            #self.settings_tab.set_style(self._style)
 
     def closeEvent(self, a0):
         self.to_file()
@@ -176,11 +184,16 @@ class PlannerWidget(QTabWidget):
                 # Calendar start and end dates
                 self.make_start_end_dates()
                 self.start_date_widget.setFixedSize(int(SCREEN_WIDTH * 0.05),
-                                                int(self.height() * 0.05))
-                self.end_date_widget.setFixedSize(int(SCREEN_WIDTH * 0.05),
                                                     int(self.height() * 0.05))
+                self.end_date_widget.setFixedSize(int(SCREEN_WIDTH * 0.05),
+                                                  int(self.height() * 0.05))
 
+                self.set_style()
+                # Lock the vertical scrollbars of the timelines and the task list
+                self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
 
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
@@ -194,9 +207,16 @@ class PlannerWidget(QTabWidget):
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['new_task_textedit'])
+                    set_style(widget=self.upload_task_pushbutton,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']
+                              ['upload_task_pushbutton'])
+                    self.task_list_widget.set_style(self._style)
+                    self.calendar_widget.set_style(self._style)
+                    self.view_selector.set_style(self._style)
+                    self.start_date_widget.set_style(self._style)
+                    self.end_date_widget.set_style(self._style)
 
-                # Lock the vertical scrollbars of the timelines and the task list
-                self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
 
 
             def make_new_task_textedit(self):
@@ -249,12 +269,7 @@ class PlannerWidget(QTabWidget):
                         print(e)
 
                 self.upload_task_pushbutton.clicked.connect(lambda: callback())
-                # Set style
-                if self._style is not None:
-                    set_style(widget=self.upload_task_pushbutton,
-                              stylesheets=self._style.stylesheets
-                              ['planner_tab']
-                              ['upload_task_pushbutton'])
+
 
             def make_view_selector(self):
                 class ViewSelector(QFrame):
@@ -278,12 +293,16 @@ class PlannerWidget(QTabWidget):
                         # Combobox
                         self.make_combobox()
                         # Style
+                        self.set_style()
+                        self.layout.addStretch()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
                         if self._style is not None:
                             set_style(widget=self,
                                       stylesheets=self._style.stylesheets
                                       ['planner_tab']
                                       ['view_selector'])
-                        self.layout.addStretch()
 
                     def make_label(self):
                         self.label = QLabel('Planner View')
@@ -320,7 +339,8 @@ class PlannerWidget(QTabWidget):
 
             def make_task_list_widget(self):
                 self.task_list_widget = TaskListWidget(planner=self.planner,
-                                                       parent=self)
+                                                       parent=self,
+                                                       style=self._style)
 
             def make_calendar_widget(self):
                 self.calendar_widget = CalendarWidget(planner=self.planner,
@@ -372,6 +392,10 @@ class PlannerWidget(QTabWidget):
                         self.make_pushbutton()
                         # Calendar widget
                         self.make_calendar_widget()
+                        self.set_style()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
                         if self._style is not None:
                             set_style(widget=self,
                                       stylesheets=self._style.stylesheets
@@ -874,12 +898,15 @@ class PlannerWidget(QTabWidget):
                         # Font selection widget
                         self.make_font_selection_widget()
                         # Apply pushbutton
+                        self.make_apply_pushbutton()
                         # Example task widget
                         self.example_task = Task(name='Example Task',
                                                 category='Example Category',
                                                 description='## Example Description\n- First point',
                                                 priority='urgent')
                         self.make_example_task_widget()
+
+                        self.apply_pushbutton.click()
 
 
                     def make_title_label(self):
@@ -1054,10 +1081,6 @@ class PlannerWidget(QTabWidget):
                         self.layout.addWidget(self.color_palette_selection_widget)
 
 
-
-
-
-
                     def make_font_selection_widget(self):
                         class FontSizeSelector(QFrame):
                             """
@@ -1084,7 +1107,7 @@ class PlannerWidget(QTabWidget):
                                 self.graphics_settings_widget = graphics_settings_widget
                                 self._style = style
                                 if font_property not in list(DEFAULT_PLANNER_STYLE.font.keys()):
-                                    raise ValueError(f'Invalid font property "{font}". '
+                                    raise ValueError(f'Invalid font property "{font_property}". '
                                                      f'Valid color properties are '
                                                      f'{list(set(DEFAULT_PLANNER_STYLE.font.keys())) - set(["family"])}')
                                 self.font_property = font_property
@@ -1120,6 +1143,63 @@ class PlannerWidget(QTabWidget):
 
                                 # Connect task and widget
                                 self.slider.valueChanged.connect(changed)
+
+                        class FontFamilySelector(QFrame):
+                            """
+                            This widget contains:
+                                - A label that indicates the purpose of choosing the font family
+                                - A push button containing the name of the font family
+                                - A font picker widget, popping up at the click of the color push button,
+                                 that allows the user to select a new font family.
+                            """
+
+                            def __init__(self,
+                                         planner: Planner,
+                                         graphics_settings_widget: GraphicsSettingsWidget,
+                                         parent: QWidget = None,
+                                         style: PlannerWidgetStyle = DEFAULT_PLANNER_STYLE):
+                                """
+
+                                :param planner:
+                                :param graphics_settings_widget:
+                                :param parent:
+                                :param style:
+                                """
+                                self.planner = planner
+                                self.graphics_settings_widget = graphics_settings_widget
+                                self._style = style
+                                super().__init__(parent=parent)
+                                # Layout
+                                self.layout = QHBoxLayout(self)
+                                self.layout.setAlignment(Qt.AlignLeft)
+                                # Label
+                                self.make_label()
+                                self.chosen_font_family = self.graphics_settings_widget.chosen_style.font['family']
+                                # Color font combobox
+                                self.make_combobox()
+
+                            def make_label(self):
+                                self.label = QLabel('Family')
+                                self.layout.addWidget(self.label)
+                                self.label.setAlignment(Qt.AlignLeft)
+
+                            def make_combobox(self):
+                                self.combobox = QFontComboBox()
+                                self.layout.addWidget(self.combobox)
+
+                                # User interactions
+                                def update_family():
+                                    self.chosen_font_family = self.combobox.currentText()
+
+                                    self.graphics_settings_widget.chosen_style. \
+                                        font['family'] = self.chosen_font_family
+                                    self.graphics_settings_widget.update_example_task()
+
+                                self.combobox.currentTextChanged.connect(update_family)
+                                # Set the initial font
+                                self.combobox.blockSignals(True)
+                                self.combobox.setCurrentText(self.chosen_font_family)
+                                self.combobox.blockSignals(False)
 
                         class FontSelectionWidget(QFrame):
                             """
@@ -1174,6 +1254,13 @@ class PlannerWidget(QTabWidget):
                                     self.font_selectors_layout.addWidget(widget, row, col)
                                     self.font_selectors[font_property] = widget
 
+                                self.font_selectors['family'] = FontFamilySelector(planner=self.planner,
+                                                                                   graphics_settings_widget=self.graphics_settings_widget,
+                                                                                   parent=self,
+                                                                                   style=self._style)
+                                self.font_selectors_layout.addWidget(self.font_selectors['family'], 3, 0)
+
+
                         self.font_selection_widget = FontSelectionWidget(planner=self.planner,
                                                                                           graphics_settings_widget=self,
                                                                                           parent=self,
@@ -1181,7 +1268,15 @@ class PlannerWidget(QTabWidget):
                         self.layout.addWidget(self.font_selection_widget)
 
                     def make_apply_pushbutton(self):
-                        warning('To be implemented')
+                        self.apply_pushbutton = QPushButton('Apply Changes')
+                        self.layout.addWidget(self.apply_pushbutton)
+
+                        def clicked():
+                            self.planner_widget.set_style(PlannerWidgetStyle(color_palette=self.chosen_style.color_palette,
+                                                                             font=self.chosen_style.font,
+                                                                             style_name=self.chosen_style.style_name))
+
+                        self.apply_pushbutton.clicked.connect(clicked)
 
                     def make_example_task_widget(self):
                         planner = Planner()
@@ -1196,6 +1291,7 @@ class PlannerWidget(QTabWidget):
                                                               ))
                         self.layout.addWidget(self.example_task_widget.scrollarea)
                         self.example_task_widget.title_widget.textedit.setReadOnly(True)
+                        task_widget_widget_open.disconnect(self.example_task_widget.hide)
 
                     def update_example_task(self):
                         self.example_task_widget.hide()
@@ -1332,6 +1428,7 @@ class TaskListWidget(QWidget):
         """
         self.planner, self._style = planner, style
         self.task_widgets_updated = Signal()
+        self._style = style
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout(self)
@@ -1340,12 +1437,22 @@ class TaskListWidget(QWidget):
         self.task_widgets = []
         self.layout.addStretch()
         self.make_task_widgets()
+        # Set style
+        self.set_style()
 
         slots = [slot for slot in self.planner.tasks_changed._slots if
                  'TaskListWidget.' in str(slot)]
         for slot in slots:
             self.planner.tasks_changed.disconnect(slot)
         self.planner.tasks_changed.connect(lambda **kwargs: self.make_task_widgets())
+
+    def set_style(self, style: PlannerWidgetStyle = None):
+        self._style = style if style is not None else self._style
+        if self._style is not None:
+            for widget in self.task_widgets:
+                widget.set_style(TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                 font=self._style.font,
+                                                 style_name=self._style.style_name))
 
     def make_task_widgets(self):
         self.layout.removeItem(self.layout.itemAt(self.layout.count() - 1))
@@ -1431,8 +1538,6 @@ class CalendarWidget(QWidget):
         # Horizontal layout for settings
         self.settings_layout = QHBoxLayout()
         self.layout.addLayout(self.settings_layout)
-        # Start date widget
-        # End date widget
         self.settings_layout.addStretch()
         # Horizontal layout for month widgets
         self.month_widgets_layout = QHBoxLayout()
@@ -1456,12 +1561,20 @@ class CalendarWidget(QWidget):
             self.planner.tasks_changed.disconnect(slot)
         self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
 
+        self.set_style()
+        self.layout.addStretch()
+
+    def set_style(self, style: PlannerWidgetStyle = None):
+        self._style = style if style is not None else self._style
         if self._style is not None:
             set_style(widget=self,
                       stylesheets=self._style.stylesheets
                       ['planner_tab']
                       ['calendar_widget']['main'])
-        self.layout.addStretch()
+            for widget in self.month_widgets:
+                widget.set_style(self._style)
+            for widget in self.timeline_widgets:
+                widget.set_style(self._style)
 
     @property
     def view_type(self):
@@ -1508,9 +1621,6 @@ class CalendarWidget(QWidget):
         self.make_month_widgets()
         self.make_timelines()
 
-    def make_start_end_date_widgets(self):
-        warning(f'Funtion "make_start_end_date_widgets" of widget {self} is not implemented yet.')
-
     def make_month_widgets(self):
         # Make month widget
         class MonthWidget(QFrame):
@@ -1546,6 +1656,7 @@ class CalendarWidget(QWidget):
                 self.layout.addLayout(self.week_widgets_layout)
 
                 # Week widgets
+                '''
                 if calendar_widget.view_type in ['weekly',
                                                  'daily']:
                     if self._style is not None:
@@ -1586,6 +1697,45 @@ class CalendarWidget(QWidget):
                               ['planner_tab']
                               ['calendar_widget']
                               ['month_widget'])
+                '''
+                if calendar_widget.view_type in ['weekly',
+                                                 'daily']:
+                    self.layout.setContentsMargins(0, 0, 0, 0)
+                    self.week_widgets_layout.setSpacing(0)
+                    self.make_week_widgets()
+                    self.layout.insertStretch(1)
+                else:
+                    self.setFixedWidth(int(SCREEN_WIDTH * 0.13))
+                # Style
+                self.set_style()
+
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
+                if self._style is not None:
+                    if self.calendar_widget.view_type in ['weekly',
+                                                          'daily']:
+                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
+                        stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
+                        stylesheet['label'] = stylesheet['label'].replace(
+                            'background-color:None',
+                            f'background-color:{self._style.color_palette["background 2"]}')
+                        self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
+                        self.layout.setAlignment(Qt.AlignLeft)
+                    else:
+                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
+                        stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
+                        stylesheet['label'] = stylesheet['label'].replace(
+                            f'background-color:{self._style.color_palette["background 2"]}',
+                            'background-color:None')
+                        self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
+                        self.layout.setAlignment(Qt.AlignCenter)
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']
+                              ['calendar_widget']
+                              ['month_widget'])
+                    for widget in self.week_widgets:
+                        widget.set_style(self._style)
 
             def make_label(self):
                 self.label = QLabel()
@@ -1629,6 +1779,7 @@ class CalendarWidget(QWidget):
                         self.day_widgets_layout.setAlignment(Qt.AlignLeft)
                         self.layout.addLayout(self.day_widgets_layout)
                         # Day widgets
+                        '''
                         if calendar_widget.view_type == 'daily':
                             if self._style is not None:
                                 stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
@@ -1663,6 +1814,37 @@ class CalendarWidget(QWidget):
                                       ['planner_tab']
                                       ['calendar_widget']
                                       ['week_widget'])
+                        '''
+                        if calendar_widget.view_type == 'daily':
+                            self.layout.setContentsMargins(0, 0, 0, 0)
+                            self.day_widgets_layout.setSpacing(0)
+                            self.make_day_widgets()
+                        else:
+                            self.setFixedWidth(int(SCREEN_WIDTH * 0.05))
+                        # Style
+                        self.set_style()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
+                        if self._style is not None:
+                            if self.calendar_widget.view_type == 'daily':
+                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
+                                stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
+                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
+                                self.layout.setAlignment(Qt.AlignLeft)
+                            else:
+                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
+                                stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
+                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
+                                self.layout.setAlignment(Qt.AlignCenter)
+
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['planner_tab']
+                                      ['calendar_widget']
+                                      ['week_widget'])
+                            for widget in self.day_widgets:
+                                widget.set_style(self._style)
 
                     def make_label(self):
                         self.label = QLabel()
@@ -1697,12 +1879,17 @@ class CalendarWidget(QWidget):
                                 # Day label
                                 self.make_label()
                                 # Set style
+                                self.set_style()
+
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
                                 if self._style is not None:
                                     set_style(widget=self,
                                               stylesheets=self._style.stylesheets
                                               ['planner_tab']
                                               ['calendar_widget']
                                               ['day_widget'])
+
 
                             def make_label(self):
                                 self.label = QLabel()
@@ -1844,12 +2031,8 @@ class CalendarWidget(QWidget):
                 for slot in slots:
                     self.task.children_changed.disconnect(slot)
                 self.task.children_changed.connect(lambda **kwargs: self.make_sub_timelines())
-                if self._style is not None:
-                    set_style(widget=self,
-                              stylesheets=self._style.stylesheets
-                              ['planner_tab']
-                              ['calendar_widget']
-                              ['timeline']['main'])
+                # Style
+                self.set_style()
                 '''
                 from PyQt5.Qt import QGraphicsDropShadowEffect, QColor
                 self.shadow = QGraphicsDropShadowEffect()
@@ -1857,6 +2040,18 @@ class CalendarWidget(QWidget):
                 self.shadow.setBlurRadius(10)
                 self.label_pushbutton.setGraphicsEffect(self.shadow)
                 '''
+
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
+                if self._style is not None:
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['planner_tab']
+                              ['calendar_widget']
+                              ['timeline']['main'])
+                    self.set_color()
+                    for widget in self.sub_timelines:
+                        widget.set_style(self._style)
 
             def make_label_pushbutton(self):
                 self.label_pushbutton = QPushButton()
