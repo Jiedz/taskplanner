@@ -799,10 +799,14 @@ class PlannerWidgetStyle:
                         font-family:%s;
                         color:%s;
                     }
+                    QTabWidget
+                    {
+                        border:None;
+                    }
                     QTabWidget:tab-bar
                     {
-                        min-width:%spx;
-                        min-height:%spx;
+                        width:%spx;
+                        height:%spx;
                     }
                     QTabBar:tab
                     {
@@ -810,16 +814,20 @@ class PlannerWidgetStyle:
                         color:%s;
                         font-size:%s;
                     }
+                    QTabBar:tab:hover
+                    {
+                        background-color:%s;
+                    }
                     ''' % (self.color_palette['background 1'],
                            self.color_palette['border'],
                            self.font['family'],
                            self.color_palette['text'],
-                           int(SCREEN_WIDTH*0.1),
-                           int(1.5*int(self.font['size - text'].split('p')[0])),
+                           int(SCREEN_WIDTH*0.3),
+                           int(3*int(self.font['size - text'].split('p')[0])),
                            self.color_palette['background 2'],
                            self.color_palette['text'],
                            self.font['size - text'],
-                           ),
+                           self.color_palette['background 1']),
                 'planner_tab':
                     {
                         'main':

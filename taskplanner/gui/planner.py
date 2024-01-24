@@ -86,7 +86,7 @@ class PlannerWidget(QTabWidget):
         # Settings tab
         self.make_settings_tab()
         # Set style
-        self.set_style()
+        self.settings_tab.graphics_settings_widget.apply_pushbutton.click()
         self.planner.tasks_changed.connect(lambda **kwargs: self.to_file())
 
     def set_style(self, style: PlannerWidgetStyle = None):
@@ -96,7 +96,7 @@ class PlannerWidget(QTabWidget):
                       stylesheets=self._style.stylesheets['main'])
             self.planner_tab.set_style(self._style)
             self.task_buckets_tab.set_style(self._style)
-            #self.settings_tab.set_style(self._style)
+            self.settings_tab.set_style(self._style)
 
     def closeEvent(self, a0):
         self.to_file()
@@ -990,8 +990,6 @@ class PlannerWidget(QTabWidget):
                                                 description='## Example Description\n- First point',
                                                 priority='urgent')
                         self.make_example_task_widget()
-
-                        self.apply_pushbutton.click()
                         # Style
                         self.set_style()
 
