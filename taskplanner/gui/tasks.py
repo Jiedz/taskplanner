@@ -935,7 +935,7 @@ class TaskWidget(QWidget):
 
             def __init__(self,
                          task: Task,
-                         render_type: str = 'plain text',
+                         render_type: str = 'Markdown',
                          planner: Planner = None,
                          parent: QWidget = None,
                          style: TaskWidgetStyle = None):
@@ -1093,7 +1093,7 @@ class TaskWidget(QWidget):
                 self.textbrowser.setReadOnly(False)
 
         self.description_widget = DescriptionWidget(task=self.task,
-                                                    render_type='Plain Text',
+                                                    render_type='Markdown',
                                                     planner=self.planner,
                                                     parent=self,
                                                     style = self._style)

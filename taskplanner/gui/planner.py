@@ -611,6 +611,9 @@ class PlannerWidget(QTabWidget):
                     #set_style(widget=self,
                     #          stylesheets=self._style.stylesheets
                     #          ['task_buckets_tab']['main'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['task_buckets_tab']['bucket_list_scrollarea'])
                     self.property_widget.set_style(self._style)
                     self.bucket_list_widget.set_style(self._style)
 
@@ -730,6 +733,28 @@ class PlannerWidget(QTabWidget):
                         self.graphs_layout.setAlignment(Qt.AlignCenter)
                         # Graph widgets
                         self.make_graph_widgets()
+                        # Style
+                        self.set_style()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['task_buckets_tab']
+                                      ['stats_widget']['main'])
+                            set_style(widget=self.title_label,
+                                      stylesheets=self._style.stylesheets
+                                      ['task_buckets_tab']
+                                      ['stats_widget']['title_label'])
+                            set_style(widget=self.graph_number_of_tasks,
+                                      stylesheets=self._style.stylesheets
+                                      ['task_buckets_tab']
+                                      ['stats_widget']['graph_widget'])
+                            set_style(widget=self.graph_time_for_tasks,
+                                      stylesheets=self._style.stylesheets
+                                      ['task_buckets_tab']
+                                      ['stats_widget']['graph_widget'])
 
                     def make_title_label(self):
                         self.title_label = QLabel()
@@ -746,7 +771,7 @@ class PlannerWidget(QTabWidget):
                         self.graphs_layout.addWidget(self.graph_number_of_tasks)
                         self.graph_number_of_tasks.figure.set_size_inches(width_inches, height_inches, forward=True)
                         self.graph_number_of_tasks.canvas.setFixedSize(int(self.parent().width() * 0.4),
-                                                                       int(self.parent().width() * 0.25))
+                                                                       int(self.parent().width() * 0.2))
                         self.graph_number_of_tasks.figure.axes[0].grid(False)
                         self.graph_number_of_tasks.figure.axes[0].axis('equal')
                         self.graph_number_of_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
@@ -756,7 +781,7 @@ class PlannerWidget(QTabWidget):
                         # self.graph_number_of_tasks.figure.set_dpi(int(self.parent().width() * 0.05))
                         self.graph_time_for_tasks.figure.set_size_inches(width_inches, height_inches, forward=True)
                         self.graph_time_for_tasks.canvas.setFixedSize(int(self.parent().width() * 0.4),
-                                                                      int(self.parent().width() * 0.25))
+                                                                      int(self.parent().width() * 0.2))
                         self.graph_time_for_tasks.figure.patch.set_facecolor(self._style.color_palette['background 1'])
                         self.graph_time_for_tasks.figure.axes[0].grid(False)
                         self.graph_time_for_tasks.figure.axes[0].axis('equal')
@@ -900,6 +925,21 @@ class PlannerWidget(QTabWidget):
                 self.graphics_scrollarea.setWidget(self.graphics_settings_widget)
                 self.layout.addWidget(self.graphics_scrollarea)
                 self.graphics_settings_widget.setFixedWidth(self.graphics_settings_widget.example_task_widget.width())
+                # Style
+                self.set_style()
+
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
+                if self._style is not None:
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['settings_tab']
+                              ['main'])
+                    set_style(widget=self.graphics_scrollarea,
+                              stylesheets=self._style.stylesheets
+                              ['settings_tab']
+                              ['graphics_scrollarea'])
+                    self.graphics_settings_widget.set_style(self._style)
 
 
             def make_graphics_settings(self):
@@ -943,6 +983,7 @@ class PlannerWidget(QTabWidget):
                         self.make_font_selection_widget()
                         # Apply pushbutton
                         self.make_apply_pushbutton()
+                        self.apply_pushbutton.setFixedWidth(int(SCREEN_WIDTH*0.05))
                         # Example task widget
                         self.example_task = Task(name='Example Task',
                                                 category='Example Category',
@@ -951,6 +992,26 @@ class PlannerWidget(QTabWidget):
                         self.make_example_task_widget()
 
                         self.apply_pushbutton.click()
+                        # Style
+                        self.set_style()
+
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['settings_tab']['graphics_settings_widget']
+                                      ['main'])
+                            set_style(widget=self.title_label,
+                                      stylesheets=self._style.stylesheets
+                                      ['settings_tab']['graphics_settings_widget']
+                                      ['title_label'])
+                            set_style(widget=self.apply_pushbutton,
+                                      stylesheets=self._style.stylesheets
+                                      ['settings_tab']['graphics_settings_widget']
+                                      ['apply_pushbutton'])
+                            self.color_palette_selection_widget.set_style(self._style)
+                            self.font_selection_widget.set_style(self._style)
 
 
                     def make_title_label(self):
@@ -994,6 +1055,38 @@ class PlannerWidget(QTabWidget):
                                 self.make_color_button()
                                 # Color picking dialog
                                 self.make_color_dialog()
+                                # Style
+                                self.set_style()
+
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['color_palette_selection_widget']['color_selector']
+                                              ['main'])
+                                    set_style(widget=self.label,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['color_palette_selection_widget']['color_selector']
+                                              ['label'])
+                                    pushbutton_stylesheet = \
+                                        stylesheet = '''
+                                            QPushButton
+                                            {
+                                                background-color:%s;
+                                                border-color:%s;
+                                            }
+                                            QPushButton:hover
+                                            {
+                                                border:2px solid %s;
+                                            }
+                                            ''' % (self.chosen_color,
+                                                   self._style.color_palette['background 1'],
+                                                   self._style.color_palette['text - highlight'])
+                                    set_style(widget=self.color_pushbutton,
+                                              stylesheets=pushbutton_stylesheet)
 
                             def make_label(self):
                                 self.label = QLabel(self.color_property.title())
@@ -1092,6 +1185,24 @@ class PlannerWidget(QTabWidget):
                                 self.layout.addLayout(self.color_selectors_layout)
                                 # Make color selection widgets
                                 self.make_color_selectors()
+                                # Style
+                                self.set_style()
+                                
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['color_palette_selection_widget']
+                                              ['main'])
+                                    set_style(widget=self.title_label,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['color_palette_selection_widget']
+                                              ['title_label'])
+                                    for selector in self.color_selectors.values():
+                                        selector.set_style(self._style)
 
                             def make_title_label(self):
                                 self.title_label = QLabel()
@@ -1164,6 +1275,27 @@ class PlannerWidget(QTabWidget):
                                 # Color button
                                 self.chosen_fontsize = int(self.graphics_settings_widget.chosen_style.font[self.font_property].replace('pt', ''))
                                 self.make_slider()
+                                # Style
+                                self.set_style()
+
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['fontsize_selector']
+                                              ['main'])
+                                    set_style(widget=self.label,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['fontsize_selector']
+                                              ['label'])
+                                    set_style(widget=self.slider,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['fontsize_selector']
+                                              ['slider'])
 
                             def make_label(self):
                                 self.label = QLabel(self.font_property.title())
@@ -1221,6 +1353,27 @@ class PlannerWidget(QTabWidget):
                                 self.chosen_font_family = self.graphics_settings_widget.chosen_style.font['family']
                                 # Color font combobox
                                 self.make_combobox()
+                                # Style
+                                self.set_style()
+
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['font_family_selector']
+                                              ['main'])
+                                    set_style(widget=self.label,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['font_family_selector']
+                                              ['label'])
+                                    set_style(widget=self.combobox,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']['font_family_selector']
+                                              ['combobox'])
 
                             def make_label(self):
                                 self.label = QLabel('Family')
@@ -1273,6 +1426,24 @@ class PlannerWidget(QTabWidget):
                                 self.layout.addLayout(self.font_selectors_layout)
                                 # Make font selection widgets
                                 self.make_font_selectors()
+                                # Style
+                                self.set_style()
+
+                            def set_style(self, style: PlannerWidgetStyle = None):
+                                self._style = style if style is not None else self._style
+                                if self._style is not None:
+                                    set_style(widget=self,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']
+                                              ['main'])
+                                    set_style(widget=self.title_label,
+                                              stylesheets=self._style.stylesheets
+                                              ['settings_tab']['graphics_settings_widget']
+                                              ['font_selection_widget']
+                                              ['title_label'])
+                                    for selector in self.font_selectors.values():
+                                        selector.set_style(self._style)
 
                             def make_title_label(self):
                                 self.title_label = QLabel()
@@ -2419,6 +2590,7 @@ class TaskBucketWidget(QFrame):
         self.layout.setContentsMargins(0, 0, 0, 0)
         # Label
         self.make_label()
+        self.layout.addSpacing(20)
         # Task List Widget
         self.make_task_list()
         # Scrollarea for task list
@@ -2485,6 +2657,28 @@ class TaskBucketWidget(QFrame):
                 self.planner.tasks_changed.connect(self.make_task_widgets)
                 self.make_task_widgets()
                 self.destroyed.connect(self.disconnect_tasks)
+                # Style
+                self.set_style()
+
+            def set_style(self, style: PlannerWidgetStyle = None):
+                self._style = style if style is not None else self._style
+                if self._style is not None:
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['task_buckets_tab']
+                              ['bucket_list_widget']
+                              ['bucket_widget']
+                              ['task_list_widget']['main'])
+                    set_style(widget=self,
+                              stylesheets=self._style.stylesheets
+                              ['task_buckets_tab']
+                              ['bucket_list_widget']
+                              ['bucket_widget']
+                              ['task_list_scrollarea']['main'])
+                    for widget in self.task_widgets:
+                        widget.set_style(TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                         font=self._style.font,
+                                                         style_name=self._style.style_name))
 
             def make_task_widgets(self, **kwargs):
                 all_tasks = self.planner.all_tasks

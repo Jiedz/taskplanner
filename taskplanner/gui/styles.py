@@ -1155,6 +1155,13 @@ class PlannerWidgetStyle:
                                            self.color_palette['text'],
                                            self.color_palette['border']),
                             },
+                        'bucket_list_scrollarea':
+                            '''
+                            QScrollArea
+                            {
+                                border:None;
+                            }
+                            ''',
                         'bucket_list_widget':
                             {
                                 'main':
@@ -1170,7 +1177,7 @@ class PlannerWidgetStyle:
                                             '''
                                             QFrame
                                             {
-                                                border:4px solid %s;
+                                                border:3px solid %s;
                                             }
                                             ''' % self.color_palette['border'],
                                         'label':
@@ -1184,29 +1191,255 @@ class PlannerWidgetStyle:
                                             ''' % (self.font['size - title 2'],
                                                    self.color_palette['text - light']),
                                         'task_list_widget':
-                                            '''
-                                            '''
+                                            {
+                                                'main':
+                                                    '''
+                                                    QFrame
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    '''
+                                            },
+                                        'task_list_scrollarea':
+                                            {
+                                                'main':
+                                                    '''
+                                                    QFrame
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    '''
+                                            },
                                     }
                             },
                         'stats_widget':
                             {
-                                'label':
+                                'main':
+                                    '''
+                                    QFrame
+                                    {
+                                        border:*3px solid %s;
+                                    }
+                                    ''' % self.color_palette['border'],
+                                'title_label':
                                     '''
                                     QLabel
                                     {
-                                    
+                                        border:None;
+                                        font-size:%s;
+                                        color:%s;
                                     }
-                                    ''',
+                                    ''' % (self.font['size - title 2'],
+                                           self.color_palette['text - light']),
                                 'graph_widget':
                                     {
+                                        'main':
+                                            '''
+                                            QFrame
+                                            {
+                                                border:2px solid %s;
+                                            }
+                                            ''' % self.color_palette['border'],
                                         'title_label':
                                             '''
                                             QLabel
                                             {
-                                            
+                                                border:None;
+                                                font-size:%s;
+                                                color:%s;
                                             }
-                                            '''
+                                            ''' % (self.font['size - text'],
+                                                   self.color_palette['text'])
                                     }
+                            }
+                    },
+                'settings_tab':
+                    {
+                        'main':
+                            '''
+                            QWidget
+                            {
+                            }
+                            ''',
+                        'graphics_scrollarea':
+                            '''
+                            QScrollArea
+                            {
+                                border:None;
+                            }
+                            ''',
+                        'graphics_settings_widget':
+                            {
+                                'main':
+                                    '''
+                                    QFrame
+                                    {
+                                        border:3px solid %s;
+                                    }
+                                    ''' % self.color_palette['border'],
+                                'title_label':
+                                    '''
+                                    QLabel
+                                    {
+                                        font-size:%s;
+                                        color:%s;
+                                        border:None;
+                                    }
+                                    ''' % (self.font['size - title 2'],
+                                           self.color_palette['text - light']),
+                                'apply_pushbutton':
+                                    '''
+                                    QPushButton
+                                    {
+                                        font-size:%s;
+                                        color:%s;
+                                        border:1px solid %s;
+                                    }
+                                    QPushButton:hover
+                                    {
+                                        background-color:%s;
+                                    }
+                                    ''' % (self.font['size - text - small'],
+                                           self.color_palette['text'],
+                                           self.color_palette['border'],
+                                           self.color_palette['background 2']),
+                                'color_palette_selection_widget':
+                                    {
+                                        'main':
+                                            '''
+                                            QFrame
+                                            {
+                                                border:1px solid %s;
+                                            }
+                                            ''' % self.color_palette['border'],
+                                        'title_label':
+                                            '''
+                                            QLabel
+                                            {
+                                                font-size:%s;
+                                                color:%s;
+                                                border:None;
+                                            }
+                                            ''' % (self.font['size - text'],
+                                                   self.color_palette['text - light']),
+                                        'color_selector':
+                                            {
+                                                'main':
+                                                    '''
+                                                    QFrame
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    ''',
+                                                'label':
+                                                    '''
+                                                    QLabel
+                                                    {
+                                                        font-size:%s;
+                                                        color:%s;
+                                                        border:None;
+                                                    }
+                                                    ''' % (self.font['size - text - small'],
+                                                           self.color_palette['text']),
+                                                'color_dialog':
+                                                    '''
+                                                    QColorDialog
+                                                    {
+                                                        background-color
+                                                    }
+                                                    ''',
+                                            }
+                                    },
+                                'font_selection_widget':
+                                    {
+                                        'main':
+                                            '''
+                                            QFrame
+                                            {
+                                                border:1px solid %s;
+                                            }
+                                            ''' % self.color_palette['border'],
+                                        'title_label':
+                                            '''
+                                            QLabel
+                                            {
+                                                font-size:%s;
+                                                color:%s;
+                                                border:None;
+                                            }
+                                            ''' % (self.font['size - text'],
+                                                   self.color_palette['text - light']),
+                                        'fontsize_selector':
+                                            {
+                                                'main':
+                                                    '''
+                                                    QFrame
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    ''',
+                                                'label':
+                                                    '''
+                                                    QLabel
+                                                    {
+                                                        font-size:%s;
+                                                        color:%s;
+                                                        border:None;
+                                                    }
+                                                    ''' % (self.font['size - text - small'],
+                                                           self.color_palette['text']),
+                                                'slider':
+                                                    '''
+                                                    QSlider
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    QSlider::handle:horizontal
+                                                    {
+                                                        background-color:%s;
+                                                        border:1px solid %s;
+                                                    }
+                                                    ''' % (
+                                                        self.color_palette['background 2'],
+                                                        self.color_palette['border']),
+                                            },
+                                        'font_family_selector':
+                                            {
+                                                'main':
+                                                    '''
+                                                    QFrame
+                                                    {
+                                                        border:None;
+                                                    }
+                                                    ''',
+                                                'label':
+                                                    '''
+                                                    QLabel
+                                                    {
+                                                        font-size:%s;
+                                                        color:%s;
+                                                        border:None;
+                                                    }
+                                                    ''' % (self.font['size - text - small'],
+                                                           self.color_palette['text']),
+                                                'combobox':
+                                                    '''
+                                                    QCombobox
+                                                    {
+                                                        font-size:%s;
+                                                        color:%s;
+                                                        border:None;
+                                                    }
+                                                    QComboBox:item:selected
+                                                    {
+                                                        background-color:%s;
+                                                    }
+                                                    ''' % (
+                                                        self.font['size - text - small'],
+                                                        self.color_palette['text'],
+                                                        self.color_palette['background 2']),
+                                            }
+                                    },
                             }
                     }
             }
