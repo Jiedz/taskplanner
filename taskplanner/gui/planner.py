@@ -1976,7 +1976,7 @@ class CalendarWidget(QWidget):
                                  style: PlannerWidgetStyle = None):
                         self.planner = Planner
                         self.task_list_widget = task_list_widget
-                        self.calendar_widget = CalendarWidget
+                        self.calendar_widget = calendar_widget
                         self._style = style
                         self.date = date
                         self.dates = []
@@ -1992,42 +1992,6 @@ class CalendarWidget(QWidget):
                         self.day_widgets_layout.setAlignment(Qt.AlignLeft)
                         self.layout.addLayout(self.day_widgets_layout)
                         # Day widgets
-                        '''
-                        if calendar_widget.view_type == 'daily':
-                            if self._style is not None:
-                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
-                                stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
-                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
-                                set_style(widget=self,
-                                          stylesheets=self._style.stylesheets
-                                          ['planner_tab']
-                                          ['calendar_widget']
-                                          ['week_widget'])
-                                self.layout.setAlignment(Qt.AlignLeft)
-                            self.layout.setContentsMargins(0, 0, 0, 0)
-                            self.day_widgets_layout.setSpacing(0)
-                            self.make_day_widgets()
-                        else:
-                            self.setFixedWidth(int(SCREEN_WIDTH*0.05))
-                            if self._style is not None:
-                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
-                                stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
-                                self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
-                                set_style(widget=self,
-                                          stylesheets=self._style.stylesheets
-                                          ['planner_tab']
-                                          ['calendar_widget']
-                                          ['week_widget'])
-                                self.layout.setAlignment(Qt.AlignCenter)
-
-                        # Set style
-                        if self._style is not None:
-                            set_style(widget=self,
-                                      stylesheets=self._style.stylesheets
-                                      ['planner_tab']
-                                      ['calendar_widget']
-                                      ['week_widget'])
-                        '''
                         if calendar_widget.view_type == 'daily':
                             self.layout.setContentsMargins(0, 0, 0, 0)
                             self.day_widgets_layout.setSpacing(0)
