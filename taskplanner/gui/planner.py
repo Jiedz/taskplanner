@@ -796,7 +796,7 @@ class PlannerWidget(QTabWidget):
                         self.graph_number_of_tasks.set_title(f'Number of Tasks of Each '
                                                              f'{self.bucket_list_widget.property_name.title()}')
                         self.graph_number_of_tasks.figure.axes[0].cla()
-                        if self.planner.all_tasks:
+                        if any([widget.task_list_widget.tasks for widget in self.bucket_list_widget.bucket_widgets]):
                             patches, outer_labels, inner_labels = self.graph_number_of_tasks.figure.axes[0].pie(
                                 x=[len(bucket.task_list_widget.tasks)
                                    for bucket
@@ -835,7 +835,7 @@ class PlannerWidget(QTabWidget):
                             f'Time Planned for Each '
                             f'{self.bucket_list_widget.property_name.title()}')
                         self.graph_time_for_tasks.figure.axes[0].cla()
-                        if self.planner.all_tasks:
+                        if any([widget.task_list_widget.tasks for widget in self.bucket_list_widget.bucket_widgets]):
                             all_tasks = self.planner.all_tasks
                             n_days = []
                             for widget in self.bucket_list_widget.bucket_widgets:
@@ -985,8 +985,10 @@ class PlannerWidget(QTabWidget):
                         # Font selection widget
                         self.make_font_selection_widget()
                         # Apply pushbutton
+                        self.apply_pushbutton_layout = QHBoxLayout()
+                        self.apply_pushbutton_layout.setAlignment(Qt.AlignLeft)
+                        self.layout.addLayout(self.apply_pushbutton_layout)
                         self.make_apply_pushbutton()
-                        self.apply_pushbutton.setFixedWidth(int(SCREEN_WIDTH*0.05))
                         # Example task widget
                         self.example_task = Task(name='Example Task',
                                                 category='Example Category',
@@ -1425,6 +1427,7 @@ class PlannerWidget(QTabWidget):
                                 # Layout for font selection widgets
                                 self.font_selectors_layout = QGridLayout()
                                 self.layout.addLayout(self.font_selectors_layout)
+                                self.font_selectors_layout.setAlignment(Qt.AlignLeft)
                                 # Make font selection widgets
                                 self.make_font_selectors()
                                 # Style
@@ -1467,8 +1470,10 @@ class PlannerWidget(QTabWidget):
                                                            font_property=font_property,
                                                            parent=self,
                                                            style=self._style)
+                                    widget.slider.setFixedWidth(int(SCREEN_WIDTH * 0.06))
                                     self.font_selectors_layout.addWidget(widget, row, col)
                                     self.font_selectors[font_property] = widget
+
 
                                 self.font_selectors['family'] = FontFamilySelector(planner=self.planner,
                                                                                    graphics_settings_widget=self.graphics_settings_widget,
@@ -1485,7 +1490,7 @@ class PlannerWidget(QTabWidget):
 
                     def make_apply_pushbutton(self):
                         self.apply_pushbutton = QPushButton('Apply Changes')
-                        self.layout.addWidget(self.apply_pushbutton)
+                        self.apply_pushbutton_layout.addWidget(self.apply_pushbutton)
 
                         def clicked():
                             self.planner_widget.set_style(PlannerWidgetStyle(color_palette=self.chosen_style.color_palette,

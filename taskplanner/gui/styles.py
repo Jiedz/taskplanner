@@ -1303,6 +1303,7 @@ class PlannerWidgetStyle:
                                     '''
                                     QPushButton
                                     {
+                                        background-color:%s;
                                         font-size:%s;
                                         color:%s;
                                         border:1px solid %s;
@@ -1311,7 +1312,8 @@ class PlannerWidgetStyle:
                                     {
                                         background-color:%s;
                                     }
-                                    ''' % (self.font['size - text - small'],
+                                    ''' % (self.color_palette['border'],
+                                           self.font['size - text'],
                                            self.color_palette['text'],
                                            self.color_palette['border'],
                                            self.color_palette['background 2']),
@@ -1411,9 +1413,15 @@ class PlannerWidgetStyle:
                                                         background-color:%s;
                                                         border:1px solid %s;
                                                     }
+                                                    QSlider::handle:horizontal:hover
+                                                    {
+                                                        background-color:%s;
+                                                    }
                                                     ''' % (
                                                         self.color_palette['background 2'],
-                                                        self.color_palette['border']),
+                                                        self.color_palette['border'],
+                                                        self.color_palette['text - highlight'],
+                                                    ),
                                             },
                                         'font_family_selector':
                                             {
