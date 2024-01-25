@@ -1965,6 +1965,8 @@ class CalendarWidget(QWidget):
 
             def make_label(self):
                 self.label = QLabel()
+                if self.calendar_widget.view_type in ['weekly', 'daily']:
+                    self.label.setContentsMargins(10, 0, 0, 0)
                 # Layout
                 self.layout.addWidget(self.label)
                 self.label.setAlignment(Qt.AlignLeft)
@@ -2051,6 +2053,8 @@ class CalendarWidget(QWidget):
 
                     def make_label(self):
                         self.label = QLabel()
+                        if self.calendar_widget.view_type in ['daily']:
+                            self.label.setContentsMargins(10, 0, 0, 0)
                         # Layout
                         self.layout.addWidget(self.label)
                         self.label.setAlignment(Qt.AlignVCenter)
