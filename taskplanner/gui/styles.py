@@ -823,7 +823,7 @@ class PlannerWidgetStyle:
                            self.font['family'],
                            self.color_palette['text'],
                            int(SCREEN_WIDTH*0.3),
-                           int(3*int(self.font['size - text'].split('p')[0])),
+                           int(1.5*int(self.font['size - text'].split('p')[0])),
                            self.color_palette['background 2'],
                            self.color_palette['text'],
                            self.font['size - text'],
@@ -932,6 +932,7 @@ class PlannerWidgetStyle:
                                             '''
                                             QFrame
                                             {
+                                                background-color:None;
                                                 border:0px solid %s;
                                                 padding:0px;
                                             }
@@ -955,7 +956,8 @@ class PlannerWidgetStyle:
                                         'main':
                                             '''
                                             QWidget
-                                            {
+                                            {                      
+                                                background-color:None;
                                                 border:0px solid %s;
                                                 padding:0px;
                                             }
@@ -978,6 +980,7 @@ class PlannerWidgetStyle:
                                             '''
                                             QWidget
                                             {
+                                                background-color:None;
                                                 border:0.5px solid %s;
                                             }
                                             ''' % (self.color_palette['border']),
@@ -989,7 +992,8 @@ class PlannerWidgetStyle:
                                                 color:%s;
                                                 font-size:%s;
                                             }
-                                            ''' % (self.color_palette['text - light'],
+                                            ''' % (
+                                                   self.color_palette['text - light'],
                                                    self.font['size - text - small']),
                                     },
                                 'timeline':

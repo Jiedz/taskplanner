@@ -1,6 +1,5 @@
 from taskplanner.planner import Planner
 from taskplanner.gui.planner import PlannerWidget
-from taskplanner.gui.styles import PlannerWidgetStyle
 
 from PyQt5.QtWidgets import QApplication
 import sys

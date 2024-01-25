@@ -44,7 +44,8 @@ DEFAULT_PLANNER_STYLE = PlannerWidgetStyle(color_palette=COLOR_PALETTES['dark ma
 BUCKET_PROPERTY_NAMES = ['category',
                          'assignee',
                          'priority',
-                         'progress']
+                         'progress',
+                         'due date']
 BUCKET_PROPERTY_NAMES.sort()
 
 TIMELINE_VIEW_TYPES = ['daily',
@@ -592,7 +593,8 @@ class PlannerWidget(QTabWidget):
                 self.bucket_list_scrollarea.setWidgetResizable(True)
                 self.bucket_list_scrollarea.setWidget(self.bucket_list_widget)
                 self.layout.addWidget(self.bucket_list_scrollarea)
-                self.bucket_list_scrollarea.setFixedHeight(int(self.height() * 0.4))
+                self.bucket_list_scrollarea.setFixedHeight(int(self.bucket_list_widget.height()
+                                                               + self.bucket_list_scrollarea.horizontalScrollBar().height()))
                 self.bucket_list_scrollarea.verticalScrollBar().setDisabled(True)
                 self.bucket_list_scrollarea.verticalScrollBar().hide()
                 # Property widget
@@ -600,6 +602,7 @@ class PlannerWidget(QTabWidget):
                 self.property_widget.setFixedSize(int(SCREEN_WIDTH * 0.08),
                                                   int(self.height() * 0.08))
                 # Stats widget
+                self.layout.addSpacing(10)
                 self.make_stats_widget()
                 # Style
                 self.set_style()
@@ -1924,10 +1927,10 @@ class CalendarWidget(QWidget):
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
+                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
                 if self._style is not None:
                     if self.calendar_widget.view_type in ['weekly',
                                                           'daily']:
-                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
                         stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
                         stylesheet['label'] = stylesheet['label'].replace(
                             'background-color:None',
@@ -1935,11 +1938,16 @@ class CalendarWidget(QWidget):
                         self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
                         self.layout.setAlignment(Qt.AlignLeft)
                     else:
-                        stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['month_widget']
-                        stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
+                        if (self.date.year, self.date.month) == (date.today().year, date.today().month): # Highlight today's month
+                            color_old = 'None',
+                            color_new = self._style.color_palette['background 2']
+                            stylesheet['main'] = stylesheet['main'].replace(
+                                f'background-color:{color_old}',
+                                f'background-color:{color_new}')
                         stylesheet['label'] = stylesheet['label'].replace(
                             f'background-color:{self._style.color_palette["background 2"]}',
-                            'background-color:None')
+                            f'background-color:None')
+                        stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
                         self._style.stylesheets['planner_tab']['calendar_widget']['month_widget'] = stylesheet
                         self.layout.setAlignment(Qt.AlignCenter)
                     set_style(widget=self,
@@ -2004,13 +2012,26 @@ class CalendarWidget(QWidget):
                     def set_style(self, style: PlannerWidgetStyle = None):
                         self._style = style if style is not None else self._style
                         if self._style is not None:
+                            stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
                             if self.calendar_widget.view_type == 'daily':
-                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
                                 stylesheet['main'] = stylesheet['main'].replace('border:0.5px', 'border:0px')
                                 self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
                                 self.layout.setAlignment(Qt.AlignLeft)
                             else:
-                                stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['week_widget']
+                                today = date.today()
+                                this_sunday = today + relativedelta(days=7 - today.weekday())
+                                if today <= self.date <= this_sunday:  # Highlight today's week
+                                    color_old = 'None',
+                                    color_new = self._style.color_palette['background 2']
+                                else:
+                                    color_new = 'None',
+                                    color_old = self._style.color_palette['background 2']
+                                stylesheet['main'] = stylesheet['main'].replace(
+                                    f'background-color:{color_old}',
+                                    f'background-color:{color_new}')
+                                stylesheet['label'] = stylesheet['label'].replace(
+                                    f'background-color:{self._style.color_palette["background 2"]}',
+                                    f'background-color:None')
                                 stylesheet['main'] = stylesheet['main'].replace('border:0px', 'border:0.5px')
                                 self._style.stylesheets['planner_tab']['calendar_widget']['week_widget'] = stylesheet
                                 self.layout.setAlignment(Qt.AlignCenter)
@@ -2061,6 +2082,17 @@ class CalendarWidget(QWidget):
                             def set_style(self, style: PlannerWidgetStyle = None):
                                 self._style = style if style is not None else self._style
                                 if self._style is not None:
+                                    stylesheet = self._style.stylesheets['planner_tab']['calendar_widget']['day_widget']
+                                    if self.date == date.today():  # Highlight today
+                                        color_old = 'None',
+                                        color_new = self._style.color_palette['background 2']
+                                    else:
+                                        color_new = 'None',
+                                        color_old = self._style.color_palette['background 2']
+                                    stylesheet['main'] = stylesheet['main'].replace(
+                                        f'background-color:{color_old}',
+                                        f'background-color:{color_new}')
+                                    self._style.stylesheets['planner_tab']['calendar_widget']['day_widget'] = stylesheet
                                     set_style(widget=self,
                                               stylesheets=self._style.stylesheets
                                               ['planner_tab']
@@ -2539,7 +2571,7 @@ class TaskBucketWidget(QFrame):
         :param parent:
         :param style:
         """
-        if not hasattr(Task(), property_name):
+        if not hasattr(Task(), property_name) and property_name != 'due date':
             raise ValueError(f'Tasks have no such property as "{property_name}"')
         self.property_name = property_name
         self.property_value = property_value
@@ -2600,7 +2632,7 @@ class TaskBucketWidget(QFrame):
                 :param parent:
                 :param style:
                 """
-                if not hasattr(Task(), property_name):
+                if not hasattr(Task(), property_name) and property_name != 'due date':
                     raise ValueError(f'Tasks have no such property as "{property_name}"')
                 self.property_name = property_name
                 self.property_value = property_value
@@ -2646,7 +2678,23 @@ class TaskBucketWidget(QFrame):
                 all_tasks = self.planner.all_tasks
 
                 for task in all_tasks:
-                    if task not in self.tasks and getattr(task, self.property_name) == self.property_value:
+                    to_be_added = task not in self.tasks
+                    if self.property_name != 'due date':
+                        to_be_added = to_be_added and getattr(task, self.property_name) == self.property_value
+                    else:
+                        to_be_added = to_be_added and task.progress != 'completed'
+                        if self.property_value == 'overdue':
+                            to_be_added = to_be_added and (task.end_date < date.today())
+
+                        elif self.property_value == 'due today':
+                            to_be_added = to_be_added and (task.end_date == date.today())
+
+                        elif self.property_value == 'due this week':
+                            today = date.today()
+                            this_sunday = today + relativedelta(days=7 - today.weekday())
+                            to_be_added = to_be_added and (today < task.end_date <= this_sunday)
+
+                    if to_be_added:
                         # Create task widget
                         widget = TaskWidgetSimple(parent=self,
                                                   task=task,
@@ -2669,27 +2717,58 @@ class TaskBucketWidget(QFrame):
                         # Add new task
                         self.tasks += [task]
                         # Connect task and task list update
-                        getattr(task, f'{self.property_name}_changed') \
-                            .connect(self.make_task_widgets)
+                        if self.property_name != 'due date':
+                            getattr(task, f'{self.property_name}_changed') \
+                                .connect(self.make_task_widgets)
+                        else:
+                            for task in self.tasks:
+                                getattr(task, f'progress_changed').connect(self.make_task_widgets)
+                                getattr(task, f'end_date_changed').connect(self.make_task_widgets)
                 # Remove non-existent tasks
                 for widget in self.task_widgets:
-                    if widget.task not in self.planner.all_tasks \
-                            or getattr(widget.task, self.property_name) != self.property_value:
+                    to_be_removed = widget.task not in self.planner.all_tasks
+                    if self.property_name != 'due date':
+                        to_be_removed = to_be_removed or getattr(widget.task, self.property_name) != self.property_value
+                    else:
+                        to_be_removed = to_be_removed or task.progress == 'completed'
+                        if self.property_value == 'overdue':
+                            to_be_removed = to_be_removed or not (task.end_date < date.today())
+
+                        elif self.property_value == 'due today':
+                            to_be_removed = to_be_removed or not (task.end_date == date.today())
+
+                        elif self.property_value == 'due this week':
+                            today = date.today()
+                            this_sunday = today + relativedelta(days=7-today.weekday())
+                            to_be_removed = to_be_removed or not (today < task.end_date <= this_sunday)
+
+
+                    if to_be_removed:
                         if widget.task in self.tasks:
                             self.tasks.remove(widget.task)
-                        getattr(widget.task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
+                        if self.property_name != 'due date':
+                            getattr(widget.task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
+                        else:
+                            for task in self.tasks:
+                                getattr(task, f'progress_changed').disconnect(self.make_task_widgets)
+                                getattr(task, f'end_date_changed').disconnect(self.make_task_widgets)
                         widget.hide()
                         self.task_widgets.remove(widget)
                         self.layout.removeWidget(widget)
-                        if not self.tasks and self.property_name not in ['priority', 'progress']:
+                        if not self.tasks and self.property_name not in ['priority', 'progress', 'due date']:
                             self.hide()
 
                 self.tasks_updated.emit()
 
 
             def disconnect_tasks(self):
-                for task in self.tasks:
-                    getattr(task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
+                if self.property_name != 'due date':
+                    for task in self.tasks:
+                        getattr(task, f'{self.property_name}_changed').disconnect(self.make_task_widgets)
+                else:
+                    for task in self.tasks:
+                        getattr(task, f'progress_changed').disconnect(self.make_task_widgets)
+                        getattr(task, f'end_date_changed').disconnect(self.make_task_widgets)
                 self.planner.tasks_changed.disconnect(self.make_task_widgets)
 
         self.task_list_widget = BucketTaskListWidget(property_name=self.property_name,
@@ -2765,9 +2844,13 @@ class BucketListWidget(QFrame):
         all_tasks = self.planner.all_tasks
         for task in all_tasks:
             # Connect task and task list update
-            getattr(task, f'{self.property_name}_changed').disconnect(self.make_bucket_widgets)
-            getattr(task, f'{self.property_name}_changed') \
-                .connect(self.make_bucket_widgets)
+            if self.property_name != 'due date':
+                getattr(task, f'{self.property_name}_changed').disconnect(self.make_bucket_widgets)
+                getattr(task, f'{self.property_name}_changed') \
+                    .connect(self.make_bucket_widgets)
+            else:
+                getattr(task, f'progress_changed').connect(self.make_bucket_widgets)
+                getattr(task, f'end_date_changed').connect(self.make_bucket_widgets)
             # Connect with subtask changes
             task.children_changed.disconnect(self.make_bucket_widgets)
             task.children_changed.connect(self.make_bucket_widgets)
@@ -2777,7 +2860,8 @@ class BucketListWidget(QFrame):
         # Identify the property values
         property_values = []
         if self.property_name not in ['priority',
-                                      'progress']:
+                                      'progress',
+                                      'due date']:
             property_values = list(set([getattr(task,
                                                 self.property_name)
                                         for task in all_tasks]))
@@ -2787,11 +2871,14 @@ class BucketListWidget(QFrame):
                 property_values = [None] + property_values
             else:
                 property_values.sort()
-        else:
+        elif self.property_name in ['priority',
+                                    'progress']:
             from taskplanner.tasks import PRIORITY_LEVELS, PROGRESS_LEVELS
             dictionary = PRIORITY_LEVELS if self.property_name == 'priority' else PROGRESS_LEVELS
             property_values = list(dictionary.keys())
             property_values.sort(key=lambda x: dictionary[x])
+        else:
+            property_values = ['due today', 'due this week', 'overdue']
 
         # Add buckets
         for value in property_values:
@@ -2811,7 +2898,7 @@ class BucketListWidget(QFrame):
 
         # Remove buckets associated to non-existent values
         for widget in self.bucket_widgets:
-            if widget.property_name not in ['priority', 'progress']:
+            if widget.property_name not in ['priority', 'progress', 'due date']:
                 if widget.property_name != self.property_name \
                         or widget.property_value not in property_values or not widget.task_list_widget.tasks:
                     widget.task_list_widget.disconnect_tasks()
