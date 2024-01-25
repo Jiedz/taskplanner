@@ -797,14 +797,19 @@ class PlannerWidget(QTabWidget):
                                                              f'{self.bucket_list_widget.property_name.title()}')
                         self.graph_number_of_tasks.figure.axes[0].cla()
                         if any([widget.task_list_widget.tasks for widget in self.bucket_list_widget.bucket_widgets]):
-                            patches, outer_labels, inner_labels = self.graph_number_of_tasks.figure.axes[0].pie(
-                                x=[len(bucket.task_list_widget.tasks)
+                            n_tasks = [len(bucket.task_list_widget.tasks)
                                    for bucket
-                                   in self.bucket_list_widget.bucket_widgets],
-                                # explode=True,
-                                labels=[bucket.label.text()
+                                   in self.bucket_list_widget.bucket_widgets]
+                            labels = [bucket.label.text()
                                         for bucket
-                                        in self.bucket_list_widget.bucket_widgets],
+                                        in self.bucket_list_widget.bucket_widgets]
+                            if self.bucket_list_widget.property_name == 'due date':
+                                n_tasks += [len(self.planner.all_tasks) - sum(n_tasks)]
+                                labels += ['Other Tasks']
+                            patches, outer_labels, inner_labels = self.graph_number_of_tasks.figure.axes[0].pie(
+                                x=n_tasks,
+                                # explode=True,
+                                labels=labels,
                                 autopct='%1.1f%%',
                                 shadow=True,
                             )
@@ -841,13 +846,21 @@ class PlannerWidget(QTabWidget):
                             for widget in self.bucket_list_widget.bucket_widgets:
                                 n_days += [sum([abs(relativedelta(t.end_date, t.start_date).days + 1)
                                                 for t in widget.task_list_widget.tasks])]
-
+                            labels = [bucket.label.text()
+                                        for bucket
+                                        in self.bucket_list_widget.bucket_widgets]
+                            labels = [bucket.label.text()
+                                      for bucket
+                                      in self.bucket_list_widget.bucket_widgets]
+                            if self.bucket_list_widget.property_name == 'due date':
+                                n_days_tot = sum([abs(relativedelta(t.end_date, t.start_date).days + 1)
+                                                for t in self.planner.all_tasks])
+                                n_days += [n_days_tot - sum(n_days)]
+                                labels += ['Other Tasks']
                             patches, outer_labels, inner_labels = self.graph_time_for_tasks.figure.axes[0].pie(
                                 x=n_days,
                                 # explode=True,
-                                labels=[bucket.label.text()
-                                        for bucket
-                                        in self.bucket_list_widget.bucket_widgets],
+                                labels=labels,
                                 autopct='%1.1f%%',
                                 shadow=True,
                             )
