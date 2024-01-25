@@ -98,6 +98,7 @@ class PlannerWidget(QTabWidget):
             self.planner_tab.set_style(self._style)
             self.task_buckets_tab.set_style(self._style)
             self.settings_tab.set_style(self._style)
+        self.tabBar().setFixedHeight(int(self.height() * 0.03))
 
     def closeEvent(self, a0):
         self.to_file()
@@ -221,7 +222,6 @@ class PlannerWidget(QTabWidget):
                     self.view_selector.set_style(self._style)
                     self.start_date_widget.set_style(self._style)
                     self.end_date_widget.set_style(self._style)
-
 
 
             def make_new_task_textedit(self):
