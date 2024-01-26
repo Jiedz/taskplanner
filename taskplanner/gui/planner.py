@@ -815,12 +815,12 @@ class PlannerWidget(QTabWidget):
                             )
                             for label in outer_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('large')
+                                label.set_fontsize('medium')
                                 label.set_color(self._style.color_palette['text'])
 
                             for label in inner_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('large')
+                                label.set_fontsize('medium')
                                 label.set_color(self._style.color_palette['text'])
                         # Connect bucket list changes to graph updates
                         self.bucket_list_widget.property_name_changed.disconnect(self.update_graph_number_of_tasks)
@@ -866,12 +866,12 @@ class PlannerWidget(QTabWidget):
                             )
                             for label in outer_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('large')
+                                label.set_fontsize('medium')
                                 label.set_color(self._style.color_palette['text'])
 
                             for label in inner_labels:
                                 label.set_fontfamily(self._style.font['family'])
-                                label.set_fontsize('large')
+                                label.set_fontsize('medium')
                                 label.set_color(self._style.color_palette['text'])
 
                         # Connect bucket list changes to graph updates
