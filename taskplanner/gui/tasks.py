@@ -105,9 +105,11 @@ class TaskWidget(QWidget):
         self.dates_layout.addSpacing(int(self.width() * 0.015))
         self.make_date_widgets()
         # Link dates to subtasks
+        self.dates_layout.addSpacing(int(self.width() * 0.1))
         self.make_link_dates_widget()
         self.link_dates_widget.pushbutton.setFixedSize(int(self.width() * 0.032),
                                                        int(self.width() * 0.032))
+        self.dates_layout.addStretch()
         ## Textedit
         self.title_widget.textedit.setFixedHeight(int(self.title_widget.height()))
         self.title_widget.textedit.setMinimumWidth(int(self.width() * 0.5))
@@ -127,8 +129,8 @@ class TaskWidget(QWidget):
         ## New textedit
         self.category_widget.new_textedit.setMaximumWidth(self.category_widget.combobox.width())
         self.category_widget.new_textedit.setMaximumHeight(int(self.category_widget.combobox.height() * 1.5))
-        self.category_assignee_layout.addStretch()
         # Assignee
+        self.category_assignee_layout.addSpacing(int(self.width() * 0.03))
         self.make_assignee_widget()
         ## Combobox
         self.assignee_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
@@ -137,7 +139,6 @@ class TaskWidget(QWidget):
         self.assignee_widget.new_textedit.setMaximumHeight(self.category_widget.new_textedit.height())
         self.category_assignee_layout.addStretch()
         # Horizontal layout for (priority, progress)
-        #self.layout.addSpacing(-int(self.height() * 0.1))
         self.priority_progress_layout = QHBoxLayout()
         self.layout.addLayout(self.priority_progress_layout)
         self.priority_progress_layout.setContentsMargins(0, 0, 0, 0)
@@ -145,8 +146,8 @@ class TaskWidget(QWidget):
         self.make_priority_widget()
         ## Combobox
         self.priority_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
-        self.priority_progress_layout.addStretch()
         # Progress widget
+        self.priority_progress_layout.addSpacing(int(self.width() * 0.12))
         self.make_progress_widget()
         ## Combobox
         self.progress_widget.combobox.setMinimumWidth(int(self.width() * 0.2))
@@ -155,7 +156,7 @@ class TaskWidget(QWidget):
         self.layout.addSpacing(int(self.height() * 0.05))
         self.make_description_widget()
         self.description_widget.textbrowser.setMaximumWidth(int(self.width()*1))
-        self.description_widget.textbrowser.setMinimumHeight(int(self.height() * 0.15))
+        self.description_widget.textbrowser.setMinimumHeight(int(self.height() * 0.3))
         self.description_widget.combobox.setFixedWidth(int(self.width() * 0.15))
         # Sub-tasks
         self.make_subtask_list_widget()
@@ -490,7 +491,7 @@ class TaskWidget(QWidget):
                                             time_mode='start')
         self.dates_layout.addWidget(self.start_date_widget)
 
-        self.title_color_layout.addSpacing(20)
+        self.dates_layout.addSpacing(int(self.width() * 0.15))
 
         self.end_date_widget = DateWidget(task=self.task,
                                           parent=self,

@@ -1785,13 +1785,7 @@ class CalendarWidget(QWidget):
         self.timelines_layout = QVBoxLayout()
         self.timelines_layout.setSpacing(self.task_list_widget.layout.spacing())
         self.timelines_layout.setAlignment(Qt.AlignTop)
-        #self.layout.addLayout(self.timelines_layout)
-
-        self.timelines_container = QWidget(self.timelines_layout)
-
-        self.timelines_scrollarea = QScrollArea()
-        self.timelines_scrollarea.setWidget(self.timelines_container)
-        self.layout.addWidget(self.timelines_scrollarea)
+        self.layout.addLayout(self.timelines_layout)
 
         self.make_timelines()
 
