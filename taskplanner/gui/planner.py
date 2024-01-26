@@ -3,6 +3,7 @@ This module defines a planner widget and related widgets.
 """
 import screeninfo
 from PyQt5.QtCore import Qt, QPoint, QDate, QEvent
+from PyQt5.Qt import QGraphicsDropShadowEffect, QColor
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import \
     (
@@ -758,6 +759,7 @@ class PlannerWidget(QTabWidget):
                                       stylesheets=self._style.stylesheets
                                       ['task_buckets_tab']
                                       ['stats_widget']['graph_widget'])
+                            self.update_graphs()
 
                     def make_title_label(self):
                         self.title_label = QLabel()
@@ -1673,6 +1675,7 @@ class TaskListWidget(QWidget):
         self.make_task_widgets()
         # Set style
         self.set_style()
+        self.layout.setSpacing(15)
 
         slots = [slot for slot in self.planner.tasks_changed._slots if
                  'TaskListWidget.' in str(slot)]
@@ -1697,7 +1700,8 @@ class TaskListWidget(QWidget):
                                           planner=self.planner,
                                           style=TaskWidgetStyle(color_palette=self._style.color_palette,
                                                                 font=self._style.font,
-                                                                style_name=self._style.style_name)
+                                                                style_name=self._style.style_name),
+                                          widget_spacing=15
                                           )
                 self.layout.addWidget(widget)
                 self.task_widgets += [widget]
@@ -2264,13 +2268,6 @@ class CalendarWidget(QWidget):
                 self.task.children_changed.connect(lambda **kwargs: self.make_sub_timelines())
                 # Style
                 self.set_style()
-                '''
-                from PyQt5.Qt import QGraphicsDropShadowEffect, QColor
-                self.shadow = QGraphicsDropShadowEffect()
-                self.shadow.setColor(QColor(self._style.color_palette['background 2']))
-                self.shadow.setBlurRadius(10)
-                self.label_pushbutton.setGraphicsEffect(self.shadow)
-                '''
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
@@ -2482,6 +2479,29 @@ class CalendarWidget(QWidget):
                                 pass
                     elif event.type() == QEvent.MouseButtonRelease:
                         self.label_pushbutton.setMouseTracking(False)
+                    elif event.type() == QEvent.HoverEnter:
+                        # Effect
+                        self.effect = QGraphicsDropShadowEffect()
+                        self.effect.setColor(QColor('#121214'))
+                        self.effect.setBlurRadius(15)
+                        self.label_pushbutton.setGraphicsEffect(self.effect)
+                        self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
+                    elif event.type() == QEvent.HoverLeave:
+                        self.label_pushbutton.setGraphicsEffect(None)
+                        self.task_widget.task_line_widget.setGraphicsEffect(None)
+
+                elif obj == self.task_widget.task_line_widget:
+                    if event.type() == QEvent.HoverEnter:
+                        # Effect
+                        self.effect = QGraphicsDropShadowEffect()
+                        self.effect.setColor(QColor('#121214'))
+                        self.effect.setBlurRadius(15)
+                        self.label_pushbutton.setGraphicsEffect(self.effect)
+                        self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
+                    elif event.type() == QEvent.HoverLeave:
+                        self.label_pushbutton.setGraphicsEffect(None)
+                        self.task_widget.task_line_widget.setGraphicsEffect(None)
+
                 return super().eventFilter(obj, event)
 
             def set_visibility(self):

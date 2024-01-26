@@ -1226,7 +1226,8 @@ class TaskWidgetSimple(QWidget):
                  planner: Planner = None,
                  parent: QWidget = None,
                  hide: bool = False,
-                 style: TaskWidgetStyle = TaskWidgetStyle()):
+                 style: TaskWidgetStyle = TaskWidgetStyle(),
+                 widget_spacing: int = 0):
         """
         :param task:
             the task associated to this widget
@@ -1259,6 +1260,7 @@ class TaskWidgetSimple(QWidget):
                                        0,
                                        int(SCREEN_WIDTH * 0.003),
                                        0)
+        self.layout.setSpacing(widget_spacing)
         self.layout.addWidget(self.task_line_widget)
         self.visibility_changed = Signal()
         # Subtasks
@@ -1299,7 +1301,8 @@ class TaskWidgetSimple(QWidget):
                                                   task=subtask,
                                                   planner=self.planner,
                                                   hide=not self.task_line_widget.expanded,
-                                                  style=self._style
+                                                  style=self._style,
+                                                  widget_spacing=self.layout.spacing()
                                                   )
                 self.layout.addWidget(subtask_widget)
                 self.subtask_widgets += [subtask_widget]
@@ -1320,6 +1323,7 @@ class TaskWidgetSimple(QWidget):
         super().hide()
         self.is_visible = False
         self.visibility_changed.emit()
+
 
 
 class TaskLineWidget(QFrame):
