@@ -1199,7 +1199,8 @@ class TaskWidget(QWidget):
                         widget = TaskWidgetSimple(parent=self,
                                                   task=subtask,
                                                   planner=self.planner,
-                                                  style=self._style
+                                                  style=self._style,
+                                                  widget_spacing=15
                                                   )
                         self.layout.addWidget(widget)
                         self.subtask_widgets += [widget]

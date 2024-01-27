@@ -13,6 +13,7 @@ COLOR_PALETTES = {
         {
             'background 1': '#232426',
             'background 2': '#3a3c3f',
+            'background 3': '#3a3c3f',
             'text': '#ededecff',
             'text - light': '#bcbec4',
             'text - highlight': '#bcbec4', #'#4273bc',
@@ -1249,9 +1250,11 @@ class PlannerWidgetStyle:
                                             '''
                                             QFrame
                                             {
+                                                background-color:%s;
                                                 border:2px solid %s;
                                             }
-                                            ''' % self.color_palette['border'],
+                                            ''' % (self.color_palette['background 2'],
+                                                   self.color_palette['border']),
                                         'title_label':
                                             '''
                                             QLabel

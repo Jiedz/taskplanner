@@ -196,22 +196,24 @@ class PlannerWidget(QTabWidget):
                 # Lock the vertical scrollbars of the timelines and the task list
                 self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
 
+                self.task_timelines_layout.setSpacing(0)
+
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
                 if self._style is not None:
                     set_style(widget=self,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['main'])
-                    set_style(widget=self,
+                    set_style(widget=self.task_list_scrollarea,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['task_list_scrollarea'])
-                    set_style(widget=self,
+                    set_style(widget=self.task_list_widget,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['task_list_widget'])
-                    set_style(widget=self,
+                    set_style(widget=self.calendar_scrollarea,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['calendar_scrollarea'])
-                    set_style(widget=self,
+                    set_style(widget=self.new_task_textedit,
                               stylesheets=self._style.stylesheets
                               ['planner_tab']['new_task_textedit'])
                     set_style(widget=self.upload_task_pushbutton,
@@ -2643,6 +2645,7 @@ class TaskBucketWidget(QFrame):
             set_style(widget=self,
                       stylesheets=self._style.stylesheets
                       ['task_buckets_tab']['bucket_list_widget']['bucket_widget'])
+            self.task_list_widget.set_style(self._style)
 
     def make_label(self):
         self.label = QLabel()
@@ -2743,7 +2746,8 @@ class TaskBucketWidget(QFrame):
                                                   planner=self.planner,
                                                   style=TaskWidgetStyle(color_palette=self._style.color_palette,
                                                                         font=self._style.font,
-                                                                        style_name=self._style.style_name)
+                                                                        style_name=self._style.style_name),
+                                                  widget_spacing=15
                                                   )
                         widget.setContentsMargins(10,
                                                   0,
