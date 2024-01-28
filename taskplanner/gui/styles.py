@@ -1415,6 +1415,7 @@ class PlannerWidgetStyle:
                                                     {
                                                         background-color:%s;
                                                         border:1px solid %s;
+                                                        border-radius:50%%;
                                                     }
                                                     QSlider::handle:horizontal:hover
                                                     {
