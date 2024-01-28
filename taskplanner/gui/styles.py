@@ -914,19 +914,19 @@ class PlannerWidgetStyle:
                             '''
                                 QWidget
                                 {
-                                    border:None;
+                                    border:2px solid %s;
                                     margin-top:0px;
                                 }
-                            ''',
+                            ''' % (self.color_palette['border']),
                         'calendar_widget':
                             {
                                 'main':
                                     '''
                                     QWidget
                                     {
-                                        border:None;
+                                        border:2px solid %s;
                                     }
-                                    ''',
+                                    ''' % (self.color_palette['border']),
                                 'month_widget':
                                     {
                                         'main':
