@@ -2263,11 +2263,9 @@ class CalendarWidget(QWidget):
                 # Sub-timelines
                 self.sub_timelines = []
                 self.make_sub_timelines()
-                slots = [slot for slot in self.task.children_changed._slots if
-                         'Timeline.' in str(slot)]
-                for slot in slots:
-                    self.task.children_changed.disconnect(slot)
-                self.task.children_changed.connect(lambda **kwargs: self.make_sub_timelines())
+                self.task.children_changed.disconnect(self.make_sub_timelines)
+                self.task.children_changed.connect(self.make_sub_timelines)
+
                 # Style
                 self.set_style()
 
@@ -2347,7 +2345,7 @@ class CalendarWidget(QWidget):
                 self.label_layout.removeItem(self.label_layout.itemAt(0))
                 if self.calendar_widget.view_type == 'daily':
                     day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    n_day_widths = delta_date.days #+ 2
+                    n_day_widths = delta_date.days
                     spacing = n_day_widths * day_width
                 elif self.calendar_widget.view_type == 'weekly':
                     week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
@@ -2509,7 +2507,7 @@ class CalendarWidget(QWidget):
             def set_visibility(self):
                 self.setVisible(self.task_widget.isVisible())
 
-            def make_sub_timelines(self):
+            def make_sub_timelines(self, **kwargs):
                 l = self.calendar_widget.timelines_layout
                 # Add new sub-timelines
                 for subtask in self.task.children:

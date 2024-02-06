@@ -1127,10 +1127,8 @@ class TaskWidget(QWidget):
                 self.subtask_widgets = []
                 self.make_subtask_widgets()
 
-                slots = [slot for slot in self.task.children_changed._slots if 'SubtaskListWidget.' in str(slot)]
-                for slot in slots:
-                    self.task.children_changed.disconnect(slot)
-                self.task.children_changed.connect(lambda **kwargs: self.make_subtask_widgets())
+                self.task.children_changed.disconnect(self.make_subtask_widgets)
+                self.task.children_changed.connect(self.make_subtask_widgets)
 
             def make_icon_label(self):
                 
@@ -1193,7 +1191,7 @@ class TaskWidget(QWidget):
 
                 self.upload_pushbutton.clicked.connect(lambda: callback())
 
-            def make_subtask_widgets(self):
+            def make_subtask_widgets(self, **kwargs):
                 for subtask in self.task.children:
                     if subtask not in [widget.task for widget in self.subtask_widgets]:
                         widget = TaskWidgetSimple(parent=self,
@@ -1276,10 +1274,8 @@ class TaskWidgetSimple(QWidget):
         else:
             self.show()
 
-        slots = [slot for slot in self.task.children_changed._slots if 'TaskWidget.' in str(slot)]
-        for slot in slots:
-            self.task.children_changed.disconnect(slot)
-        self.task.children_changed.connect(lambda **kwargs: self.update_widget())
+        self.task.children_changed.disconnect(self.update_widget)
+        self.task.children_changed.connect(self.update_widget)
 
     def set_style(self, style: TaskWidgetStyle = None):
         self._style = style if style is not None else self._style
@@ -1288,13 +1284,13 @@ class TaskWidgetSimple(QWidget):
             for widget in self.subtask_widgets:
                 widget.set_style(self._style)
 
-    def update_widget(self):
+    def update_widget(self, **kwargs):
         self.make_subtasks()
         if not self.task.is_bottom_level:
             self.task_line_widget.expand_pushbutton.show()
         else:
             self.task_line_widget.expand_pushbutton.hide()
-    def make_subtasks(self):
+    def make_subtasks(self, **kwargs):
         # Add new subtasks
         for subtask in self.task.children:
             if subtask not in [widget.task for widget in self.subtask_widgets]:
