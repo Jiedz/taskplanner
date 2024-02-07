@@ -957,6 +957,8 @@ class TaskWidget(QWidget):
                 self.make_label()
                 # Textedit
                 self.make_textbrowser()
+                self.render_description()
+                self.is_rendering = True
 
             @property
             def is_rendering(self):
