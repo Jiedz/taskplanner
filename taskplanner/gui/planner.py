@@ -149,14 +149,10 @@ class PlannerWidget(QTabWidget):
                 self.task_list_layout = QVBoxLayout()
                 self.task_list_layout.setAlignment(Qt.AlignTop)
                 # Horizontal layout for calendar widget
-                self.calendar_layout = QHBoxLayout()
-                self.calendar_layout.setAlignment(Qt.AlignLeft)
-                self.layout.addLayout(self.calendar_layout)
-                self.calendar_layout.addLayout(self.task_list_layout)
-                # Horizontal layout for task list and timelines
-                self.task_timelines_layout = QHBoxLayout()
-                self.task_timelines_layout.setAlignment(Qt.AlignLeft)
-                self.layout.addLayout(self.task_timelines_layout)
+                self.task_list_calendar_layout = QHBoxLayout()
+                self.task_list_calendar_layout.setAlignment(Qt.AlignLeft)
+                self.layout.addLayout(self.task_list_calendar_layout)
+                self.task_list_calendar_layout.addLayout(self.task_list_layout)
                 # Task list widget
                 self.make_task_list_widget()
                 ## Scroll area
@@ -171,8 +167,12 @@ class PlannerWidget(QTabWidget):
                 self.calendar_scrollarea = QScrollArea()
                 self.calendar_scrollarea.setWidgetResizable(True)
                 self.calendar_scrollarea.setWidget(self.calendar_widget)
-                self.calendar_layout.addWidget(self.calendar_scrollarea)
-                self.task_timelines_layout.addLayout(self.calendar_widget.timelines_layout)
+                self.task_list_calendar_layout.addWidget(self.calendar_scrollarea)
+                # Timelines scrollarea
+                self.timelines_scrollarea = QScrollArea()
+                self.timelines_scrollarea.setWidgetResizable(True)
+                self.timelines_scrollarea.setWidget(self.calendar_widget.timelines_widget)
+                self.calendar_widget.layout.addWidget(self.timelines_scrollarea)
                 # Adjust task list widget vertical position
                 self.task_list_layout.insertSpacing(0,
                                                     self.calendar_widget.month_widgets[0].height())
@@ -194,9 +194,10 @@ class PlannerWidget(QTabWidget):
 
                 self.set_style()
                 # Lock the vertical scrollbars of the timelines and the task list
-                self.calendar_scrollarea.setVerticalScrollBar(self.task_list_scrollarea.verticalScrollBar())
+                self.timelines_scrollarea.horizontalScrollBar().setDisabled(True)
+                self.calendar_scrollarea.verticalScrollBar().setDisabled(True)
 
-                self.task_timelines_layout.setSpacing(0)
+                self.calendar_widget.timelines_widget.layout.setSpacing(0)
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
@@ -1793,13 +1794,7 @@ class CalendarWidget(QWidget):
         self.timelines_layout.setAlignment(Qt.AlignTop)
         self.layout.addLayout(self.timelines_layout)
 
-        self.make_timelines()
-
-        slots = [slot for slot in self.planner.tasks_changed._slots if
-                 'CalendarWidget.' in str(slot)]
-        for slot in slots:
-            self.planner.tasks_changed.disconnect(slot)
-        self.planner.tasks_changed.connect(lambda **kwargs: self.make_timelines())
+        self.make_timelines_widget()
 
         self.set_style()
         self.layout.addStretch()
@@ -1811,9 +1806,11 @@ class CalendarWidget(QWidget):
                       stylesheets=self._style.stylesheets
                       ['planner_tab']
                       ['calendar_widget']['main'])
+            set_style(widget=self.timelines_widget,
+                      stylesheets=self._style.stylesheets
+                      ['planner_tab']
+                      ['calendar_widget']['timelines_widget'])
             for widget in self.month_widgets:
-                widget.set_style(self._style)
-            for widget in self.timeline_widgets:
                 widget.set_style(self._style)
 
     @property
@@ -1859,7 +1856,7 @@ class CalendarWidget(QWidget):
 
     def update_all(self):
         self.make_month_widgets()
-        self.make_timelines()
+        self.timelines_widget.make_timelines()
 
     def make_month_widgets(self):
         # Make month widget
@@ -2213,384 +2210,433 @@ class CalendarWidget(QWidget):
             self.month_widgets_layout.addWidget(self.month_widgets[-1])
         self.month_widgets_updated.emit()
 
-    def make_timelines(self):
-        class Timeline(QFrame):
+    def make_timelines_widget(self):
+        class TimelinesWidget(QFrame):
             """
-            This widget contains a label which:
-                - Has the same color as the associated task. Its color must follow the associated
-                  task's color.
-                - Has same vertical position as the associated task in the task list widget.
-                  Its position must change whenever the vertical position of the associated
-                  task changes. In particular, if the associated task is hidden or shown
-                  in the task list widget of the planner, so must the timeline be hidden or shown.
-                  Similarly, if the task is removed from the planner.
-                - Has position and a horizontal extension such that it matches the start and end date
-                  of the associated task, according to the CalendarWidget that contains it.
-                  Its geometry must change whenever the start or end date of the task change, and
-                  whenever the planner view type is changed (e.g., from daily to weekly)
-            """
+            This widget contains:
 
+                - A set of timelines, each associated to a respective task
+            """
             def __init__(self,
-                         task_widget: TaskWidgetSimple,
-                         calendar_widget: CalendarWidget,
+                         planner: Planner,
+                         task_list_widget: TaskListWidget,
                          parent: QWidget = None,
-                         style: PlannerWidgetStyle = None,
-                         add_to_timelines_layout: bool = False):
-                self.task_widget = task_widget
-                self.planner = self.task_widget.planner
-                self.task = self.task_widget.task
-                self.calendar_widget = calendar_widget
+                         view_type: str = 'weekly',
+                         start_date: date = date.today(),
+                         end_date: date = date.today() + relativedelta(months=6),
+                         style: PlannerWidgetStyle = None
+                         ):
+                """
+
+                :param planner:
+                :param ask_list_widget:
+                :param parent:
+                :param view_type:
+                :param start_date:
+                :param end_date:
+                :param style:
+                """
+                self.planner = planner
+                self.task_list_widget = task_list_widget
                 self._style = style
-                self.start_position_changed = Signal()
-                self.length_changed = Signal()
-                self.dragging_mode = None # 'start' or 'end'
+                self.timeline_widgets = []
+                self.timelines_updated = Signal()
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
-                self.setContentsMargins(0, 0, 0, 0)
-                self.layout.setContentsMargins(0, 0, 0, 0)
-                if add_to_timelines_layout and hasattr(self.parent(), 'timelines_layout'):
-                    self.parent().timelines_layout.addWidget(self)
-                self.setFixedHeight(self.task_widget.task_line_widget.height())
-                # Horizontal layout for label
-                self.label_layout = QHBoxLayout()
-                self.label_layout.setAlignment(Qt.AlignLeft)
-                self.layout.addLayout(self.label_layout)
-                # Insert first spacing
-                self.label_layout.insertSpacing(0, 0)
-                # Label pushbutton
-                self.make_label_pushbutton()
-                # Sub-timelines
-                self.sub_timelines = []
-                self.make_sub_timelines()
-                self.task.children_changed.disconnect(self.make_sub_timelines)
-                self.task.children_changed.connect(self.make_sub_timelines)
-
-                # Style
-                self.set_style()
+                self.layout.setSpacing(self.task_list_widget.layout.spacing())
+                # Make timelines
+                self.make_timelines()
+                self.planner.tasks_changed.disconnect(self.make_timelines)
+                self.planner.tasks_changed.connect(self.make_timelines)
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
                 if self._style is not None:
-                    set_style(widget=self,
-                              stylesheets=self._style.stylesheets
-                              ['planner_tab']
-                              ['calendar_widget']
-                              ['timeline']['main'])
-                    self.set_color()
-                    for widget in self.sub_timelines:
+                    for widget in self.timeline_widgets:
                         widget.set_style(self._style)
 
-            def make_label_pushbutton(self):
-                self.label_pushbutton = QPushButton()
-                # Layout
-                self.label_layout.addWidget(self.label_pushbutton)
-                self.set_height()
+            def make_timelines(self, **kwargs):
+                class Timeline(QFrame):
+                    """
+                    This widget contains a label which:
+                        - Has the same color as the associated task. Its color must follow the associated
+                          task's color.
+                        - Has same vertical position as the associated task in the task list widget.
+                          Its position must change whenever the vertical position of the associated
+                          task changes. In particular, if the associated task is hidden or shown
+                          in the task list widget of the planner, so must the timeline be hidden or shown.
+                          Similarly, if the task is removed from the planner.
+                        - Has position and a horizontal extension such that it matches the start and end date
+                          of the associated task, according to the CalendarWidget that contains it.
+                          Its geometry must change whenever the start or end date of the task change, and
+                          whenever the planner view type is changed (e.g., from daily to weekly)
+                    """
 
-                def clicked():
-                    task_widget = TaskWidget(task=self.task,
-                                             planner=self.planner,
-                                             style=TaskWidgetStyle(color_palette=self._style.color_palette,
-                                                                   font=self._style.font,
-                                                                   style_name=self._style.style_name))
-                    task_widget.show()
+                    def __init__(self,
+                                 task_widget: TaskWidgetSimple,
+                                 calendar_widget: CalendarWidget,
+                                 parent: QWidget = None,
+                                 style: PlannerWidgetStyle = None,
+                                 add_to_timelines_layout: bool = False):
+                        self.task_widget = task_widget
+                        self.planner = self.task_widget.planner
+                        self.task = self.task_widget.task
+                        self.calendar_widget = calendar_widget
+                        self._style = style
+                        self.start_position_changed = Signal()
+                        self.length_changed = Signal()
+                        self.dragging_mode = None # 'start' or 'end'
+                        super().__init__(parent=parent)
+                        # Layout
+                        self.layout = QVBoxLayout(self)
+                        self.setContentsMargins(0, 0, 0, 0)
+                        self.layout.setContentsMargins(0, 0, 0, 0)
+                        if add_to_timelines_layout and hasattr(self.parent(), 'timelines_layout'):
+                            self.parent().timelines_layout.addWidget(self)
+                        self.setFixedHeight(self.task_widget.task_line_widget.height())
+                        # Horizontal layout for label
+                        self.label_layout = QHBoxLayout()
+                        self.label_layout.setAlignment(Qt.AlignLeft)
+                        self.layout.addLayout(self.label_layout)
+                        # Insert first spacing
+                        self.label_layout.insertSpacing(0, 0)
+                        # Label pushbutton
+                        self.make_label_pushbutton()
+                        # Sub-timelines
+                        self.sub_timelines = []
+                        self.make_sub_timelines()
+                        self.task.children_changed.disconnect(self.make_sub_timelines)
+                        self.task.children_changed.connect(self.make_sub_timelines)
+                        # Style
+                        self.set_style()
 
-                def update_label():
-                    self.label_pushbutton.setText(f'({len(self.task.ancestors)}) {self.task.name}')
+                    def set_style(self, style: PlannerWidgetStyle = None):
+                        self._style = style if style is not None else self._style
+                        if self._style is not None:
+                            set_style(widget=self,
+                                      stylesheets=self._style.stylesheets
+                                      ['planner_tab']
+                                      ['calendar_widget']
+                                      ['timelines_widget']
+                                      ['timeline']['main'])
+                            self.set_color()
+                            for widget in self.sub_timelines:
+                                widget.set_style(self._style)
 
-                # Connect task and widget
-                self.label_pushbutton.installEventFilter(self)
-                # Set initial text
-                update_label()
-                self.task.name_changed.connect(lambda **kwargs: update_label())
-                # Set background color, border
-                self.set_color()
-                self.task.color_changed.connect(lambda **kwargs: self.set_color())
-                # Set geometry
-                self.set_geometry()
-                self.task.start_date_changed.connect(lambda **kwargs: self.set_geometry())
-                self.task.end_date_changed.connect(lambda **kwargs: self.set_geometry())
-                self.calendar_widget.month_widgets_updated.connect(lambda **kwargs: self.set_geometry())
-                # Set visibility
-                self.set_visibility()
-                self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
+                    def make_label_pushbutton(self):
+                        self.label_pushbutton = QPushButton()
+                        # Layout
+                        self.label_layout.addWidget(self.label_pushbutton)
+                        self.set_height()
 
+                        def clicked():
+                            task_widget = TaskWidget(task=self.task,
+                                                     planner=self.planner,
+                                                     style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                           font=self._style.font,
+                                                                           style_name=self._style.style_name))
+                            task_widget.show()
 
-            def set_color(self):
-                style_sheet = '''
-                QPushButton
-                {
-                    background-color:%s;
-                    border:0px solid %s;
-                    font-size:%s;
-                    text-align:left;
-                    padding-left:10px;
-                }
-                QPushButton:hover
-                {
-                    text-decoration:underline;
-                }
-                ''' % (self.task.color,
-                       self.task.color,
-                       self._style.font['size - text - small'])
-                self.label_pushbutton.setStyleSheet(style_sheet)
+                        def update_label():
+                            self.label_pushbutton.setText(f'({len(self.task.ancestors)}) {self.task.name}')
 
-            def set_height(self):
-                self.label_pushbutton.setFixedHeight(self.task_widget.task_line_widget.height())
-
-            def set_start_position(self):
-                delta_date = self.task.start_date - self.calendar_widget.month_widgets[0].date
-                spacing = 0
-                # Remove spacing
-                self.label_layout.removeItem(self.label_layout.itemAt(0))
-                if self.calendar_widget.view_type == 'daily':
-                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    n_day_widths = delta_date.days
-                    spacing = n_day_widths * day_width
-                elif self.calendar_widget.view_type == 'weekly':
-                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    month_widgets = [m for m in self.calendar_widget.month_widgets if m.date <= self.task.start_date]
-                    n_weeks = 0
-                    for m in month_widgets:
-                        week_widgets = [w for w in m.week_widgets if w.date <= self.task.start_date]
-                        n_weeks += len(week_widgets)
-                    n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
-                    spacing = int(week_width * n_weeks)
-                elif self.calendar_widget.view_type == 'monthly':
-                    month_width = self.calendar_widget.month_widgets[0].width()
-
-                    month_widgets = [m for m in self.calendar_widget.month_widgets
-                                     if m.date <= self.task.start_date]
-                    n_months = len(month_widgets) - 1
-                    month_date = self.calendar_widget.month_widgets[n_months].date
-                    n_days_in_month = (month_date + relativedelta(months=1, days=-1)).day
-                    n_months = n_months + (self.task.start_date.day - 1) / n_days_in_month
-                    spacing = int(n_months * month_width)
-                # Add left spacing
-                self.label_layout.insertSpacing(0, spacing)
-                self.start_position_changed.emit()
-
-            def get_start_date(self,
-                               start_position: int = None):
-                start_position = start_position if start_position is not None else self.label_pushbutton.x()
-                return self.get_date(position=start_position)
-
-
-            def get_date(self,
-                         position: int):
-                if self.calendar_widget.view_type == 'daily':
-                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    n_days = int(ceil(position / day_width)) - 1
-                    dt = self.calendar_widget.start_date + relativedelta(days=n_days)
-                elif self.calendar_widget.view_type == 'weekly':
-                    month_width = self.calendar_widget.month_widgets[0].width()
-                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    month_index = int(position / month_width)
-                    month_widget = self.calendar_widget.month_widgets[month_index]
-                    week_index = int((position - month_index * month_width) / week_width)
-                    total_width = month_index * month_width + week_index * week_width
-                    week_fraction = (position - total_width) / week_width
-                    week = month_widget.week_widgets[week_index]
-                    week_date = week.date
-                    dt = week_date + relativedelta(days=int(7*week_fraction))
-                elif self.calendar_widget.view_type == 'monthly':
-                    month_width = self.calendar_widget.month_widgets[0].width()
-                    month_index = int(position / month_width)
-                    total_width = month_index * month_width
-                    month_fraction = (position - total_width) / month_width
-                    month_date = self.calendar_widget.month_widgets[month_index].date
-                    n_days_in_month = int(((month_date + relativedelta(months=1, days=-1)).day - 1) * month_fraction)
-                    dt = month_date + relativedelta(days=n_days_in_month)
-                return dt
+                        # Connect task and widget
+                        self.label_pushbutton.installEventFilter(self)
+                        # Set initial text
+                        update_label()
+                        self.task.name_changed.connect(lambda **kwargs: update_label())
+                        # Set background color, border
+                        self.set_color()
+                        self.task.color_changed.connect(lambda **kwargs: self.set_color())
+                        # Set geometry
+                        self.set_geometry()
+                        self.task.start_date_changed.connect(lambda **kwargs: self.set_geometry())
+                        self.task.end_date_changed.connect(lambda **kwargs: self.set_geometry())
+                        self.calendar_widget.month_widgets_updated.connect(lambda **kwargs: self.set_geometry())
+                        # Set visibility
+                        self.set_visibility()
+                        self.task_widget.visibility_changed.connect(lambda **kwargs: self.set_visibility())
 
 
-            def set_length(self):
-                view_type = self.calendar_widget.view_type
-                if view_type == 'daily':
-                    day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
-                    n_days = (self.task.end_date - self.task.start_date).days + 1
-                    self.label_pushbutton.setFixedWidth(max([0, day_width*n_days]))
-                elif view_type == 'weekly':
-                    week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
-                    month_widgets = [m for m in self.calendar_widget.month_widgets
-                                     if m.date > self.task.start_date - relativedelta(months=1) and m.date <= self.task.end_date + relativedelta(months=1)]
-                    n_weeks = 0
-                    for m in month_widgets:
-                        week_widgets = [w for w in m.week_widgets
-                                        if w.date > self.task.start_date and w.date <= self.task.end_date]
-                        n_weeks += len(week_widgets)
-                    n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.start_date.weekday() + 1) / 7
-                    self.label_pushbutton.setFixedWidth(max([0, int(week_width * n_weeks)]))
-                elif view_type == 'monthly':
-                    month_width = self.calendar_widget.month_widgets[0].width()
+                    def set_color(self):
+                        style_sheet = '''
+                        QPushButton
+                        {
+                            background-color:%s;
+                            border:0px solid %s;
+                            font-size:%s;
+                            text-align:left;
+                            padding-left:10px;
+                        }
+                        QPushButton:hover
+                        {
+                            text-decoration:underline;
+                        }
+                        ''' % (self.task.color,
+                               self.task.color,
+                               self._style.font['size - text - small'])
+                        self.label_pushbutton.setStyleSheet(style_sheet)
 
-                    month_widgets = [m for m in self.calendar_widget.month_widgets
-                                     if m.date > self.task.start_date and m.date <= self.task.end_date]
-                    n_months = len(month_widgets)
-                    n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
-                    self.label_pushbutton.setFixedWidth(max([0, int(n_months * month_width)]))
+                    def set_height(self):
+                        self.label_pushbutton.setFixedHeight(self.task_widget.task_line_widget.height())
 
-                self.length_changed.emit()
+                    def set_start_position(self):
+                        delta_date = self.task.start_date - self.calendar_widget.month_widgets[0].date
+                        spacing = 0
+                        # Remove spacing
+                        self.label_layout.removeItem(self.label_layout.itemAt(0))
+                        if self.calendar_widget.view_type == 'daily':
+                            day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                            n_day_widths = delta_date.days
+                            spacing = n_day_widths * day_width
+                        elif self.calendar_widget.view_type == 'weekly':
+                            week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                            month_widgets = [m for m in self.calendar_widget.month_widgets if m.date <= self.task.start_date]
+                            n_weeks = 0
+                            for m in month_widgets:
+                                week_widgets = [w for w in m.week_widgets if w.date <= self.task.start_date]
+                                n_weeks += len(week_widgets)
+                            n_weeks = n_weeks - 1 + (self.task.start_date.weekday()) / 7
+                            spacing = int(week_width * n_weeks)
+                        elif self.calendar_widget.view_type == 'monthly':
+                            month_width = self.calendar_widget.month_widgets[0].width()
 
-            def get_end_date(self,
-                             end_position: int = None):
-                end_position = end_position if end_position is not None \
-                    else (self.label_pushbutton.x() + self.label_pushbutton.width())
-                return self.get_date(position=end_position)
+                            month_widgets = [m for m in self.calendar_widget.month_widgets
+                                             if m.date <= self.task.start_date]
+                            n_months = len(month_widgets) - 1
+                            month_date = self.calendar_widget.month_widgets[n_months].date
+                            n_days_in_month = (month_date + relativedelta(months=1, days=-1)).day
+                            n_months = n_months + (self.task.start_date.day - 1) / n_days_in_month
+                            spacing = int(n_months * month_width)
+                        # Add left spacing
+                        self.label_layout.insertSpacing(0, spacing)
+                        self.start_position_changed.emit()
 
-            def set_geometry(self):
-                self.set_start_position()
-                self.set_length()
+                    def get_start_date(self,
+                                       start_position: int = None):
+                        start_position = start_position if start_position is not None else self.label_pushbutton.x()
+                        return self.get_date(position=start_position)
 
-            def eventFilter(self, obj, event):
-                """
-                This function allows to handle all kinds of events for all subwidgets in this widget.
-                :param obj:
-                :param event:
-                :return:
-                """
-                if obj == self.label_pushbutton:
-                    if event.type() == QEvent.MouseButtonDblClick:
-                        task_widget = TaskWidget(task=self.task,
-                                                 planner=self.planner,
-                                                 style=TaskWidgetStyle(color_palette=self._style.color_palette,
-                                                                       font=self._style.font,
-                                                                       style_name=self._style.style_name))
 
-                        task_widget.show()
-                    elif event.type() == QEvent.MouseButtonPress:
-                        if event.pos().x() < self.label_pushbutton.width() / 2:
-                            self.dragging_mode = 'start'
-                        else:
-                            self.dragging_mode = 'end'
-                        self.label_pushbutton.setMouseTracking(True)
-                    elif event.type() == QEvent.MouseMove and self.label_pushbutton.hasMouseTracking():
-                        if self.dragging_mode == 'start':
-                            start_date = self.get_start_date(self.label_pushbutton.x() + event.pos().x())
-                            try:
-                                self.task.start_date = start_date
-                            except ValueError:
-                                pass
-                        else:
-                            end_date = self.get_end_date(self.label_pushbutton.x() + event.pos().x())
-                            try:
-                                self.task.end_date = end_date
-                            except ValueError:
-                                pass
-                    elif event.type() == QEvent.MouseButtonRelease:
-                        self.label_pushbutton.setMouseTracking(False)
-                    elif event.type() == QEvent.HoverEnter:
-                        # Effect
-                        self.effect = QGraphicsDropShadowEffect()
-                        self.effect.setColor(QColor('#121214'))
-                        self.effect.setBlurRadius(15)
-                        self.label_pushbutton.setGraphicsEffect(self.effect)
-                        self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
-                    elif event.type() == QEvent.HoverLeave:
-                        self.label_pushbutton.setGraphicsEffect(None)
-                        self.task_widget.task_line_widget.setGraphicsEffect(None)
+                    def get_date(self,
+                                 position: int):
+                        if self.calendar_widget.view_type == 'daily':
+                            day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                            n_days = int(ceil(position / day_width)) - 1
+                            dt = self.calendar_widget.start_date + relativedelta(days=n_days)
+                        elif self.calendar_widget.view_type == 'weekly':
+                            month_width = self.calendar_widget.month_widgets[0].width()
+                            week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                            month_index = int(position / month_width)
+                            month_widget = self.calendar_widget.month_widgets[month_index]
+                            week_index = int((position - month_index * month_width) / week_width)
+                            total_width = month_index * month_width + week_index * week_width
+                            week_fraction = (position - total_width) / week_width
+                            week = month_widget.week_widgets[week_index]
+                            week_date = week.date
+                            dt = week_date + relativedelta(days=int(7*week_fraction))
+                        elif self.calendar_widget.view_type == 'monthly':
+                            month_width = self.calendar_widget.month_widgets[0].width()
+                            month_index = int(position / month_width)
+                            total_width = month_index * month_width
+                            month_fraction = (position - total_width) / month_width
+                            month_date = self.calendar_widget.month_widgets[month_index].date
+                            n_days_in_month = int(((month_date + relativedelta(months=1, days=-1)).day - 1) * month_fraction)
+                            dt = month_date + relativedelta(days=n_days_in_month)
+                        return dt
 
-                elif obj == self.task_widget.task_line_widget:
-                    if event.type() == QEvent.HoverEnter:
-                        # Effect
-                        self.effect = QGraphicsDropShadowEffect()
-                        self.effect.setColor(QColor('#121214'))
-                        self.effect.setBlurRadius(15)
-                        self.label_pushbutton.setGraphicsEffect(self.effect)
-                        self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
-                    elif event.type() == QEvent.HoverLeave:
-                        self.label_pushbutton.setGraphicsEffect(None)
-                        self.task_widget.task_line_widget.setGraphicsEffect(None)
+                    def set_length(self):
+                        view_type = self.calendar_widget.view_type
+                        if view_type == 'daily':
+                            day_width = self.calendar_widget.month_widgets[0].week_widgets[0].day_widgets[0].width()
+                            n_days = (self.task.end_date - self.task.start_date).days + 1
+                            self.label_pushbutton.setFixedWidth(max([0, day_width*n_days]))
+                        elif view_type == 'weekly':
+                            week_width = self.calendar_widget.month_widgets[0].week_widgets[0].width()
+                            month_widgets = [m for m in self.calendar_widget.month_widgets
+                                             if m.date > self.task.start_date - relativedelta(months=1) and m.date <= self.task.end_date + relativedelta(months=1)]
+                            n_weeks = 0
+                            for m in month_widgets:
+                                week_widgets = [w for w in m.week_widgets
+                                                if w.date > self.task.start_date and w.date <= self.task.end_date]
+                                n_weeks += len(week_widgets)
+                            n_weeks = n_weeks + (self.task.end_date.weekday() - self.task.start_date.weekday() + 1) / 7
+                            self.label_pushbutton.setFixedWidth(max([0, int(week_width * n_weeks)]))
+                        elif view_type == 'monthly':
+                            month_width = self.calendar_widget.month_widgets[0].width()
 
-                return super().eventFilter(obj, event)
+                            month_widgets = [m for m in self.calendar_widget.month_widgets
+                                             if m.date > self.task.start_date and m.date <= self.task.end_date]
+                            n_months = len(month_widgets)
+                            n_months = n_months + (self.task.end_date.day - self.task.start_date.day + 1) / 30
+                            self.label_pushbutton.setFixedWidth(max([0, int(n_months * month_width)]))
 
-            def set_visibility(self):
-                self.setVisible(self.task_widget.isVisible())
+                        self.length_changed.emit()
 
-            def make_sub_timelines(self, **kwargs):
-                l = self.calendar_widget.timelines_layout
-                # Add new sub-timelines
-                for subtask in self.task.children:
-                    if subtask not in [widget.task for widget in self.sub_timelines]:
-                        subtask_widget = [w for w in self.task_widget.subtask_widgets
-                                          if w.task == subtask][0]
-                        sub_timeline = Timeline(task_widget=subtask_widget,
-                                                calendar_widget=self.calendar_widget,
-                                                parent=self.parent(),
-                                                style=self._style,
-                                                add_to_timelines_layout=True)
-                        # Add the sub-timeline to the main timelines layout
-                        # Find the correct position in the layout
-                        # where the sub-timeline is inserted
-                        l.removeWidget(sub_timeline)
-                        index = self.task.descendants.index(subtask)
-                        index += l.indexOf(self) + 1
-                        l.insertWidget(index, sub_timeline)
-                        # sub_timeline.setFixedHeight(self.height())
-                        self.sub_timelines += [sub_timeline]
-                # Remove non-existent sub-timelines
-                for widget in self.sub_timelines:
-                    if widget.task not in self.task.children:
-                        index = l.indexOf(widget)
+                    def get_end_date(self,
+                                     end_position: int = None):
+                        end_position = end_position if end_position is not None \
+                            else (self.label_pushbutton.x() + self.label_pushbutton.width())
+                        return self.get_date(position=end_position)
+
+                    def set_geometry(self):
+                        self.set_start_position()
+                        self.set_length()
+
+                    def eventFilter(self, obj, event):
+                        """
+                        This function allows to handle all kinds of events for all subwidgets in this widget.
+                        :param obj:
+                        :param event:
+                        :return:
+                        """
+                        if obj == self.label_pushbutton:
+                            if event.type() == QEvent.MouseButtonDblClick:
+                                task_widget = TaskWidget(task=self.task,
+                                                         planner=self.planner,
+                                                         style=TaskWidgetStyle(color_palette=self._style.color_palette,
+                                                                               font=self._style.font,
+                                                                               style_name=self._style.style_name))
+
+                                task_widget.show()
+                            elif event.type() == QEvent.MouseButtonPress:
+                                if event.pos().x() < self.label_pushbutton.width() / 2:
+                                    self.dragging_mode = 'start'
+                                else:
+                                    self.dragging_mode = 'end'
+                                self.label_pushbutton.setMouseTracking(True)
+                            elif event.type() == QEvent.MouseMove and self.label_pushbutton.hasMouseTracking():
+                                if self.dragging_mode == 'start':
+                                    start_date = self.get_start_date(self.label_pushbutton.x() + event.pos().x())
+                                    try:
+                                        self.task.start_date = start_date
+                                    except ValueError:
+                                        pass
+                                else:
+                                    end_date = self.get_end_date(self.label_pushbutton.x() + event.pos().x())
+                                    try:
+                                        self.task.end_date = end_date
+                                    except ValueError:
+                                        pass
+                            elif event.type() == QEvent.MouseButtonRelease:
+                                self.label_pushbutton.setMouseTracking(False)
+                            elif event.type() == QEvent.HoverEnter:
+                                # Effect
+                                self.effect = QGraphicsDropShadowEffect()
+                                self.effect.setColor(QColor('#121214'))
+                                self.effect.setBlurRadius(15)
+                                self.label_pushbutton.setGraphicsEffect(self.effect)
+                                self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
+                            elif event.type() == QEvent.HoverLeave:
+                                self.label_pushbutton.setGraphicsEffect(None)
+                                self.task_widget.task_line_widget.setGraphicsEffect(None)
+
+                        elif obj == self.task_widget.task_line_widget:
+                            if event.type() == QEvent.HoverEnter:
+                                # Effect
+                                self.effect = QGraphicsDropShadowEffect()
+                                self.effect.setColor(QColor('#121214'))
+                                self.effect.setBlurRadius(15)
+                                self.label_pushbutton.setGraphicsEffect(self.effect)
+                                self.task_widget.task_line_widget.setGraphicsEffect(self.effect)
+                            elif event.type() == QEvent.HoverLeave:
+                                self.label_pushbutton.setGraphicsEffect(None)
+                                self.task_widget.task_line_widget.setGraphicsEffect(None)
+
+                        return super().eventFilter(obj, event)
+
+                    def set_visibility(self):
+                        self.setVisible(self.task_widget.isVisible())
+
+                    def make_sub_timelines(self, **kwargs):
+                        l = self.calendar_widget.timelines_layout
+                        # Add new sub-timelines
+                        for subtask in self.task.children:
+                            if subtask not in [widget.task for widget in self.sub_timelines]:
+                                subtask_widget = [w for w in self.task_widget.subtask_widgets
+                                                  if w.task == subtask][0]
+                                sub_timeline = Timeline(task_widget=subtask_widget,
+                                                        calendar_widget=self.calendar_widget,
+                                                        parent=self.parent(),
+                                                        style=self._style,
+                                                        add_to_timelines_layout=True)
+                                # Add the sub-timeline to the main timelines layout
+                                # Find the correct position in the layout
+                                # where the sub-timeline is inserted
+                                l.removeWidget(sub_timeline)
+                                index = self.task.descendants.index(subtask)
+                                index += l.indexOf(self) + 1
+                                l.insertWidget(index, sub_timeline)
+                                # sub_timeline.setFixedHeight(self.height())
+                                self.sub_timelines += [sub_timeline]
+                        # Remove non-existent sub-timelines
+                        for widget in self.sub_timelines:
+                            if widget.task not in self.task.children:
+                                index = l.indexOf(widget)
+                                w = widget
+                                while w == widget or (w is not None and w.task in widget.task.descendants):
+                                    w.hide()
+                                    try:  # It may be that the widget had been removed from the list, but not hidden
+                                        self.calendar_widget.timeline_widgets.remove(w)
+                                    except:
+                                        pass
+                                    l.removeWidget(w)
+                                    if l.count() > 0:
+                                        try:
+                                            index += 1
+                                            w = l.itemAt(index).widget()
+                                        except:
+                                            break
+                                    else:
+                                        break
+
+                def add_timeline(task_w):
+                    if task not in [widget.task_widget.task for widget in self.timeline_widgets]:
+                        task_widget = [w for w in self.task_list_widget.task_widgets
+                                       if w.task == task][0]
+                        widget = Timeline(task_widget=task_widget,
+                                          calendar_widget=self.parent(),
+                                          parent=self,
+                                          style=self._style,
+                                          add_to_timelines_layout=True)
+                        self.timeline_widgets += [widget]
+                        if task_widget.task.is_top_level:
+                            widget.show()
+
+                for task in self.planner.tasks:
+                    add_timeline(task)
+
+                # Remove non-existent timelines and all of those related to descendant tasks
+                # This cannot be handled easily from within the nested structure of a Timeline object
+                # and removing its sub-timelines, because the information about "ancestor" timelines
+                # is absent in the current implementation. Only descendant timelines are available, hence,
+                # a top-down deletion.
+                for widget in self.timeline_widgets:
+                    if widget.task not in self.planner.tasks:
+                        index = self.timelines_layout.indexOf(widget)
                         w = widget
-                        while w == widget or (w is not None and w.task in widget.task.descendants):
+                        while w == widget or w.task in widget.task.descendants:
                             w.hide()
                             try:  # It may be that the widget had been removed from the list, but not hidden
-                                self.calendar_widget.timeline_widgets.remove(w)
+                                self.timeline_widgets.remove(w)
                             except:
                                 pass
-                            l.removeWidget(w)
-                            if l.count() > 0:
+                            self.timelines_layout.removeWidget(w)
+                            if self.timelines_layout.count() > 0:
                                 try:
                                     index += 1
-                                    w = l.itemAt(index).widget()
+                                    w = self.timelines_layout.itemAt(index).widget()
                                 except:
                                     break
                             else:
                                 break
+                self.timelines_updated.emit()
 
-        def add_timeline(task_w):
-            if task not in [widget.task_widget.task for widget in self.timeline_widgets]:
-                task_widget = [w for w in self.task_list_widget.task_widgets
-                               if w.task == task][0]
-                widget = Timeline(task_widget=task_widget,
-                                  calendar_widget=self,
-                                  parent=self,
-                                  style=self._style,
-                                  add_to_timelines_layout=True)
-                self.timeline_widgets += [widget]
-                if task_widget.task.is_top_level:
-                    widget.show()
-
-        for task in self.planner.tasks:
-            add_timeline(task)
-
-        # Remove non-existent timelines and all of those related to descendant tasks
-        # This cannot be handled easily from within the nested structure of a Timeline object
-        # and removing its sub-timelines, because the information about "ancestor" timelines
-        # is absent in the current implementation. Only descendant timelines are available, hence,
-        # a top-down deletion.
-        for widget in self.timeline_widgets:
-            if widget.task not in self.planner.tasks:
-                index = self.timelines_layout.indexOf(widget)
-                w = widget
-                while w == widget or w.task in widget.task.descendants:
-                    w.hide()
-                    try:  # It may be that the widget had been removed from the list, but not hidden
-                        self.timeline_widgets.remove(w)
-                    except:
-                        pass
-                    self.timelines_layout.removeWidget(w)
-                    if self.timelines_layout.count() > 0:
-                        try:
-                            index += 1
-                            w = self.timelines_layout.itemAt(index).widget()
-                        except:
-                            break
-                    else:
-                        break
-        self.timelines_updated.emit()
-
+        self.timelines_widget = TimelinesWidget(planner=self.planner,
+                                                task_list_widget=self.task_list_widget,
+                                                parent=self,
+                                                style=self._style)
 
 class TaskBucketWidget(QFrame):
     """

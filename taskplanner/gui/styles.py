@@ -997,15 +997,18 @@ class PlannerWidgetStyle:
                                                    self.color_palette['text - light'],
                                                    self.font['size - text - small']),
                                     },
-                                'timeline':
+                                'timelines_widget':
                                     {
-                                        'main':
-                                            '''
-                                            QWidget
+                                        'timeline':
                                             {
-                                                border:2px solid %s;
+                                                'main':
+                                                    '''
+                                                    QWidget
+                                                    {
+                                                        border:2px solid %s;
+                                                    }
+                                                    ''' % (self.color_palette['border']),
                                             }
-                                            ''' % (self.color_palette['border']),
                                     }
                             },
                         'new_task_textedit':
