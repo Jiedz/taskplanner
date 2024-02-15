@@ -196,8 +196,10 @@ class PlannerWidget(QTabWidget):
                 # Lock the vertical scrollbars of the timelines and the task list
                 self.timelines_scrollarea.horizontalScrollBar().setDisabled(True)
                 self.calendar_scrollarea.verticalScrollBar().setDisabled(True)
-
-                self.calendar_widget.timelines_widget.layout.setSpacing(0)
+                scrollbar1, scrollbar2 = self.timelines_scrollarea.verticalScrollBar(), \
+                                         self.task_list_scrollarea.verticalScrollBar()
+                scrollbar1.valueChanged.connect(lambda: scrollbar2.setSliderPosition(scrollbar1.sliderPosition()))
+                scrollbar2.valueChanged.connect(lambda: scrollbar1.setSliderPosition(scrollbar2.sliderPosition()))
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
@@ -1766,10 +1768,8 @@ class CalendarWidget(QWidget):
                         + 1
         self._style = style
         self.month_widgets = []
-        self.timeline_widgets = []
         self._view_type = view_type
         self.view_type_changed = Signal()
-        self.timelines_updated = Signal()
         super().__init__(parent=parent)
         # Layout
         self.layout = QVBoxLayout(self)
@@ -1789,15 +1789,12 @@ class CalendarWidget(QWidget):
         self.month_widgets_updated = Signal()
         self.make_month_widgets()
         # Timelines
-        self.timelines_layout = QVBoxLayout()
-        self.timelines_layout.setSpacing(self.task_list_widget.layout.spacing())
-        self.timelines_layout.setAlignment(Qt.AlignTop)
-        self.layout.addLayout(self.timelines_layout)
-
         self.make_timelines_widget()
-
+        self.timelines_widget.layout.setSpacing(self.task_list_widget.layout.spacing())
+        self.timelines_widget.make_timelines()
+        # Style
         self.set_style()
-        self.layout.addStretch()
+        #self.layout.addStretch()
 
     def set_style(self, style: PlannerWidgetStyle = None):
         self._style = style if style is not None else self._style
@@ -1806,10 +1803,7 @@ class CalendarWidget(QWidget):
                       stylesheets=self._style.stylesheets
                       ['planner_tab']
                       ['calendar_widget']['main'])
-            set_style(widget=self.timelines_widget,
-                      stylesheets=self._style.stylesheets
-                      ['planner_tab']
-                      ['calendar_widget']['timelines_widget'])
+            self.timelines_widget.set_style(self._style)
             for widget in self.month_widgets:
                 widget.set_style(self._style)
 
@@ -1856,7 +1850,7 @@ class CalendarWidget(QWidget):
 
     def update_all(self):
         self.make_month_widgets()
-        self.timelines_widget.make_timelines()
+        #self.timelines_widget.make_timelines()
 
     def make_month_widgets(self):
         # Make month widget
@@ -2220,6 +2214,7 @@ class CalendarWidget(QWidget):
             def __init__(self,
                          planner: Planner,
                          task_list_widget: TaskListWidget,
+                         calendar_widget: CalendarWidget,
                          parent: QWidget = None,
                          view_type: str = 'weekly',
                          start_date: date = date.today(),
@@ -2238,17 +2233,24 @@ class CalendarWidget(QWidget):
                 """
                 self.planner = planner
                 self.task_list_widget = task_list_widget
+                self.calendar_widget = calendar_widget
                 self._style = style
                 self.timeline_widgets = []
                 self.timelines_updated = Signal()
                 super().__init__(parent=parent)
                 # Layout
                 self.layout = QVBoxLayout(self)
+                self.layout.setAlignment(Qt.AlignTop)
                 self.layout.setSpacing(self.task_list_widget.layout.spacing())
+                self.layout.setContentsMargins(0, 0, 0, 0)
                 # Make timelines
-                self.make_timelines()
+                #self.make_timelines()
+                self.calendar_widget.month_widgets_updated.disconnect(self.make_timelines)
+                self.calendar_widget.month_widgets_updated.connect(self.make_timelines)
                 self.planner.tasks_changed.disconnect(self.make_timelines)
                 self.planner.tasks_changed.connect(self.make_timelines)
+                # Style
+                self.set_style()
 
             def set_style(self, style: PlannerWidgetStyle = None):
                 self._style = style if style is not None else self._style
@@ -2292,8 +2294,8 @@ class CalendarWidget(QWidget):
                         self.layout = QVBoxLayout(self)
                         self.setContentsMargins(0, 0, 0, 0)
                         self.layout.setContentsMargins(0, 0, 0, 0)
-                        if add_to_timelines_layout and hasattr(self.parent(), 'timelines_layout'):
-                            self.parent().timelines_layout.addWidget(self)
+                        if add_to_timelines_layout:
+                            self.calendar_widget.timelines_widget.layout.addWidget(self)
                         self.setFixedHeight(self.task_widget.task_line_widget.height())
                         # Horizontal layout for label
                         self.label_layout = QHBoxLayout()
@@ -2550,7 +2552,7 @@ class CalendarWidget(QWidget):
                         self.setVisible(self.task_widget.isVisible())
 
                     def make_sub_timelines(self, **kwargs):
-                        l = self.calendar_widget.timelines_layout
+                        l = self.calendar_widget.timelines_widget.layout
                         # Add new sub-timelines
                         for subtask in self.task.children:
                             if subtask not in [widget.task for widget in self.sub_timelines]:
@@ -2596,7 +2598,7 @@ class CalendarWidget(QWidget):
                         task_widget = [w for w in self.task_list_widget.task_widgets
                                        if w.task == task][0]
                         widget = Timeline(task_widget=task_widget,
-                                          calendar_widget=self.parent(),
+                                          calendar_widget=self.calendar_widget,
                                           parent=self,
                                           style=self._style,
                                           add_to_timelines_layout=True)
@@ -2614,7 +2616,7 @@ class CalendarWidget(QWidget):
                 # a top-down deletion.
                 for widget in self.timeline_widgets:
                     if widget.task not in self.planner.tasks:
-                        index = self.timelines_layout.indexOf(widget)
+                        index = self.layout.indexOf(widget)
                         w = widget
                         while w == widget or w.task in widget.task.descendants:
                             w.hide()
@@ -2622,11 +2624,11 @@ class CalendarWidget(QWidget):
                                 self.timeline_widgets.remove(w)
                             except:
                                 pass
-                            self.timelines_layout.removeWidget(w)
-                            if self.timelines_layout.count() > 0:
+                            self.layout.removeWidget(w)
+                            if self.layout.count() > 0:
                                 try:
                                     index += 1
-                                    w = self.timelines_layout.itemAt(index).widget()
+                                    w = self.layout.itemAt(index).widget()
                                 except:
                                     break
                             else:
@@ -2635,6 +2637,7 @@ class CalendarWidget(QWidget):
 
         self.timelines_widget = TimelinesWidget(planner=self.planner,
                                                 task_list_widget=self.task_list_widget,
+                                                calendar_widget=self,
                                                 parent=self,
                                                 style=self._style)
 
