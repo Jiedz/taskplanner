@@ -924,7 +924,7 @@ class PlannerWidgetStyle:
                                     '''
                                     QWidget
                                     {
-                                        border:2px solid %s;
+                                        border:0px solid %s;
                                     }
                                     ''' % (self.color_palette['border']),
                                 'month_widget':
@@ -999,6 +999,13 @@ class PlannerWidgetStyle:
                                     },
                                 'timelines_widget':
                                     {
+                                        'main':
+                                            '''
+                                            QWidget
+                                            {
+                                                border:None;
+                                            }
+                                            ''',
                                         'timeline':
                                             {
                                                 'main':
