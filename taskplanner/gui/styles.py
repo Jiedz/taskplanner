@@ -7,17 +7,16 @@ from signalslot import Signal
 
 from taskplanner.gui.utilities import get_primary_screen
 from PyQt5.Qt import QSize
-
 COLOR_PALETTES = {
     'dark material':
         {
-            'background 1': '#232426',
-            'background 2': '#3a3c3f',
-            'background 3': '#3a3c3f',
-            'text': '#ededecff',
-            'text - light': '#bcbec4',
-            'text - highlight': '#bcbec4', #'#4273bc',
-            'border': '#3a3c3f',
+            'background 1': '#1f1f1f',
+            'background 2': '#2e2e30',
+            'background 3': '#202023',
+            'text': '#f6f5f4',
+            'text - light': '#deddda',
+            'text - highlight': '#ffffff', #'#4273bc',
+            'border': '#121214',
         },
 }
 
