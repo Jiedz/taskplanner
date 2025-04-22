@@ -130,7 +130,8 @@ class Task(Node):
             self._start_date = date.today()
         else:
             if 'datetime.date' not in str(type(value)):
-                raise TypeError(f'Invalid start date type {type(value)}. Accepted types are ("datetime.date")')
+                raise TypeError(f'Invalid start date type {type(value)} for task "{self.name}". '
+                                f'Accepted types are ("datetime.date")')
             if self.end_date is not None:
                 if value > self.end_date:
                     raise ValueError(f'Start date ({value}) is greater than end date ({self.end_date})')
@@ -155,7 +156,8 @@ class Task(Node):
             self._end_date = self.start_date
         else:
             if 'datetime.date' not in str(type(value)):
-                raise TypeError(f'Invalid end date type {type(value)}. Accepted types are ("datetime.date")')
+                raise TypeError(f'Invalid end date type {type(value)} for task "{self.name}". '
+                                f'Accepted types are ("datetime.date")')
             if self.end_date is not None:
                 if value < self.start_date:
                     raise ValueError(f'end date ({value}) is smaller than start date ({self.start_date})')
@@ -185,7 +187,8 @@ class Task(Node):
     @priority.setter
     def priority(self, value):
         if value not in list(PRIORITY_LEVELS.keys()):
-            raise ValueError(f'Invalid priority level {value}. Accepted values are {list(PRIORITY_LEVELS.keys())}')
+            raise ValueError(f'Invalid priority level {value} for task "{self.name}". '
+                             f'Accepted values are {list(PRIORITY_LEVELS.keys())}')
         self._priority = value
         if not self.is_top_level:
             if (any([PRIORITY_LEVELS[task.priority] > PRIORITY_LEVELS[self.parent.priority]
@@ -206,7 +209,8 @@ class Task(Node):
     @progress.setter
     def progress(self, value):
         if value not in list(PROGRESS_LEVELS.keys()):
-            raise ValueError(f"Invalid progress level '{value}'. Accepted values are {list(PROGRESS_LEVELS.keys())}")
+            raise ValueError(f'Invalid progress level {value} for task "{self.name}". '
+                             f'Accepted values are {list(PROGRESS_LEVELS.keys())}')
         self._progress = value
         if not self.is_top_level:
             max_progress = max([PROGRESS_LEVELS[task.progress] for task in [self] + list(self.siblings)])
